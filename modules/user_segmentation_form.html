@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户分群画像 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+<header class="topbar"><div class="topbar-inner"><div class="logo">📊</div><h1>AI 数据分析平台</h1><span class="sub">用户分群画像</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
+<div class="form-wrap">
+  <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>👥 用户分群画像</h2><p>按行为/付费/设备/地区等维度划分人群，对比各群体规模、特征与价值贡献。</p></div>
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步定义分群规则。</span></button>
+    <button data-mode="fast">⚡ 快速模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填分群参数。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div><div class="mode-hint" id="hint-fast" style="display:none;"></div>
+  <form id="seg-form">
+    <div class="form-error-summary"></div>
+    <div class="fcard"><h3><span class="n">1</span> 基本信息</h3>
+      <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-seg-product"><label class="chip"><input type="radio" name="seg_product" value="P10">P10</label><label class="chip"><input type="radio" name="seg_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="seg_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="seg_product" value="UNO2">UNO2</label></div><select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
+      <div class="field"><label>分析目标</label><textarea id="seg_goal" rows="2" placeholder="如：按 3PP 付费比例分层，对比高/中/低三方付费用户的行为差异"></textarea></div>
+      <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="date_end" data-required><div class="err-msg">必填</div></div></div>
+    </div>
+    <div class="fcard"><h3><span class="n">2</span> 分群规则</h3>
+      <div class="field"><label>分群维度 <span class="req">*</span></label><div class="chips" data-required-group="seg_dims" data-custom="seg_dims"><label class="chip"><input type="checkbox" name="seg_dims" value="3pp_ratio">3PP 付费比例分桶</label><label class="chip"><input type="checkbox" name="seg_dims" value="pay_level">付费等级(大R/中R/小R/免费)</label><label class="chip"><input type="checkbox" name="seg_dims" value="reg_days">注册天数</label><label class="chip"><input type="checkbox" name="seg_dims" value="platform">设备平台</label><label class="chip"><input type="checkbox" name="seg_dims" value="country">国家/地区</label><label class="chip"><input type="checkbox" name="seg_dims" value="device_type">设备类型</label><label class="chip"><input type="checkbox" name="seg_dims" value="activity_level">活跃度等级</label></div><div class="err-msg">至少选一个</div></div>
+      <div class="field"><label>人群基础条件 <span class="help">选填</span></label><input type="text" id="seg_filter" placeholder="如：只看活跃天数>=3 的用户 / 只看新用户"></div>
+    </div>
+    <div class="fcard"><h3><span class="n">3</span> 对比指标</h3>
+      <div class="field"><label>分群间对比指标 <span class="help">选填</span></label><div class="chips" data-custom="seg_metrics"><label class="chip"><input type="checkbox" name="seg_metrics" value="user_count">用户数</label><label class="chip"><input type="checkbox" name="seg_metrics" value="revenue_share">收入贡献占比</label><label class="chip"><input type="checkbox" name="seg_metrics" value="arpu">ARPU</label><label class="chip"><input type="checkbox" name="seg_metrics" value="retention_d7">D7 留存</label><label class="chip"><input type="checkbox" name="seg_metrics" value="session_freq">活跃频次</label><label class="chip"><input type="checkbox" name="seg_metrics" value="ad_freq">广告频次</label></div></div>
+    </div>
+    <div class="fcard"><h3><span class="n">4</span> 数据源</h3>
+      <div class="field"><label>主键 <span class="req">*</span></label><input type="text" id="pk" data-required placeholder="account_id / role_id"><div class="err-msg">必填</div></div>
+      <div class="field"><label>埋点参考</label><div class="dyn-table" id="seg-log-ref-rows"></div><button type="button" class="btn-add" id="add-seg-log-ref">+ 添加</button></div>
+      <div class="field"><label>历史 SQL</label><textarea id="seg_sql_ref" rows="3" style="font-family:monospace;font-size:12px;" placeholder="粘贴历史 SQL"></textarea></div>
+      <div class="field"><label>补充</label><textarea id="seg_notes" rows="2" placeholder="补充口径说明"></textarea></div>
+    </div>
+    <div class="submit-bar"><button type="button" class="btn btn-ghost" id="btn-reset">重置</button><button type="submit" class="btn btn-primary">⚙️ 生成</button></div>
+  </form>
+  <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
+</div>
+<script src="../assets/form-framework.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  FF.init();
+  FF.initWizard([
+    { title: '背景', question: '分析哪批用户？', explain: '选产品、日期。', example: '<b>例：</b>P10 最近 30 天活跃用户' },
+    { title: '分群', question: '按什么规则分群？', explain: '选分群维度。', example: '<b>例：</b>按 3PP 付费比例分高/中/低' },
+    { title: '指标', question: '分群之间对比什么？', explain: '选对比指标。', example: '<b>例：</b>ARPU + 留存 + 广告频次' },
+    { title: '数据源', question: '数据从哪来？', explain: '填主键、贴参考。', example: '<b>例：</b>account_id' },
+  ]);
+  document.querySelectorAll('#chips-seg-product .chip').forEach(chip => { const inp = chip.querySelector('input'); inp.addEventListener('change', () => { chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked')); chip.classList.add('checked'); document.getElementById('product').value = inp.value; }); });
+  FF.initDynamic('seg-log-ref-rows', 'add-seg-log-ref', (d={}) => `<input type="text" data-f="log_name" placeholder="表名" value="${d.log_name||''}" style="flex:0 0 140px;"><input type="text" data-f="doc_url" placeholder="链接" value="${d.doc_url||''}"><input type="text" data-f="fields" placeholder="字段" value="${d.fields||''}">`, { initial: [] });
+  document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('确认重置？')) location.reload(); });
+  document.getElementById('seg-form').addEventListener('submit', e => {
+    e.preventDefault(); if (!FF.validate(e.target)) return;
+    const d = { module:'user_seg', product:FF.val('product'), project:FF.val('product')+' 用户分群', goal:FF.val('seg_goal'), date_range:[FF.val('date_start'),FF.val('date_end')], dims:FF.getCheckedChips('seg_dims'), filter:FF.val('seg_filter'), metrics:FF.getCheckedChips('seg_metrics'), pk:FF.val('pk'), log_refs:FF.collectRows('seg-log-ref-rows',['log_name','doc_url','fields']), sql_ref:FF.val('seg_sql_ref'), notes:FF.val('seg_notes') };
+    const prompt = `# 角色\n你是资深数据分析师。请编写用户分群取数 SQL。\n\n# 背景\n- 产品：${d.product}　时间：${d.date_range[0]}~${d.date_range[1]}\n- 目标：${d.goal||'用户分群画像'}\n\n# 分群规则\n- 维度：${d.dims.join('、')}\n${d.filter?'- 过滤：'+d.filter:''}\n\n# 对比指标\n- ${(d.metrics||[]).join('、')||'用户数+收入贡献'}\n\n# 数据源\n- 主键：${d.pk}\n- 引擎：Presto/Trino\n${d.sql_ref?'\n# 历史SQL\n```sql\n'+d.sql_ref+'\n```':''}${d.notes?'\n# 补充\n'+d.notes:''}`;
+    FF.renderArtifacts([{key:'sql',label:'SQL Prompt',content:prompt},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
+  });
+});
+</script>
+</body></html>

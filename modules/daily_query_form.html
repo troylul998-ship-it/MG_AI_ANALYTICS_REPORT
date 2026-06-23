@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日常取数工作台 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">📊</div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">日常取数工作台</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>🛠️ 日常取数工作台</h2>
+    <p>快速生成取数 SQL，不套完整报告。选产品、描述需求、出 SQL。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">用白话描述你想取什么数据，AI 帮你写 SQL。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填技术参数，最快拿到 SQL。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="dq-form">
+    <div class="form-error-summary">⚠️ 以下必填项未填写</div>
+
+    <!-- 1 基本信息 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 基本信息</h3>
+      <div class="field">
+        <label>产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-product-dq">
+          <label class="chip"><input type="radio" name="product_dq" value="P10">P10</label>
+          <label class="chip"><input type="radio" name="product_dq" value="SKB">SKB</label>
+          <label class="chip"><input type="radio" name="product_dq" value="UNO">UNO</label>
+          <label class="chip"><input type="radio" name="product_dq" value="UNO2">UNO2</label>
+          <label class="chip"><input type="radio" name="product_dq" value="ALL">全部</label>
+        </div>
+        <select id="product" data-required style="display:none;">
+          <option value="">请选择</option>
+          <option value="P10">P10</option><option value="SKB">SKB</option>
+          <option value="UNO">UNO</option><option value="UNO2">UNO2</option>
+          <option value="ALL">ALL</option>
+        </select>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>开始日期 <span class="help">选填</span></label>
+          <input type="date" id="date_start">
+        </div>
+        <div class="field">
+          <label>结束日期 <span class="help">选填</span></label>
+          <input type="date" id="date_end">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 需求描述 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 你想取什么数据？</h3>
+      <div class="field">
+        <label>需求描述 <span class="req">*</span></label>
+        <textarea id="query_desc" data-required rows="4" placeholder="用白话写，如：&#10;• 帮我拉 P10 最近 7 天分平台的 DAU 和付费人数&#10;• 我要 UNO2 上周每天的广告收入，分 RV 和 INT&#10;• 取 SKB 新用户 D7 留存率，分渠道"></textarea>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>常用取数场景 <span class="help">点选快速填充</span></label>
+        <div class="chips" id="chips-dq-presets">
+          <label class="chip"><input type="radio" name="dq_preset" value="分平台 DAU 和付费人数">DAU+付费人数</label>
+          <label class="chip"><input type="radio" name="dq_preset" value="每日广告收入，分 RV/INT">广告收入</label>
+          <label class="chip"><input type="radio" name="dq_preset" value="新用户 D1/D3/D7/D14/D30 留存率">留存率</label>
+          <label class="chip"><input type="radio" name="dq_preset" value="分渠道付费金额和 ARPU">渠道ARPU</label>
+          <label class="chip"><input type="radio" name="dq_preset" value="3PP 转移比例趋势">3PP转移</label>
+          <label class="chip"><input type="radio" name="dq_preset" value="">自定义 ↑</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 补充（选填） -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 补充信息 <span class="help" style="font-weight:400">选填</span></h3>
+      <div class="field">
+        <label>输出维度 <span class="help">希望按什么拆分</span></label>
+        <div class="chips" id="chips-dq-dims" data-custom="dq_dims">
+          <label class="chip"><input type="checkbox" name="dq_dims" value="platform">设备平台</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="date">按天</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="channel">渠道</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="reg_days">注册天数</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="country">国家</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>额外过滤条件 <span class="help">选填</span></label>
+        <input type="text" id="dq_filter" placeholder="如：只看 APP 端、只看新用户、排除内部账号">
+      </div>
+      <div class="field">
+        <label>历史 SQL 参考 <span class="help">选填，有类似 SQL 可贴这里</span></label>
+        <textarea id="dq_sql_ref" rows="3" placeholder="粘贴历史 SQL，AI 会参考其中的表名和字段" style="font-family:monospace;font-size:12px;"></textarea>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">⚙️ 生成 SQL</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+
+</div>
+
+<script src="../assets/form-framework.js"></script>
+<script src="../assets/modules/daily_query.js"></script>
+</body>
+</html>

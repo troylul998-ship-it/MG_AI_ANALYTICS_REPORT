@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漏斗转化分析 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">📊</div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">漏斗转化分析</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>🌪️ 漏斗转化分析</h2>
+    <p>定义漏斗步骤、分组维度，生成取数 SQL 和分析契约。内置 3PP 支付漏斗等常用预设。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步定义漏斗，系统帮你生成 SQL。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填漏斗步骤和参数。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="funnel-form">
+    <div class="form-error-summary"></div>
+
+    <!-- 1 背景 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 基本信息</h3>
+      <div class="field">
+        <label>产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-fn-product">
+          <label class="chip"><input type="radio" name="fn_product" value="P10">P10</label>
+          <label class="chip"><input type="radio" name="fn_product" value="SKB">SKB</label>
+          <label class="chip"><input type="radio" name="fn_product" value="UNO">UNO</label>
+          <label class="chip"><input type="radio" name="fn_product" value="UNO2">UNO2</label>
+          <label class="chip"><input type="radio" name="fn_product" value="GameCenter">游戏中心(3PP)</label>
+        </div>
+        <select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option><option value="GameCenter">GameCenter</option></select>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>分析目标 <span class="req">*</span></label>
+        <textarea id="fn_goal" data-required rows="2" placeholder="如：分析 3PP 支付漏斗各步转化率，定位流失最严重的环节"></textarea>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="row">
+        <div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="date_start" data-required><div class="err-msg">必填</div></div>
+        <div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="date_end" data-required><div class="err-msg">必填</div></div>
+      </div>
+    </div>
+
+    <!-- 2 漏斗步骤 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 漏斗步骤定义</h3>
+      <div class="field">
+        <label>快速预设 <span class="help">选一个快速填充，也可手动改</span></label>
+        <div class="chips" id="chips-fn-preset">
+          <label class="chip"><input type="radio" name="fn_preset" value="3pp_payment">3PP 支付漏斗</label>
+          <label class="chip"><input type="radio" name="fn_preset" value="weekly_report">UNO 周报转化</label>
+          <label class="chip"><input type="radio" name="fn_preset" value="rm_popup">RM 弹窗漏斗</label>
+          <label class="chip"><input type="radio" name="fn_preset" value="custom">自定义</label>
+        </div>
+      </div>
+      <div id="fn-step-rows"></div>
+      <button type="button" class="btn-add" id="add-fn-step">+ 添加漏斗步骤</button>
+    </div>
+
+    <!-- 3 分组与指标 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 分组与指标</h3>
+      <div class="field">
+        <label>核心指标 <span class="req">*</span></label>
+        <div class="chips" data-required-group="fn_metrics">
+          <label class="chip"><input type="checkbox" name="fn_metrics" value="overall_cvr" checked>整体转化率</label>
+          <label class="chip"><input type="checkbox" name="fn_metrics" value="step_cvr" checked>步骤转化率</label>
+          <label class="chip"><input type="checkbox" name="fn_metrics" value="drop_rate">跳失率</label>
+          <label class="chip"><input type="checkbox" name="fn_metrics" value="funnel_users">漏斗完成用户数</label>
+          <label class="chip"><input type="checkbox" name="fn_metrics" value="step_time">步骤耗时</label>
+        </div>
+        <div class="err-msg">至少选一个</div>
+      </div>
+      <div class="field">
+        <label>分组下钻维度 <span class="help">选填</span></label>
+        <div class="chips" id="chips-fn-dims" data-custom="fn_dims">
+          <label class="chip"><input type="checkbox" name="fn_dims" value="platform">设备平台</label>
+          <label class="chip"><input type="checkbox" name="fn_dims" value="country">国家/地区</label>
+          <label class="chip"><input type="checkbox" name="fn_dims" value="pay_method">支付方式</label>
+          <label class="chip"><input type="checkbox" name="fn_dims" value="ab_group">AB 实验组</label>
+          <label class="chip"><input type="checkbox" name="fn_dims" value="user_source">用户来源</label>
+          <label class="chip"><input type="checkbox" name="fn_dims" value="device_type">设备类型(Mobile/PC/Tablet)</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>是否为 AB 实验对比 <span class="help">选填</span></label>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="fn_is_ab" value="no" checked>否</label>
+          <label class="chip"><input type="radio" name="fn_is_ab" value="yes">是</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 数据源 -->
+    <div class="fcard">
+      <h3><span class="n">4</span> 数据源</h3>
+      <div class="row">
+        <div class="field"><label>主键字段 <span class="req">*</span></label><input type="text" id="pk" data-required placeholder="如：account_id / game_aid"><div class="err-msg">必填</div></div>
+        <div class="field"><label>日期字段</label><input type="text" id="date_col" placeholder="如：date / dt"></div>
+      </div>
+      <div class="field">
+        <label>埋点/日志参考 <span class="help">选填</span></label>
+        <div class="dyn-table" id="fn-log-ref-rows"></div>
+        <button type="button" class="btn-add" id="add-fn-log-ref">+ 添加埋点参考</button>
+      </div>
+      <div class="field">
+        <label>历史 SQL 参考 <span class="help">选填</span></label>
+        <textarea id="fn_sql_ref" rows="3" style="font-family:monospace;font-size:12px;" placeholder="粘贴类似漏斗的历史 SQL"></textarea>
+      </div>
+      <div class="field">
+        <label>补充信息 <span class="help">选填</span></label>
+        <textarea id="fn_notes" rows="2" placeholder="如：礼包码上线后下单失败需排除 165 个误操作用户"></textarea>
+      </div>
+    </div>
+
+    <!-- 5 分析问题 -->
+    <div class="fcard">
+      <h3><span class="n">5</span> 分析问题</h3>
+      <div class="field">
+        <label>常用问题 <span class="help">点选快速添加</span></label>
+        <div class="chips" id="chips-fn-presetq">
+          <label class="chip"><input type="checkbox" value="哪一步流失最严重？原因是什么？">最大流失环节</label>
+          <label class="chip"><input type="checkbox" value="不同平台/地区的转化率差异如何？">分群差异</label>
+          <label class="chip"><input type="checkbox" value="改版前后漏斗转化率是否有提升？">改版效果</label>
+          <label class="chip"><input type="checkbox" value="支付成功率与行业基准（75%）差距多大？">对标基准</label>
+          <label class="chip"><input type="checkbox" value="漏斗各步耗时是否正常？卡在哪？">耗时瓶颈</label>
+        </div>
+      </div>
+      <div id="fn-q-rows"></div>
+      <button type="button" class="btn-add" id="add-fn-q">+ 添加问题</button>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">⚙️ 生成 SQL Prompt + 分析契约</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+</div>
+
+<script src="../assets/form-framework.js"></script>
+<script src="../assets/modules/funnel.js"></script>
+</body>
+</html>

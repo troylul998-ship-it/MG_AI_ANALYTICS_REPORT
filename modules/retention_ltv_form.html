@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>留存 & LTV 分析 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">📊</div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">留存 & LTV 分析</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>📈 留存 & LTV 分析</h2>
+    <p>Cohort 分组、留存节点、LTV 计算，支持 IAA LTV / IAP LTV / 综合 LTV，版本/渠道对比。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步定义 Cohort 和留存规则。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填 Cohort 参数和 LTV 公式。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="ret-form">
+    <div class="form-error-summary"></div>
+
+    <!-- 1 背景 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> Cohort 定义</h3>
+      <div class="field">
+        <label>产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-ret-product">
+          <label class="chip"><input type="radio" name="ret_product" value="P10">P10</label>
+          <label class="chip"><input type="radio" name="ret_product" value="SKB">SKB</label>
+          <label class="chip"><input type="radio" name="ret_product" value="UNO">UNO</label>
+          <label class="chip"><input type="radio" name="ret_product" value="UNO2">UNO2</label>
+          <label class="chip"><input type="radio" name="ret_product" value="ALL">多产品对比</label>
+        </div>
+        <select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option><option value="ALL">ALL</option></select>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>分析目标</label>
+        <textarea id="ret_goal" rows="2" placeholder="如：对比新版本 vs 旧版本的 D7 留存和 LT30 IAA LTV"></textarea>
+      </div>
+      <div class="row">
+        <div class="field"><label>Cohort 起始日 <span class="req">*</span></label><input type="date" id="cohort_start" data-required><div class="err-msg">必填</div></div>
+        <div class="field"><label>Cohort 结束日 <span class="req">*</span></label><input type="date" id="cohort_end" data-required><div class="err-msg">必填</div></div>
+      </div>
+      <div class="field">
+        <label>用户范围 <span class="req">*</span></label>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="user_scope" value="new_users" checked>新注册用户 (been_reg_days=1)</label>
+          <label class="chip"><input type="radio" name="user_scope" value="all_active">全部活跃用户</label>
+          <label class="chip"><input type="radio" name="user_scope" value="custom">自定义</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 留存定义 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 留存 & LTV 定义</h3>
+      <div class="field">
+        <label>留存节点 <span class="req">*</span></label>
+        <div class="chips" data-required-group="ret_days">
+          <label class="chip"><input type="checkbox" name="ret_days" value="D1" checked>D1</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D3" checked>D3</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D7" checked>D7</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D14">D14</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D30" checked>D30</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D60">D60</label>
+          <label class="chip"><input type="checkbox" name="ret_days" value="D90">D90</label>
+        </div>
+        <div class="err-msg">至少选一个</div>
+      </div>
+      <div class="field">
+        <label>留存类型</label>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="ret_type" value="classic" checked>经典留存（第N天回访）</label>
+          <label class="chip"><input type="radio" name="ret_type" value="rolling">滚动留存（第N天内回访）</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>LTV 类型 <span class="help">可多选</span></label>
+        <div class="chips" data-custom="ltv_type">
+          <label class="chip"><input type="checkbox" name="ltv_type" value="iaa_ltv" checked>IAA LTV（广告收入）</label>
+          <label class="chip"><input type="checkbox" name="ltv_type" value="iap_ltv">IAP LTV（付费收入）</label>
+          <label class="chip"><input type="checkbox" name="ltv_type" value="total_ltv">综合 LTV</label>
+          <label class="chip"><input type="checkbox" name="ltv_type" value="3pp_ltv">3PP LTV</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>LTV 时间窗口 <span class="help">累积式，如 LT7/LT30/LT60</span></label>
+        <div class="chips" data-custom="ltv_windows">
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT7" checked>LT7</label>
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT30" checked>LT30</label>
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT60">LT60</label>
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT90">LT90</label>
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT120">LT120</label>
+          <label class="chip"><input type="checkbox" name="ltv_windows" value="LT180">LT180</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 对比维度 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 对比维度</h3>
+      <div class="field">
+        <label>分组对比 <span class="help">选填</span></label>
+        <div class="chips" id="chips-ret-dims" data-custom="ret_dims">
+          <label class="chip"><input type="checkbox" name="ret_dims" value="platform">设备平台</label>
+          <label class="chip"><input type="checkbox" name="ret_dims" value="ad_type">广告类型(RV/INT)</label>
+          <label class="chip"><input type="checkbox" name="ret_dims" value="version">版本</label>
+          <label class="chip"><input type="checkbox" name="ret_dims" value="channel">渠道</label>
+          <label class="chip"><input type="checkbox" name="ret_dims" value="country">国家</label>
+          <label class="chip"><input type="checkbox" name="ret_dims" value="ab_group">AB 实验组</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 数据源 -->
+    <div class="fcard">
+      <h3><span class="n">4</span> 数据源</h3>
+      <div class="row">
+        <div class="field"><label>主键 <span class="req">*</span></label><input type="text" id="pk" data-required placeholder="account_id / role_id"><div class="err-msg">必填</div></div>
+        <div class="field"><label>收入字段 <span class="help">选填</span></label><input type="text" id="revenue_col" placeholder="如：ad_revenue / iap_revenue"></div>
+      </div>
+      <div class="field">
+        <label>埋点/日志参考</label>
+        <div class="dyn-table" id="ret-log-ref-rows"></div>
+        <button type="button" class="btn-add" id="add-ret-log-ref">+ 添加</button>
+      </div>
+      <div class="field">
+        <label>历史 SQL</label>
+        <textarea id="ret_sql_ref" rows="3" style="font-family:monospace;font-size:12px;" placeholder="粘贴历史留存/LTV SQL"></textarea>
+      </div>
+      <div class="field"><label>补充</label><textarea id="ret_notes" rows="2" placeholder="如：UNO2 advalue 安卓需除 1000000"></textarea></div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">⚙️ 生成 SQL Prompt + 分析契约</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+</div>
+
+<script src="../assets/form-framework.js"></script>
+<script src="../assets/modules/retention_ltv.js"></script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>付费 / 收入分析 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">📊</div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">付费 / 收入分析</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>💰 付费 / 收入分析</h2>
+    <p>填写下列信息，生成分析 SQL Prompt 与分析契约（Analysis Contract）。覆盖 IAP / 3PP 渠道收入、ARPU、付费率、渠道转移与付费漏斗。</p>
+  </div>
+
+  <!-- 模式切换 -->
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">用白话填写，系统帮你整理分析方案、生成 SQL，并输出分析思路框架。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填技术参数：指标、数据表、日期范围、CSV 列映射等，跳过引导。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="rev-form">
+    <div class="form-error-summary">⚠️ 请填写所有必填项（标 <span style="color:var(--red)">*</span> 的字段）。</div>
+
+    <!-- 1 基本信息 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 基本信息</h3>
+      <div class="field">
+        <label>产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-product-select">
+          <label class="chip"><input type="radio" name="product_radio" value="P10">P10</label>
+          <label class="chip"><input type="radio" name="product_radio" value="SKB">SKB</label>
+          <label class="chip"><input type="radio" name="product_radio" value="UNO">UNO</label>
+          <label class="chip"><input type="radio" name="product_radio" value="UNO2">UNO2</label>
+          <label class="chip"><input type="radio" name="product_radio" value="ALL">多产品对比</label>
+        </div>
+        <select id="product" data-required style="display:none;">
+          <option value="">请选择</option>
+          <option value="P10">P10</option>
+          <option value="SKB">SKB</option>
+          <option value="UNO">UNO</option>
+          <option value="UNO2">UNO2</option>
+          <option value="ALL">多产品对比</option>
+        </select>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>开始日期 <span class="req">*</span></label>
+          <input type="date" id="date_start" data-required>
+          <div class="err-msg">必填</div>
+        </div>
+        <div class="field">
+          <label>结束日期 <span class="req">*</span></label>
+          <input type="date" id="date_end" data-required>
+          <div class="err-msg">必填</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>这次分析想搞清楚什么？ <span class="req">*</span></label>
+        <div class="chips" id="chips-goal-presets" style="margin-bottom:10px;">
+          <label class="chip"><input type="radio" name="goal_preset" value="看 3PP 转移比例有没有提升">3PP 转移效果</label>
+          <label class="chip"><input type="radio" name="goal_preset" value="评估功能上线对 ARPU 的影响">功能对 ARPU 影响</label>
+          <label class="chip"><input type="radio" name="goal_preset" value="对比不同渠道的收入构成">渠道收入构成</label>
+          <label class="chip"><input type="radio" name="goal_preset" value="分析付费率和客单价的变化趋势">付费率趋势</label>
+          <label class="chip"><input type="radio" name="goal_preset" value="">自定义 ↓</label>
+        </div>
+        <textarea id="goal" data-required rows="2" placeholder="一句话，如：看 RM 弹窗上线后付费有没有变好"></textarea>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>分析负责人 <span class="help">选填</span></label>
+        <input type="text" id="owner" placeholder="你的名字">
+      </div>
+    </div>
+
+    <!-- 2 北极星指标定义 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 北极星指标定义</h3>
+      <p class="card-desc">定义本次分析最核心的比例/北极星指标口径，用 CSV 列名表达。</p>
+      <div class="field">
+        <label>核心比例 / 北极星指标公式 <span class="help">可填任意你关注的核心公式</span></label>
+        <div class="guide-only"><div class="guide-tip">💡 可以是任意核心指标公式：ARPU、付费率、毛利率、3PP 转移比例等。留空默认按 ARPU 处理。</div></div>
+        <input type="text" id="transfer_formula" placeholder="如：revenue_total / dau，或 revenue_3pp / revenue_total，或任意北极星公式">
+      </div>
+    </div>
+
+    <!-- 3 核心指标 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 核心指标</h3>
+      <p class="card-desc">选择本次报告要呈现的指标，AI 将据此规划图表与章节。每组末尾可「+ 自定义」。</p>
+      <div class="field" data-required-group="metrics">
+        <label>收入 / 付费指标 <span class="req">*</span></label>
+        <div class="chips" id="chips-metrics" data-custom="metrics">
+          <label class="chip"><input type="checkbox" name="metrics" value="ARPU">ARPU</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="ARPPU">ARPPU</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="pay_rate">付费率</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="pay_count">付费次数</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="iap_amount">IAP 金额</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="3pp_amount">3PP 金额</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="transfer_rate">3PP 转移比例</label>
+          <label class="chip"><input type="checkbox" name="metrics" value="total_revenue">总收入</label>
+        </div>
+        <div class="err-msg">至少选择一个指标</div>
+      </div>
+      <div class="field">
+        <label>用户指标 <span class="help">选填</span></label>
+        <div class="chips" id="chips-user-metrics" data-custom="user_metrics">
+          <label class="chip"><input type="checkbox" name="user_metrics" value="payers">付费人数</label>
+          <label class="chip"><input type="checkbox" name="user_metrics" value="new_payers">新付费人数</label>
+          <label class="chip"><input type="checkbox" name="user_metrics" value="back_payers">回流付费人数</label>
+          <label class="chip"><input type="checkbox" name="user_metrics" value="pay_freq">付费频次</label>
+          <label class="chip"><input type="checkbox" name="user_metrics" value="aov">客单价</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>分组 / 下钻维度 <span class="help">选填，预设勾选与自定义可同时使用</span></label>
+        <div class="chips" id="chips-dims" data-custom="dims">
+          <label class="chip"><input type="checkbox" name="dims" value="platform">设备平台</label>
+          <label class="chip"><input type="checkbox" name="dims" value="lifecycle">生命周期(LT)</label>
+          <label class="chip"><input type="checkbox" name="dims" value="reg_days">注册天数</label>
+          <label class="chip"><input type="checkbox" name="dims" value="3pp_ratio">3PP 比例分桶</label>
+          <label class="chip"><input type="checkbox" name="dims" value="product_type">商品类型</label>
+        </div>
+        <input type="text" id="dims_custom" placeholder="补充自定义分组维度，逗号分隔，如：country, ab_group, channel" style="margin-top:10px;">
+      </div>
+    </div>
+
+    <!-- 4 商品维度 -->
+    <div class="fcard">
+      <h3><span class="n">4</span> 商品维度 <span class="help" style="font-weight:400">选填</span></h3>
+      <p class="card-desc">需要按商品拆分时填写，不需要可留空。预设勾选与自定义填写可同时使用（或的关系）。</p>
+      <div class="field">
+        <label>常用商品类型 <span class="help">点选，可多选；末尾可 + 自定义</span></label>
+        <div class="chips" id="chips-product-type" data-custom="product_type">
+          <label class="chip"><input type="checkbox" name="product_type" value="starpass">starpass</label>
+          <label class="chip"><input type="checkbox" name="product_type" value="gift">gift</label>
+          <label class="chip"><input type="checkbox" name="product_type" value="diamond">diamond</label>
+          <label class="chip"><input type="checkbox" name="product_type" value="prop">prop</label>
+          <label class="chip"><input type="checkbox" name="product_type" value="subscription">订阅</label>
+          <label class="chip"><input type="checkbox" name="product_type" value="noads">去广告</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>商品分类体系 <span class="help">选填；末尾可 + 自定义</span></label>
+        <div class="chips" id="chips-product-cat" data-custom="product_cat">
+          <label class="chip"><input type="checkbox" name="product_cat" value="consumable_durable">消耗型/持有型</label>
+          <label class="chip"><input type="checkbox" name="product_cat" value="l1_l2">一级/二级分类</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>自定义商品类型明细 <span class="help">上方自定义 chip 会自动同步到此处，可补充备注</span></label>
+        <div id="custom-product-detail"></div>
+        <input type="text" id="products_focus" placeholder="如：weekly_card battle_pass（空格或逗号分隔，与上方勾选合并）">
+      </div>
+      <div class="field">
+        <label>价格区间分桶 <span class="help">选填，逗号分隔</span></label>
+        <input type="text" id="price_buckets" placeholder="如：0-0.99, 1-4.99, 5-9.99, 10+">
+      </div>
+    </div>
+
+    <!-- 5 CSV 列映射 -->
+    <div class="fcard">
+      <h3><span class="n">5</span> CSV 列名映射 <span class="req">*</span></h3>
+      <p class="card-desc">定义 CSV 每列含义，AI 据此处理数据。可上传/粘贴 CSV 自动识别列名。</p>
+      <div class="guide-only"><div class="guide-tip">💡 至少映射「日期、用户ID、收入」三类列。也可直接拖入 CSV 文件或粘贴表头一行，自动识别列名与类型。</div></div>
+      <div class="csv-detect">
+        <label class="csv-drop" id="csv-drop">
+          📄 点击选择 CSV 文件，或把文件拖到这里 —— <b>自动识别列名</b>
+          <input type="file" id="csv-file" accept=".csv,.txt,.tsv" hidden>
+        </label>
+        <input type="text" id="csv-paste" placeholder="或粘贴表头一行后回车" style="flex:1;min-width:200px;">
+      </div>
+      <div class="detected" id="csv-detected" style="display:none;font-size:12px;color:var(--green);margin-bottom:10px;"></div>
+      <div class="dyn-table" id="map-rows"></div>
+      <button type="button" class="btn-add" id="add-map">+ 添加列映射</button>
+
+      <!-- 埋点/日志参考 -->
+      <div style="margin-top:24px; padding-top:18px; border-top:1px solid var(--border);">
+        <label style="font-size:14px;font-weight:700;display:block;margin-bottom:4px;">📋 埋点 / 日志参考 <span class="help" style="font-weight:400">选填，提供后 SQL 会引用真实表和字段</span></label>
+        <p class="card-desc" style="margin:0 0 12px;">填写相关埋点名、Confluence 文档链接、可获取的指标，AI 生成 SQL 时会参考这些真实口径。</p>
+        <div class="dyn-table" id="log-ref-rows"></div>
+        <button type="button" class="btn-add" id="add-log-ref">+ 添加埋点参考</button>
+      </div>
+
+      <!-- 历史 SQL 参考 -->
+      <div style="margin-top:24px; padding-top:18px; border-top:1px solid var(--border);">
+        <label style="font-size:14px;font-weight:700;display:block;margin-bottom:4px;">📝 历史 SQL 参考 <span class="help" style="font-weight:400">选填，有类似指标的历史 SQL 可贴在这里</span></label>
+        <p class="card-desc" style="margin:0 0 12px;">AI 会参考历史 SQL 的表名、字段名、JOIN 逻辑和过滤条件来编写新 SQL。</p>
+        <div id="sql-ref-rows"></div>
+        <button type="button" class="btn-add" id="add-sql-ref">+ 添加历史 SQL</button>
+      </div>
+    </div>
+
+    <!-- 6 分析问题 -->
+    <div class="fcard">
+      <h3><span class="n">6</span> 分析问题</h3>
+      <p class="card-desc">每个问题对应报告中的一个独立章节，建议 1~5 个。这是分析契约的核心。</p>
+      <div class="guide-only"><div class="guide-tip">💡 好问题是「可被数据回答 + 能驱动决策」的。可先勾选下方常用付费问题，再自行补充。</div></div>
+      <div class="field">
+        <label>常用付费分析问题 <span class="help">点选快速添加为章节</span></label>
+        <div class="chips" id="chips-preset-q">
+          <label class="chip"><input type="checkbox" value="不同渠道（IAP/3PP）的收入构成与占比如何？">渠道收入构成</label>
+          <label class="chip"><input type="checkbox" value="3PP 转移比例的趋势如何？是否达到预期？">3PP 转移趋势</label>
+          <label class="chip"><input type="checkbox" value="付费率与 ARPPU 在各分组间有何差异？">付费率/ARPPU 差异</label>
+          <label class="chip"><input type="checkbox" value="本次变化对整体 ARPU 是否有正向/负向影响？">对整体 ARPU 影响</label>
+          <label class="chip"><input type="checkbox" value="高价值付费用户的特征与集中度如何？">付费用户集中度</label>
+          <label class="chip"><input type="checkbox" value="各商品类型的收入贡献与客单价分布如何？">商品收入贡献</label>
+        </div>
+      </div>
+      <div id="q-rows"></div>
+      <button type="button" class="btn-add" id="add-q">+ 添加问题</button>
+    </div>
+
+    <!-- 7 数据源 -->
+    <div class="fcard">
+      <h3><span class="n">7</span> 数据源信息</h3>
+      <div class="row-3">
+        <div class="field">
+          <label>数据粒度 <span class="req">*</span></label>
+          <select id="grain" data-required>
+            <option value="user">用户级（一行一用户）</option>
+            <option value="user_day">用户×日</option>
+            <option value="order">订单/交易级</option>
+            <option value="agg">已聚合汇总</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>主键字段 <span class="req">*</span></label>
+          <input type="text" id="pk" data-required placeholder="如：account_id / role_id">
+          <div class="err-msg">必填</div>
+        </div>
+        <div class="field">
+          <label>CSV 编码</label>
+          <select id="encoding">
+            <option value="utf-8">UTF-8</option>
+            <option value="utf-8-sig">UTF-8-SIG（带BOM）</option>
+            <option value="gbk">GBK</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>补充信息 <span class="help">选填：特殊口径、已知数据问题、表名等</span></label>
+        <textarea id="notes" placeholder="如：UNO2 的 advalue 安卓需除以 1000000；3PP 内嵌与主站在 pay_channel 字段区分。"></textarea>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">⚙️ 生成 SQL Prompt + 分析契约</button>
+    </div>
+  </form>
+
+  <!-- 输出区 -->
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+
+</div>
+
+<script src="../assets/form-framework.js"></script>
+<script src="../assets/modules/revenue.js"></script>
+</body>
+</html>

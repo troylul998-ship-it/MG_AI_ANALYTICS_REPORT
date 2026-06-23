@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>指标诊断 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+<header class="topbar"><div class="topbar-inner"><div class="logo">📊</div><h1>AI 数据分析平台</h1><span class="sub">指标诊断</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
+<div class="form-wrap">
+  <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>🩺 指标诊断</h2><p>诊断指标为何变化：定位变动、量化驱动因素、区分混合效应与段内变动。</p></div>
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">描述变化现象，AI 帮你定位原因。</span></button>
+    <button data-mode="fast">⚡ 快速模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填指标和对比窗口。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div><div class="mode-hint" id="hint-fast" style="display:none;"></div>
+  <form id="diag-form">
+    <div class="form-error-summary"></div>
+    <div class="fcard"><h3><span class="n">1</span> 什么变了？</h3>
+      <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-diag-product"><label class="chip"><input type="radio" name="diag_product" value="P10">P10</label><label class="chip"><input type="radio" name="diag_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="diag_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="diag_product" value="UNO2">UNO2</label></div><select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
+      <div class="field"><label>异常指标 <span class="req">*</span></label><div class="chips" data-required-group="diag_metric" data-custom="diag_metric"><label class="chip"><input type="checkbox" name="diag_metric" value="ARPU">ARPU</label><label class="chip"><input type="checkbox" name="diag_metric" value="DAU">DAU</label><label class="chip"><input type="checkbox" name="diag_metric" value="revenue">收入</label><label class="chip"><input type="checkbox" name="diag_metric" value="pay_rate">付费率</label><label class="chip"><input type="checkbox" name="diag_metric" value="ecpm">eCPM</label><label class="chip"><input type="checkbox" name="diag_metric" value="retention">留存</label><label class="chip"><input type="checkbox" name="diag_metric" value="transfer_rate">3PP转移比例</label></div><div class="err-msg">至少选一个</div></div>
+      <div class="field"><label>变化描述 <span class="req">*</span></label><textarea id="diag_desc" data-required rows="2" placeholder="如：上周 ARPU 突然下降了 15%，但 DAU 没变"></textarea><div class="err-msg">必填</div></div>
+    </div>
+    <div class="fcard"><h3><span class="n">2</span> 对比窗口</h3>
+      <div class="row"><div class="field"><label>异常期开始 <span class="req">*</span></label><input type="date" id="focus_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>异常期结束 <span class="req">*</span></label><input type="date" id="focus_end" data-required><div class="err-msg">必填</div></div></div>
+      <div class="row"><div class="field"><label>基线期开始 <span class="help">选填</span></label><input type="date" id="base_start"></div><div class="field"><label>基线期结束</label><input type="date" id="base_end"></div></div>
+    </div>
+    <div class="fcard"><h3><span class="n">3</span> 切分维度</h3>
+      <p class="card-desc">选择用来切分定位驱动因素的维度。</p>
+      <div class="field"><label>驱动因素维度</label><div class="chips" data-custom="diag_dims"><label class="chip"><input type="checkbox" name="diag_dims" value="platform">平台</label><label class="chip"><input type="checkbox" name="diag_dims" value="country">国家</label><label class="chip"><input type="checkbox" name="diag_dims" value="ad_type">广告类型</label><label class="chip"><input type="checkbox" name="diag_dims" value="user_seg">用户分层</label><label class="chip"><input type="checkbox" name="diag_dims" value="version">版本</label><label class="chip"><input type="checkbox" name="diag_dims" value="channel">渠道</label></div></div>
+    </div>
+    <div class="fcard"><h3><span class="n">4</span> 数据源</h3>
+      <div class="field"><label>主键 <span class="req">*</span></label><input type="text" id="pk" data-required placeholder="account_id"><div class="err-msg">必填</div></div>
+      <div class="field"><label>历史 SQL</label><textarea id="diag_sql_ref" rows="3" style="font-family:monospace;font-size:12px;" placeholder="相关指标的历史SQL"></textarea></div>
+      <div class="field"><label>补充</label><textarea id="diag_notes" rows="2" placeholder="已知事件：如版本发布、渠道政策变化等"></textarea></div>
+    </div>
+    <div class="submit-bar"><button type="button" class="btn btn-ghost" id="btn-reset">重置</button><button type="submit" class="btn btn-primary">⚙️ 生成诊断 Prompt</button></div>
+  </form>
+  <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
+</div>
+<script src="../assets/form-framework.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  FF.init();
+  FF.initWizard([
+    {title:'现象',question:'什么指标出了问题？',explain:'选指标、描述变化。',example:'<b>例：</b>ARPU 上周突降 15%'},
+    {title:'时间',question:'什么时候开始变的？',explain:'填异常期 + 基线期。',example:'<b>例：</b>异常期 6/10~6/16 vs 基线 6/3~6/9'},
+    {title:'切分',question:'按什么维度找原因？',explain:'选切分维度。',example:'<b>例：</b>按平台 + 国家 + 广告类型切'},
+    {title:'数据源',question:'数据从哪来？',explain:'填主键、贴相关SQL。',example:'<b>例：</b>account_id'},
+  ]);
+  document.querySelectorAll('#chips-diag-product .chip').forEach(chip=>{const inp=chip.querySelector('input');inp.addEventListener('change',()=>{chip.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('checked'));chip.classList.add('checked');document.getElementById('product').value=inp.value;});});
+  document.getElementById('btn-reset').addEventListener('click',()=>{if(confirm('确认重置？'))location.reload();});
+  document.getElementById('diag-form').addEventListener('submit',e=>{
+    e.preventDefault();if(!FF.validate(e.target))return;
+    const d={module:'metric_diag',product:FF.val('product'),project:FF.val('product')+' 指标诊断',goal:FF.val('diag_desc'),metrics:FF.getCheckedChips('diag_metric'),desc:FF.val('diag_desc'),focus_range:[FF.val('focus_start'),FF.val('focus_end')],base_range:[FF.val('base_start'),FF.val('base_end')],dims:FF.getCheckedChips('diag_dims'),pk:FF.val('pk'),sql_ref:FF.val('diag_sql_ref'),notes:FF.val('diag_notes')};
+    const prompt=`# 角色\n你是资深数据分析师，擅长指标诊断和归因分析。\n\n# 问题\n${d.desc}\n\n# 异常指标\n${d.metrics.join('、')}\n\n# 时间窗口\n- 异常期：${d.focus_range[0]} ~ ${d.focus_range[1]}\n${d.base_range[0]?'- 基线期：'+d.base_range[0]+' ~ '+d.base_range[1]:''}\n\n# 产品\n${d.product}\n\n# 切分维度（用来定位驱动因素）\n${d.dims.length?d.dims.join('、'):'按日趋势 + 整体'}\n\n# SQL 要求\n1. 先出异常期 vs 基线期的整体对比\n2. 再按每个维度切分，找贡献最大的变动来源\n3. 对于比率指标，分解为分子变动 + 分母变动\n4. 区分混合效应（Mix Shift）和段内变动（Rate Change）\n5. 主键：${d.pk}　引擎：Presto/Trino\n${d.sql_ref?'\n# 历史SQL参考\n```sql\n'+d.sql_ref+'\n```':''}${d.notes?'\n# 补充（已知事件）\n'+d.notes:''}`;
+    const contract=`# 指标诊断分析契约\n\n## 1. 诊断问题\n${d.desc}\n\n## 2. 诊断框架\n1. 确认变动幅度和时间\n2. 按维度切分，排名贡献最大的驱动因素\n3. 区分 Mix Shift vs Rate Change\n4. 对比率指标分解分子/分母\n5. 关联已知事件（版本/政策/季节）\n\n## 3. 输出结构\n- 变动量化：指标值、环比/同比\n- 驱动归因：Top 3 驱动因素 + 贡献量化\n- 结论：是否需要关注、建议行动\n\n## 4. 图表\n- 时间趋势折线（异常期高亮）\n- 维度贡献瀑布图\n- 分子/分母分解柱状图`;
+    FF.renderArtifacts([{key:'sql',label:'① 诊断 SQL Prompt',content:prompt},{key:'contract',label:'② 诊断契约',content:contract},{key:'json',label:'③ JSON',content:JSON.stringify(d,null,2)}],{collectFn:()=>d});
+  });
+});
+</script>
+</body></html>
