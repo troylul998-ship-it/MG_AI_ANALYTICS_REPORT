@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AB 实验分析 · AI 数据分析平台</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">📊</div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">AB 实验分析</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>🧪 AB 实验分析</h2>
+    <p>实验组 vs 对照组指标对比、显著性检验、DID 基线校正，输出实验结论与建议。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步引导你定义实验和指标。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填实验参数，快速生成。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="ab-form">
+    <div class="form-error-summary"></div>
+
+    <!-- 1 实验背景 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 实验背景</h3>
+      <div class="field">
+        <label>产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-ab-product">
+          <label class="chip"><input type="radio" name="ab_product" value="P10">P10</label>
+          <label class="chip"><input type="radio" name="ab_product" value="SKB">SKB</label>
+          <label class="chip"><input type="radio" name="ab_product" value="UNO">UNO</label>
+          <label class="chip"><input type="radio" name="ab_product" value="UNO2">UNO2</label>
+        </div>
+        <select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option></select>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>实验名称 / 目的 <span class="req">*</span></label>
+        <textarea id="ab_goal" data-required rows="2" placeholder="如：RM 二选一弹窗实验，验证是否提升 3PP 转移比例且不损害 ARPU"></textarea>
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="row">
+        <div class="field"><label>实验开始日 <span class="req">*</span></label><input type="date" id="date_start" data-required><div class="err-msg">必填</div></div>
+        <div class="field"><label>实验结束日 <span class="req">*</span></label><input type="date" id="date_end" data-required><div class="err-msg">必填</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>AA 基线开始日 <span class="help">选填，用于 DID</span></label><input type="date" id="aa_start"></div>
+        <div class="field"><label>AA 基线结束日 <span class="help">选填</span></label><input type="date" id="aa_end"></div>
+      </div>
+    </div>
+
+    <!-- 2 实验分组 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 实验分组</h3>
+      <div class="row">
+        <div class="field"><label>实验组标签 <span class="req">*</span></label><input type="text" id="treat_label" data-required placeholder="如：treatment / test / rm_on"><div class="err-msg">必填</div></div>
+        <div class="field"><label>对照组标签 <span class="req">*</span></label><input type="text" id="ctrl_label" data-required placeholder="如：control / ctrl / rm_off"><div class="err-msg">必填</div></div>
+      </div>
+      <div class="field">
+        <label>分组字段名 <span class="help">CSV 中标识实验组的列名</span></label>
+        <input type="text" id="group_col" placeholder="如：ab_group / experiment_arm">
+      </div>
+      <div class="field">
+        <label>人群筛选条件 <span class="help">选填</span></label>
+        <input type="text" id="population_filter" placeholder="如：只看新用户 / 只看 APP 端 / 排除内部账号">
+      </div>
+    </div>
+
+    <!-- 3 核心指标 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 评估指标</h3>
+      <div class="field" data-required-group="ab_metrics">
+        <label>主要成功指标 <span class="req">*</span> <span class="help">实验想证明的核心指标</span></label>
+        <div class="chips" id="chips-ab-metrics" data-custom="ab_metrics">
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="transfer_rate">3PP 转移比例</label>
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="ARPU">ARPU</label>
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="pay_rate">付费率</label>
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="revenue">收入</label>
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="retention">留存率</label>
+          <label class="chip"><input type="checkbox" name="ab_metrics" value="engagement">活跃/参与度</label>
+        </div>
+        <div class="err-msg">至少选择一个指标</div>
+      </div>
+      <div class="field">
+        <label>护栏指标 <span class="help">选填，确保实验不伤害的指标</span></label>
+        <div class="chips" id="chips-ab-guardrails" data-custom="ab_guardrails">
+          <label class="chip"><input type="checkbox" name="ab_guardrails" value="ARPU">ARPU</label>
+          <label class="chip"><input type="checkbox" name="ab_guardrails" value="retention_d7">D7 留存</label>
+          <label class="chip"><input type="checkbox" name="ab_guardrails" value="crash_rate">崩溃率</label>
+          <label class="chip"><input type="checkbox" name="ab_guardrails" value="session_time">会话时长</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>下钻维度 <span class="help">选填</span></label>
+        <div class="chips" id="chips-ab-dims" data-custom="ab_dims">
+          <label class="chip"><input type="checkbox" name="ab_dims" value="platform">设备平台</label>
+          <label class="chip"><input type="checkbox" name="ab_dims" value="reg_days">注册天数</label>
+          <label class="chip"><input type="checkbox" name="ab_dims" value="pay_segment">付费分层</label>
+          <label class="chip"><input type="checkbox" name="ab_dims" value="country">国家</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 数据源 -->
+    <div class="fcard">
+      <h3><span class="n">4</span> 数据源</h3>
+      <div class="field">
+        <label>主键字段 <span class="req">*</span></label>
+        <input type="text" id="pk" data-required placeholder="如：account_id / role_id">
+        <div class="err-msg">必填</div>
+      </div>
+      <div class="field">
+        <label>埋点/日志参考 <span class="help">选填</span></label>
+        <div class="dyn-table" id="ab-log-ref-rows"></div>
+        <button type="button" class="btn-add" id="add-ab-log-ref">+ 添加埋点参考</button>
+      </div>
+      <div class="field">
+        <label>历史 SQL 参考 <span class="help">选填</span></label>
+        <textarea id="ab_sql_ref" rows="3" placeholder="粘贴类似实验的历史 SQL" style="font-family:monospace;font-size:12px;"></textarea>
+      </div>
+      <div class="field">
+        <label>补充信息 <span class="help">选填</span></label>
+        <textarea id="notes" rows="2" placeholder="如：实验 ID 为 exp_123，分组通过 server 下发"></textarea>
+      </div>
+    </div>
+
+    <!-- 5 分析问题 -->
+    <div class="fcard">
+      <h3><span class="n">5</span> 分析问题</h3>
+      <div class="field">
+        <label>常用实验问题 <span class="help">点选快速添加</span></label>
+        <div class="chips" id="chips-ab-presetq">
+          <label class="chip"><input type="checkbox" value="实验组的核心指标是否显著优于对照组？">核心指标显著性</label>
+          <label class="chip"><input type="checkbox" value="实验是否对护栏指标有负面影响？">护栏是否受损</label>
+          <label class="chip"><input type="checkbox" value="效果在不同人群/平台间是否一致？">分群一致性</label>
+          <label class="chip"><input type="checkbox" value="AA 期间两组基线是否对齐？">AA 基线检验</label>
+          <label class="chip"><input type="checkbox" value="是否建议全量？条件是什么？">全量建议</label>
+        </div>
+      </div>
+      <div id="ab-q-rows"></div>
+      <button type="button" class="btn-add" id="add-ab-q">+ 添加问题</button>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">⚙️ 生成 SQL Prompt + 分析契约</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+
+</div>
+
+<script src="../assets/form-framework.js"></script>
+<script src="../assets/modules/ab_test.js"></script>
+</body>
+</html>
