@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>分析方法论 · AI 数据分析平台</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.m-wrap{max-width:1100px;margin:0 auto;padding:28px 24px 80px;}
+.m-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;}
+.m-tab{font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;background:#f4f3f0;color:var(--text-2);}
+.m-tab.active{background:var(--surface);color:var(--brand-1);border-color:var(--brand-1);}
+.m-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 12px 12px 12px;padding:28px;}
+.m-panel.active{display:block;}
+.m-panel h3{font-size:17px;margin:24px 0 10px;color:var(--text-1);letter-spacing:-0.01em;}
+.m-panel h3:first-child{margin-top:0;}
+.m-panel h4{font-size:14px;margin:18px 0 8px;color:var(--brand-1);font-weight:600;}
+.m-panel p{font-size:13.5px;color:var(--text-2);margin-bottom:10px;line-height:1.7;}
+.m-panel ul{padding-left:20px;margin-bottom:12px;}
+.m-panel li{font-size:13px;color:var(--text-2);margin:5px 0;line-height:1.6;}
+.m-panel table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px;}
+.m-panel th,.m-panel td{border:1px solid var(--border);padding:7px 10px;text-align:left;vertical-align:top;}
+.m-panel th{background:#faf9f6;font-weight:600;}
+.m-panel code{background:#f1f0ec;padding:1px 5px;border-radius:4px;font-size:12px;}
+.m-lead{font-size:13px;color:var(--text-3);background:#faf9f6;border-left:3px solid var(--brand-1);padding:10px 14px;border-radius:6px;margin-bottom:18px;}
+.step-box{background:#faf9f6;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.step-box .num{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--text-1);color:#fff;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px;}
+.step-box b{font-size:13px;}
+.tmpl{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<header class="topbar">
+<div class="topbar-inner">
+<div class="logo">📊</div>
+<h1>AI 数据分析平台</h1>
+<span class="sub">分析方法论</span>
+<nav><a href="index.html">← 返回工作台</a></nav>
+</div>
+</header>
+
+<div class="m-wrap">
+<h2 style="margin-bottom:6px;letter-spacing:-0.02em;">🧠 分析方法论</h2>
+<p style="font-size:13px;color:var(--text-3);margin-bottom:20px;">沉淀自团队实战的分析方法论：从付费/广告根因定位，到数据质量、KPI、可视化与报告交付的完整体系。</p>
+
+<div class="m-tabs">
+<div class="m-tab active" data-panel="m-pay">💰 付费根因定位</div>
+<div class="m-tab" data-panel="m-ad">📺 广告漏斗分析</div>
+<div class="m-tab" data-panel="m-flow">🔄 分析工作流</div>
+<div class="m-tab" data-panel="m-assist">🤖 AI 探索助手</div>
+<div class="m-tab" data-panel="m-quality">数据质量评估</div>
+<div class="m-tab" data-panel="m-diag">指标诊断 & KPI</div>
+<div class="m-tab" data-panel="m-kpi">KPI 设计 & 市场估算</div>
+<div class="m-tab" data-panel="m-viz">数据可视化</div>
+<div class="m-tab" data-panel="m-report">分析报告 & 仪表盘</div>
+</div>
+
+<!-- 付费根因定位 6 步法 -->
+<div class="m-panel active" id="m-pay">
+<div class="m-lead">付费收入波动的系统化根因定位方法。核心思路：先看整体趋势，再层层拆解，定位到具体维度和用户行为，最后排除外部因素得出可行动结论。</div>
+
+<h3>核心公式</h3>
+<div class="tmpl">收入 = DAU × 付费率 × ARPPU
+
+付费率   = 付费用户数 / 活跃用户数
+ARPPU   = 付费金额 / 付费用户数
+ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
+<p>任何收入变化，最终都能归因到 <b>DAU、付费率、ARPPU</b> 三个乘数之一（或组合）。先判断是哪个乘数在变，再往下拆。</p>
+
+<h3>6 步根因定位法</h3>
+<div class="step-box"><span class="num">1</span><b>整体趋势判断</b><p style="margin:6px 0 0;">先看收入大盘的时间趋势，确认是真实波动还是正常周期。对比环比/同比、节假日、版本节点。明确"变了多少、从什么时候开始变"。</p></div>
+<div class="step-box"><span class="num">2</span><b>多维拆解贡献度</b><p style="margin:6px 0 0;">把收入变化拆到 DAU / 付费率 / ARPPU 三因子，算出各因子对总变化的贡献度，锁定主因子。</p></div>
+<div class="step-box"><span class="num">3</span><b>交叉分析</b><p style="margin:6px 0 0;">沿主因子继续按维度下钻（国家、渠道、版本、新老用户、付费档位…），找出贡献最大的细分人群/场景。警惕辛普森悖论。</p></div>
+<div class="step-box"><span class="num">4</span><b>行为归因</b><p style="margin:6px 0 0;">进入用户行为层：付费路径、商品结构、触发场景、漏斗转化是否变化。把指标波动和具体行为变化对应起来。</p></div>
+<div class="step-box"><span class="num">5</span><b>外部因素排除</b><p style="margin:6px 0 0;">排除版本发布、活动、价格调整、买量结构、市场大盘、数据口径变更/埋点改动等外部干扰，确认根因。</p></div>
+<div class="step-box"><span class="num">6</span><b>结论输出</b><p style="margin:6px 0 0;">答案优先：一句话说清主因 + 证据 + 业务影响 + 建议动作 + 信心程度。</p></div>
+
+<h3>贡献度公式</h3>
+<div class="m-lead" style="border-left-color:var(--brand-1);">当 收入 = A × B 时，A、B 各自对收入变化的贡献可拆解为：</div>
+<div class="tmpl">ΔRevenue = (A₁ - A₀) × B₀        ← A 的贡献（量的变化）
+         + A₀ × (B₁ - B₀)        ← B 的贡献（率的变化）
+         + (A₁ - A₀) × (B₁ - B₀)  ← 交互项
+
+贡献度% = 单因子贡献 / ΔRevenue 总额</div>
+<p>三因子（DAU × 付费率 × ARPPU）可逐层套用：先拆 DAU vs (付费率×ARPPU)，再把后者拆成付费率 vs ARPPU。</p>
+
+<h3>12 个常用拆解维度</h3>
+<table>
+<tr><th>维度类别</th><th>具体维度</th></tr>
+<tr><td>用户属性</td><td>新老用户、注册天数/生命周期阶段、付费历史档位</td></tr>
+<tr><td>获取来源</td><td>国家/地区、买量渠道、媒体来源、自然量 vs 买量</td></tr>
+<tr><td>产品环境</td><td>App 版本、平台（iOS/Android）、机型/系统</td></tr>
+<tr><td>付费结构</td><td>商品/SKU、价格档位、支付方式（官方 vs 三方）、首充 vs 复购</td></tr>
+</table>
+
+<h3>数据需求清单（拆解前先备齐）</h3>
+<ul>
+<li>收入大盘日粒度时间序列（含 DAU、付费用户数、付费金额）</li>
+<li>各拆解维度的明细（国家 / 渠道 / 版本 / 新老 / 商品）</li>
+<li>版本发布、活动、价格调整的时间节点表（用于第 5 步排除）</li>
+<li>埋点/口径变更记录（避免把数据问题当业务问题）</li>
+</ul>
+</div>
+
+<!-- 广告漏斗分析 -->
+<div class="m-panel" id="m-ad">
+<div class="m-lead">广告变现（IAA）全链路漏斗分析方法。核心：用 adsessionid 串联一次广告会话的完整链路，逐环节定位加载、播放、转化的损耗点。</div>
+
+<h3>广告全链路漏斗</h3>
+<div class="step-box"><span class="num">1</span><b>广告请求</b><p style="margin:6px 0 0;">触发广告位、向 mediation 发起请求。</p></div>
+<div class="step-box"><span class="num">2</span><b>加载成功</b><p style="margin:6px 0 0;">广告素材成功返回并加载。<b>加载成功率 = 加载成功 / 广告请求</b>。</p></div>
+<div class="step-box"><span class="num">3</span><b>展示/播放</b><p style="margin:6px 0 0;">广告成功展示给用户。<b>播放成功率 = 播放成功 / 加载成功</b>。</p></div>
+<div class="step-box"><span class="num">4</span><b>完整观看 / 转化</b><p style="margin:6px 0 0;">用户看完或产生奖励发放。<b>转化率 = 完成 / 播放成功</b>。</p></div>
+<div class="step-box"><span class="num">5</span><b>收益</b><p style="margin:6px 0 0;">产生 eCPM 收益。<b>eCPM = 收益 / 展示次数 × 1000</b>。</p></div>
+
+<h3>关键指标定义</h3>
+<table>
+<tr><th>指标</th><th>定义</th></tr>
+<tr><td>加载成功率</td><td>加载成功次数 / 广告请求次数</td></tr>
+<tr><td>播放成功率</td><td>播放成功次数 / 加载成功次数</td></tr>
+<tr><td>转化率</td><td>完成观看次数 / 播放成功次数</td></tr>
+<tr><td>eCPM</td><td>广告收益 / 展示次数 × 1000，衡量单位展示价值</td></tr>
+<tr><td>人均广告次数</td><td>展示次数 / 活跃用户数，衡量广告频次</td></tr>
+<tr><td>广告 LTV</td><td>用户生命周期内累计广告收益</td></tr>
+</table>
+
+<h3>核心分析维度</h3>
+<table>
+<tr><th>维度</th><th>说明</th></tr>
+<tr><td>mediation</td><td>聚合平台（如 MAX、AdMob），对比不同聚合层表现</td></tr>
+<tr><td>adchannel</td><td>广告渠道/网络（Meta、Google、Unity…）</td></tr>
+<tr><td>arm（广告位）</td><td>激励视频、插屏、Banner、开屏等广告形式</td></tr>
+<tr><td>material（素材）</td><td>具体广告素材，定位素材级别的转化差异</td></tr>
+<tr><td>国家 / 版本 / 平台</td><td>常规人群与环境维度</td></tr>
+</table>
+
+<h3>adsessionid：会话串联</h3>
+<p>用 <code>adsessionid</code> 把一次广告会话的"请求 → 加载 → 播放 → 完成 → 收益"所有事件串联起来，才能算准每一环的真实转化率，定位损耗发生在哪一步。这是广告漏斗分析的核心技术前提。</p>
+
+<h3>6 个常用分析视图</h3>
+<ul>
+<li><b>大盘趋势</b>：广告收益、eCPM、人均次数、填充率的时间趋势</li>
+<li><b>漏斗损耗</b>：请求→加载→播放→完成各环节转化率，定位瓶颈</li>
+<li><b>渠道对比</b>：不同 adchannel / mediation 的 eCPM 与填充率</li>
+<li><b>广告位分析</b>：各 arm 形式的收益贡献与用户体验平衡</li>
+<li><b>素材分析</b>：material 级别的转化与收益，指导素材优化</li>
+<li><b>人群分析</b>：国家/版本/新老用户的广告价值差异</li>
+</ul>
+
+<div class="m-lead" style="border-left-color:var(--brand-1);">⚠️ 口径提醒：UNO2（MN08）广告明细在 <code>dw_ods_mn08.c_client_app_ad_log</code>，安卓收益需 <code>/1000000</code>；详见数据口径字典。</div>
+</div>
+
+<!-- 分析工作流 -->
+<div class="m-panel" id="m-flow">
+<div class="m-lead">把分析需求拆成标准化流程。区分"活动类"与"复杂探索类"两种工作流，配合埋点准则，保证分析可复用、可追溯。</div>
+
+<h3>埋点准则</h3>
+<ul>
+<li><b>先确认埋点再写 SQL</b>：分析前必须确认相关行为是否有埋点、字段含义、上报时机</li>
+<li><b>口径以文档为准</b>：指标定义、过滤条件参考 Confluence 真实文档，不凭经验猜</li>
+<li><b>关注埋点变更</b>：埋点改动/删除会造成数据断层，分析前查变更记录</li>
+<li><b>明确分析单元</b>：事件级 / 用户级 / 会话级，避免粒度混用导致重复计算</li>
+</ul>
+
+<h3>活动类分析工作流</h3>
+<p>针对运营活动、版本功能上线等有明确时间节点的分析。</p>
+<div class="step-box"><span class="num">1</span><b>明确活动信息</b><p style="margin:6px 0 0;">活动时间、参与门槛、目标人群、预期目标指标。</p></div>
+<div class="step-box"><span class="num">2</span><b>选择对比基准</b><p style="margin:6px 0 0;">活动前 vs 活动中 vs 活动后；或参与组 vs 未参与组。注意完整周期对比，避免部分期间比较。</p></div>
+<div class="step-box"><span class="num">3</span><b>核心指标评估</b><p style="margin:6px 0 0;">参与率、目标指标提升、收入/留存影响，量化活动效果。</p></div>
+<div class="step-box"><span class="num">4</span><b>排除干扰</b><p style="margin:6px 0 0;">剔除自然增长、其他并行活动、买量波动等因素。</p></div>
+<div class="step-box"><span class="num">5</span><b>结论与建议</b><p style="margin:6px 0 0;">活动是否达标、ROI、是否值得复用/放量。</p></div>
+
+<h3>复杂探索类分析工作流</h3>
+<p>针对开放式问题（"为什么 X 下降了？""哪类用户更值钱？"），没有现成答案需要探索。</p>
+<div class="step-box"><span class="num">1</span><b>拆解问题</b><p style="margin:6px 0 0;">把模糊问题拆成可量化的子问题，明确要回答什么、用什么证据证明。</p></div>
+<div class="step-box"><span class="num">2</span><b>建立假设</b><p style="margin:6px 0 0;">基于业务理解列出可能原因（假设），按可能性和可验证性排序。</p></div>
+<div class="step-box"><span class="num">3</span><b>逐一验证</b><p style="margin:6px 0 0;">用数据验证/推翻每个假设，从最可能、最易验证的开始。</p></div>
+<div class="step-box"><span class="num">4</span><b>交叉下钻</b><p style="margin:6px 0 0;">对成立的假设继续多维拆解，定位到具体人群/场景/行为。</p></div>
+<div class="step-box"><span class="num">5</span><b>综合结论</b><p style="margin:6px 0 0;">整合多条证据形成完整因果链，输出结论与行动建议。</p></div>
+
+<h3>UNO 用户研究方法论沉淀</h3>
+<table>
+<tr><th>方法</th><th>应用场景</th></tr>
+<tr><td>付费用户画像</td><td>刻画付费人群的行为/偏好特征，指导精准运营</td></tr>
+<tr><td>留存与情绪体验研究</td><td>结合行为数据与体验反馈，定位留存关键节点</td></tr>
+<tr><td>新老手差异分析</td><td>对比新手与老手的行为路径，优化新手引导</td></tr>
+<tr><td>辛普森悖论防范</td><td>聚合趋势与分段趋势冲突时，以分段结论为准</td></tr>
+</table>
+</div>
+
+<!-- AI 探索助手技能 -->
+<div class="m-panel" id="m-assist">
+<div class="m-lead">面向非数分职能（运营/产品）的 AI 数据分析探索助手设计规范。核心：用对话式引导降低门槛，让小白也能产出可靠的分析需求和 SQL。</div>
+
+<h3>6 步对话工作流</h3>
+<div class="step-box"><span class="num">1</span><b>需求澄清</b><p style="margin:6px 0 0;">用提问把模糊诉求变清晰：想看什么指标、什么时间范围、哪个产品、对比什么。给选项让用户勾选，不问开放题。</p></div>
+<div class="step-box"><span class="num">2</span><b>方案确认</b><p style="margin:6px 0 0;">把理解到的分析方案复述给用户确认：分析目标、口径、维度、产出形式。确认后再往下。</p></div>
+<div class="step-box"><span class="num">3</span><b>确认字段</b><p style="margin:6px 0 0;">明确用到的表、字段、埋点。引用数据口径字典，确保字段真实存在、口径正确。</p></div>
+<div class="step-box"><span class="num">4</span><b>SQL 生成</b><p style="margin:6px 0 0;">基于确认的字段和口径生成 SQL，遵守各产品表名/主键差异。</p></div>
+<div class="step-box"><span class="num">5</span><b>SQL 自评</b><p style="margin:6px 0 0;">生成后自查：粒度对不对、join 会不会爆炸、过滤条件全不全、口径有没有踩坑。</p></div>
+<div class="step-box"><span class="num">6</span><b>解读指引</b><p style="margin:6px 0 0;">告诉用户跑出来的数据怎么看、关注哪些异常、下一步可以怎么深挖。</p></div>
+
+<h3>5 条数据管理规范</h3>
+<table>
+<tr><th>规范</th><th>说明</th></tr>
+<tr><td>先写后查</td><td>先把 SQL 写进文件存档，再执行查询，保证可追溯、可复用</td></tr>
+<tr><td>SQL 变更策略</td><td>SQL 有改动时保留版本，记录改了什么、为什么改</td></tr>
+<tr><td>CSV 命名规范</td><td>结果 CSV 用统一命名（主题_产品_日期），方便归档检索</td></tr>
+<tr><td>SQL 与 CSV 关联</td><td>每份 CSV 对应记录其来源 SQL，数据与查询一一对应</td></tr>
+<tr><td>UTF-8 BOM 头</td><td>导出 CSV 带 UTF-8 BOM 头，避免 Excel 打开中文乱码</td></tr>
+</table>
+
+<h3>对话式引导原则</h3>
+<ul>
+<li><b>给选项，不问开放题</b>：用编号 + 字母（如 <code>1A / 2B</code>）让用户快速回复，降低输入成本</li>
+<li><b>一次只问一件事</b>：分步引导，不要一次抛一堆问题</li>
+<li><b>能勾选不填写</b>：尽量用选择代替手动输入</li>
+<li><b>语言精炼直白</b>：10 岁小孩也能看懂，不用术语黑话</li>
+<li><b>每步可确认可回退</b>：复述理解让用户确认，错了能改</li>
+</ul>
+
+<h3>SQL 高手指南（自评要点）</h3>
+<ul>
+<li><b>粒度优先</b>：写之前先想清楚结果是一行代表什么（用户/天/事件）</li>
+<li><b>防 join 爆炸</b>：多对多 join 会静默倍增行数，join 后核对行数</li>
+<li><b>过滤完整</b>：日期、产品、平台、测试用户排除等过滤条件不能漏</li>
+<li><b>口径对齐</b>：指标定义、分子分母、去重逻辑严格对齐文档</li>
+<li><b>大表先限流</b>：探索阶段先加日期/LIMIT 限制扫描量，避免全表扫描</li>
+</ul>
+</div>
+
+<!-- 1. 数据质量评估 -->
+<div class="m-panel" id="m-quality">
+<div class="m-lead">评估数据集是否可信以用于分析/建模/仪表盘；并验证已完成的分析在分享前是否可靠。</div>
+
+<h3>Part A：数据质量评估</h3>
+<h4>工作流</h4>
+<div class="step-box"><span class="num">1</span><b>明确质量问题和操作上下文</b><p style="margin:6px 0 0;">建立数据集代表什么、预期分析单元、下游用途。确定主键、日期列、时区假设、领域规则、业务阈值。</p></div>
+<div class="step-box"><span class="num">2</span><b>选择可检查的分析路径</b><p style="margin:6px 0 0;">默认使用配套 notebook 或脚本，以便检查发现背后的确切代码。先确认 schema、粒度、样本行。</p></div>
+<div class="step-box"><span class="num">3</span><b>构建紧凑的数据画像</b><p style="margin:6px 0 0;">行数、列数、类型、候选键重复率、空值率、时间戳范围。先确认粒度——许多表面问题实际是混合粒度/部分回填/重复 join。</p></div>
+<div class="step-box"><span class="num">4</span><b>运行核心质量检查</b><p style="margin:6px 0 0;">完整性、唯一性、有效性、一致性、引用完整性、时效性、容量与形态。比较比率而非仅计数，按维度切分。</p></div>
+<div class="step-box"><span class="num">5</span><b>形态特定检查 + 时间分布检查</b><p style="margin:6px 0 0;">事件/维度/事实/特征/实验数据各有专属检查。有历史数据时关注变化点（发布、迁移、事故）。</p></div>
+<div class="step-box"><span class="num">6</span><b>调查风险 + 推荐修复</b><p style="margin:6px 0 0;">将每个问题与下游风险联系，推荐最小一组修复/监控/自动化测试。</p></div>
+
+<h4>核心检查类别</h4>
+<table>
+<tr><th>类别</th><th>检查内容</th></tr>
+<tr><td>完整性</td><td>按列/分区/分段统计空值率；意外空字符串或哨兵值；必需列填充率</td></tr>
+<tr><td>唯一性</td><td>完全重复行、重复主键、重复复合键</td></tr>
+<tr><td>有效性</td><td>类型符合性；ID/邮箱/URL/枚举/时间戳格式；度量和日期范围检查</td></tr>
+<tr><td>一致性</td><td>跨字段规则、单位/货币一致性、状态-时间戳对齐</td></tr>
+<tr><td>引用完整性</td><td>父子键覆盖、孤儿记录、意外多对多 join、断裂 SCD join</td></tr>
+<tr><td>时效性</td><td>新鲜度延迟、缺失最近分区、无法解释的历史重写/回填</td></tr>
+<tr><td>容量和形态</td><td>行数漂移、不同值计数漂移、分布漂移、新增/消失类别</td></tr>
+</table>
+
+<h4>严重程度分类</h4>
+<table>
+<tr><th>级别</th><th>定义</th></tr>
+<tr><td>Critical</td><td>中断可信分析、核心 join、生产仪表盘或关键决策</td></tr>
+<tr><td>High</td><td>实质性偏向下游决策（大范围空值激增、类别漂移、泄漏）</td></tr>
+<tr><td>Medium</td><td>局部或可解释问题，需文档记录或监控</td></tr>
+<tr><td>Low</td><td>表面不一致、预期稀疏性或已知边缘情况</td></tr>
+</table>
+
+<h3>Part B：分析验证（QA）</h3>
+<h4>常见陷阱</h4>
+<ul>
+<li><b>Join 爆炸</b>：多对多 join 静默地倍增行</li>
+<li><b>幸存者偏差</b>：仅包括今天存在的实体</li>
+<li><b>不完整期间比较</b>：部分期间 vs 完整期间</li>
+<li><b>分母偏移</b>：比较组之间合格人群变化</li>
+<li><b>平均值的平均值</b>：未加权平均预计算的均值</li>
+<li><b>时区不匹配</b>：不同时间戳约定或截止点</li>
+<li><b>辛普森悖论</b>：聚合和分段级别趋势冲突</li>
+</ul>
+<h4>置信度评级</h4>
+<table>
+<tr><th>评级</th><th>含义</th></tr>
+<tr><td>Ready to share</td><td>方法论健全，关键计算已验证，注意事项清晰</td></tr>
+<tr><td>Share with caveats</td><td>方向性可用，但必须传达特定限制</td></tr>
+<tr><td>Needs revision</td><td>实质性错误、不受支持的声明或方法论问题</td></tr>
+</table>
+</div>
+
+<!-- 2. 指标诊断 & KPI报告 -->
+<div class="m-panel" id="m-diag">
+<div class="m-lead">诊断指标为何变更或与预期不同，并生成面向领导层的 KPI 更新。</div>
+
+<h3>Part A：指标诊断</h3>
+<div class="step-box"><span class="num">1</span><b>定义诊断问题</b><p style="margin:6px 0 0;">框定什么变了、什么比较能证明它。明确时间窗口、人群、粒度、诊断类型（变动/集中度/对账）。</p></div>
+<div class="step-box"><span class="num">2</span><b>验证指标定义和来源</b><p style="margin:6px 0 0;">确认定义、粒度、聚合逻辑、过滤、join、排除、新鲜度、血缘。至少检查一个业务面 + 一个低层来源。</p></div>
+<div class="step-box"><span class="num">3</span><b>建立指标模式</b><p style="margin:6px 0 0;">量化相关期间和范围内的指标，重现比较。模式的大小、时间、范围验证前不要找原因。</p></div>
+<div class="step-box"><span class="num">4</span><b>选择诊断计划</b><p style="margin:6px 0 0;">从指标操作逻辑、业务上下文、源形态中选驱动因素维度。优先业务可监控/可行动的因素。</p></div>
+<div class="step-box"><span class="num">5</span><b>分解并验证驱动因素</b><p style="margin:6px 0 0;">用最强证据衡量每个驱动因素。比率指标看分子/分母/两者；区分混合效应 vs 段内绩效效应。</p></div>
+<div class="step-box"><span class="num">6</span><b>陈述含义和后续行动</b><p style="margin:6px 0 0;">以诊断问题的答案开头，陈述最强驱动因素 + 证据 + 业务影响 + 信心程度 + 下一步。</p></div>
+
+<h4>解释模式</h4>
+<table>
+<tr><th>场景</th><th>方法</th></tr>
+<tr><td>指标变更</td><td>焦点窗口 vs 基线，对分段贡献排名，检查混合偏移 vs 段内变动</td></tr>
+<tr><td>尖峰/回归/事故</td><td>确定开始/峰值/恢复、分布形态、受影响切片、广泛 vs 局部退化</td></tr>
+<tr><td>最大贡献者</td><td>定义"最大"，对实体排名，比较总量份额和变化，找主要变动者/进入者/退出者</td></tr>
+<tr><td>对账</td><td>对齐定义/过滤/粒度/分子/分母，量化解释差距的组成部分</td></tr>
+</table>
+
+<h3>Part B：KPI 报告</h3>
+<h4>报告结构</h4>
+<div class="tmpl">**Status**: [On track / At risk / Ahead of plan]
+**Current**: [Value] vs. Target: [Value] ([+/-X%, pacing])
+**Driver**: [What's driving performance]
+**Implication**: [What the team should do]</div>
+<h4>呈现标准</h4>
+<ul>
+<li>为略读的高管写作：以答案开头，然后是证据</li>
+<li>使用业务可读的数字：<code>123k (+8% w/w, +19% m/m)</code></li>
+<li>用指标证据替代通用形容词（"强劲"、"健康"）</li>
+<li>将注意事项放在它们影响的声明附近</li>
+<li>仅在有助于优先行动时使用交通信号灯状态</li>
+</ul>
+</div>
+
+<!-- 3. KPI 设计 & 市场估算 -->
+<div class="m-panel" id="m-kpi">
+<div class="m-lead">设计 KPI 框架、设定目标、制定测量计划，并估算市场/机会规模（TAM/SAM/SOM）。</div>
+
+<h3>Part A：KPI 框架设计</h3>
+<div class="step-box"><span class="num">1</span><b>明确决策和操作上下文</b><p style="margin:6px 0 0;">理解指标支持的决策、审查上下文、谁对结果采取行动。</p></div>
+<div class="step-box"><span class="num">2</span><b>收集证据再推荐指标</b><p style="margin:6px 0 0;">了解目标、当前状态、受众、约束、风险、现有定义、基线/目标上下文。</p></div>
+<div class="step-box"><span class="num">3</span><b>生成更广泛的候选集</b><p style="margin:6px 0 0;">创建候选结果、驱动因素、护栏指标，每个有明确定义和与决策的合理联系。</p></div>
+<div class="step-box"><span class="num">4</span><b>比较和选择指标</b><p style="margin:6px 0 0;">按 6 标准筛选，推荐 1-3 个主要 KPI + 每个 1-2 个驱动因素 + 1-2 个护栏。</p></div>
+<div class="step-box"><span class="num">5</span><b>设定目标</b><p style="margin:6px 0 0;">自上而下（基准/历史/竞品）vs 自下而上（团队能做什么）。比较雄心与现实影响力。</p></div>
+
+<h4>指标选择 6 标准</h4>
+<table>
+<tr><th>标准</th><th>说明</th></tr>
+<tr><td>反映目标</td><td>指标代表预期结果，用代理时解释原因</td></tr>
+<tr><td>为决策提供信息</td><td>变动应该改变团队的做法</td></tr>
+<tr><td>显示有用信号</td><td>在决策节奏下不太慢或太嘈杂</td></tr>
+<tr><td>可被团队影响</td><td>存在合理杠杆，或与驱动因素配对</td></tr>
+<tr><td>可操作测量</td><td>持续地仪表化、计算、跟踪</td></tr>
+<tr><td>难以博弈</td><td>改进指标不应隐藏对质量/信任/留存的损害</td></tr>
+</table>
+
+<h3>Part B：市场估算</h3>
+<h4>方法选择</h4>
+<table>
+<tr><th>方法</th><th>何时</th></tr>
+<tr><td>自上而下</td><td>存在可靠的聚合市场数据</td></tr>
+<tr><td>自下而上</td><td>市场可从可观察单位和假设构建</td></tr>
+<tr><td>基于价值</td><td>从创造的价值而非公布的市场总量估算</td></tr>
+</table>
+<h4>关键原则</h4>
+<ul>
+<li>区分来源事实、推断估算、判断调用</li>
+<li>派生值可追溯到公式，不硬编码输出</li>
+<li>识别最能移动估算的假设，做灵敏度分析</li>
+<li>不确定性显著时用范围，不要藏在单点估算后</li>
+</ul>
+</div>
+
+<!-- 4. 数据可视化 -->
+<div class="m-panel" id="m-viz">
+<div class="m-lead">设计、指定、实现、修订和 QA 定量可视化及图表选择。将图表视为结论的证据。</div>
+
+<h3>图表选择指南</h3>
+<table>
+<tr><th>数据关系</th><th>最佳图表</th><th>要点</th></tr>
+<tr><td>随时间趋势</td><td><code>line</code></td><td>展示足够多点揭示形态；目标 8-12 个时间点</td></tr>
+<tr><td>随时间构成</td><td><code>stackedArea</code></td><td>各部分作为整体读取；比较轨迹更重要时切 line</td></tr>
+<tr><td>跨类别比较</td><td><code>bar</code></td><td>顺序非语义时排序；长标签用水平条</td></tr>
+<tr><td>排名/Top-N</td><td><code>leaderboard</code></td><td>紧凑单度量；要上下文切排序 bar</td></tr>
+<tr><td>整体-部分</td><td>stacked <code>bar</code></td><td>分母明确；少数切片才用 pie</td></tr>
+<tr><td>分布/扩散</td><td><code>histogram</code></td><td>揭示形态的数值 bin；比较组用 boxPlot</td></tr>
+<tr><td>变量间关系</td><td><code>scatter</code></td><td>数值 x/y；目标 12-20 个有意义的点</td></tr>
+<tr><td>密集 2D 模式</td><td><code>heatmap</code></td><td>矩阵形状或强度；点级变化切 scatter</td></tr>
+<tr><td>加性桥接</td><td><code>waterfall</code></td><td>驱动因素干净加到最终值；否则排序 bar</td></tr>
+<tr><td>有序阶段</td><td><code>funnel</code></td><td>仅用于有序单系列阶段</td></tr>
+</table>
+
+<h3>视觉设计标准</h3>
+<h4>排版和颜色</h4>
+<ul>
+<li>跨图表单一字体系列；白色/近白背景、安静灰网格线、深炭文本</li>
+<li>不仅依赖颜色——用色调、填充、标记、线条样式、直接标签、排序</li>
+<li>调色板策略：单根色优先 / 硬性双根色上限 / 宽松多类别（≤5）</li>
+</ul>
+<h4>选择规则</h4>
+<ul>
+<li>从分析问题开始，不是最喜欢的图表类型</li>
+<li>图表用于形态和比较；表格用于精确查找</li>
+<li>不交付动力不足的趋势图（&lt;8点）或散点图（&lt;12点）</li>
+<li>pie / Pareto / waterfall / Likert 保留为变体而非默认</li>
+</ul>
+<h4>质量门槛</h4>
+<ul>
+<li>图表选择遵循分析问题，而非视觉偏好</li>
+<li>形式匹配比较；比例诚实一致</li>
+<li>每个图表有可见标题 + 带必要上下文的副标题</li>
+<li>正/负状态用色调 + 符号标签，不仅是颜色</li>
+</ul>
+</div>
+
+<!-- 5. 分析报告 & 仪表盘 -->
+<div class="m-panel" id="m-report">
+<div class="m-lead">构建精美的分析报告、仪表盘和产品/业务分析。</div>
+
+<h3>Part A：报告构建</h3>
+<div class="step-box"><span class="num">1</span><b>定义报告任务</b><p style="margin:6px 0 0;">陈述问题、决策、受众、范围、时间框架、比较基线。选一种受众：产品利益相关者 / 技术。</p></div>
+<div class="step-box"><span class="num">2</span><b>收集并界定证据</b><p style="margin:6px 0 0;">清点源数据、指标定义、分母、假设、注意事项、notebook/SQL。草拟声明前解决歧义。</p></div>
+<div class="step-box"><span class="num">3</span><b>提炼报告主干</b><p style="margin:6px 0 0;">答案优先：问题 → 答案 → 指标口径 → 发现+证据 → 验证 → 注意事项 → 下一步。</p></div>
+<div class="step-box"><span class="num">4</span><b>规划读者面向的结构</b><p style="margin:6px 0 0;">有序主段落 + 可见标题。定量发现默认可视化，表格用于精确查找。</p></div>
+<div class="step-box"><span class="num">5</span><b>设计可视化和表格</b><p style="margin:6px 0 0;">每个视觉支持特定声明，规划相邻解释段落。</p></div>
+
+<h4>报告标准</h4>
+<ul>
+<li>利益相关者报告以执行摘要开启（2-4 个带粗体主题句的要点）</li>
+<li>以结论开启主段落，而非设置性散文</li>
+<li>每个重要数字/可视化与通俗英语解释配对</li>
+<li>将原始数字放入上下文：基准百分比、基线比较、历史范围</li>
+<li>在叙述中用速记大数字（<code>899k</code>, <code>10.9k</code>, <code>1.2M</code>）</li>
+</ul>
+
+<h3>Part B：仪表盘构建</h3>
+<h4>指标模型分类</h4>
+<table>
+<tr><th>类型</th><th>测量对象</th></tr>
+<tr><td>Reach 触达</td><td>谁/什么在使用、渗透率、激活、覆盖</td></tr>
+<tr><td>Volume 量</td><td>事件、使用、交易、会话、吞吐量、频率</td></tr>
+<tr><td>Value 价值</td><td>收入、成本、利润、节省、转化、留存价值</td></tr>
+<tr><td>Quality 质量</td><td>成功/失败率、可靠性、延迟、满意度</td></tr>
+<tr><td>Depth 深度</td><td>重复使用、强度、功能组合、工作流完成</td></tr>
+<tr><td>Mix 混合</td><td>细分、地理、渠道、产品/版本、计划、队列</td></tr>
+<tr><td>Movement 变动</td><td>趋势、增长、季节性、前/后、基准、预测</td></tr>
+<tr><td>Risk 风险</td><td>数据覆盖、新鲜度、已知盲点、容量</td></tr>
+</table>
+<h4>布局原则</h4>
+<ul>
+<li>从摘要到详情：关键状态/KPI → 随时间变动 → 分解 → 详情表格</li>
+<li>默认视图在交互前回答主要受众问题</li>
+<li>过滤器少、有意义且正确工作</li>
+<li>卡片、图表、表对账一致</li>
+</ul>
+
+<h3>Part C：产品和业务分析</h3>
+<h4>决策透镜（选相关的解释证据）</h4>
+<table>
+<tr><th>透镜</th><th>问题</th></tr>
+<tr><td>当前规模</td><td>足够大以重要？</td></tr>
+<tr><td>势头</td><td>增长、收缩、加速？</td></tr>
+<tr><td>广度</td><td>广泛还是狭窄？</td></tr>
+<tr><td>集中度</td><td>依赖少数大实体？</td></tr>
+<tr><td>效率</td><td>相同输入下输出更好？</td></tr>
+<tr><td>可寻址性</td><td>团队能对此采取行动？</td></tr>
+<tr><td>风险/依赖</td><td>改变建议的约束？</td></tr>
+</table>
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.m-tab').forEach(tab => {
+  tab.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
