@@ -241,17 +241,115 @@
 <!-- 广告变现 -->
 <div class="dict-panel" id="p-ad">
 <h3>广告变现通用指标</h3>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a></p>
+<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a> | <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">飞书: MG 数据分析 SQL 知识库</a></p>
+
+<h3>核心指标公式</h3>
 <table>
 <tr><th>指标</th><th>英文</th><th>公式</th><th>说明</th></tr>
-<tr><td>eCPM (API)</td><td>eCPM</td><td>Revenue / Impressions * 1000</td><td>渠道API数据</td></tr>
-<tr><td>eCPM (Log)</td><td>eCPM(log)</td><td>Advalue / AdPlayTimes * 1000</td><td>打点日志数据</td></tr>
-<tr><td>日人均广告价值</td><td>AdARPU</td><td>IAA / DAUsum</td><td>DAUsum=adinit用户</td></tr>
-<tr><td>Total ARPU</td><td>Total ARPU</td><td>(Advalue+IAP) / DAUsum</td><td></td></tr>
-<tr><td>人均频次 (Log)</td><td>FrequencyDAU</td><td>AdPlayTimes / DAU</td><td></td></tr>
-<tr><td>参与率</td><td>ParticipateRate</td><td>AdPlayUser / DAU</td><td></td></tr>
-<tr><td>填充率</td><td>Fillrate</td><td>FilledRequests / Requests</td><td></td></tr>
-<tr><td>IAA LTV(N)</td><td>IAALTV(N)</td><td>累计N日IAA / 累计N日新增用户</td><td>N=1/3/7/15/30/60/90</td></tr>
+<tr><td>eCPM (API)</td><td>eCPM</td><td><code>Revenue / Impressions * 1000</code></td><td>渠道API数据，来源广告平台后台</td></tr>
+<tr><td>eCPM (Log)</td><td>eCPM(log)</td><td><code>SUM(advalue) * 1000 / NULLIF(SUM(adplay_cnt), 0)</code></td><td>打点日志数据，按 advalue/adplay 计算</td></tr>
+<tr><td>日人均广告价值</td><td>Ad ARPU</td><td><code>SUM(advalue_sum_1d) / COUNT(DISTINCT user_id)</code></td><td>分母为当日 DAU（adinit 用户）</td></tr>
+<tr><td>Total ARPU</td><td>Total ARPU</td><td><code>(SUM(advalue_sum_1d) + SUM(payment_sum_1d)) / COUNT(DISTINCT user_id)</code></td><td>广告+内购总收入 / DAU</td></tr>
+<tr><td>人均频次</td><td>Freq/DAU</td><td><code>SUM(adplay_cnt) / COUNT(DISTINCT user_id)</code></td><td>日活用户人均广告观看次数</td></tr>
+<tr><td>RV 人均频次</td><td>RV Freq/DAU</td><td><code>SUM(rv_play_cnt) / COUNT(DISTINCT user_id)</code></td><td>激励视频人均频次</td></tr>
+<tr><td>INT 人均频次</td><td>INT Freq/DAU</td><td><code>SUM(int_play_cnt) / COUNT(DISTINCT user_id)</code></td><td>插屏人均频次</td></tr>
+<tr><td>参与率</td><td>ParticipateRate</td><td><code>COUNT(DISTINCT ad_user) / COUNT(DISTINCT dau_user)</code></td><td>有广告行为的用户占 DAU 比例</td></tr>
+<tr><td>填充率</td><td>Fillrate</td><td><code>FilledRequests / Requests</code></td><td>广告请求被填充的比例（API 口径）</td></tr>
+<tr><td>IAA LTV(N)</td><td>IAA LTV(N)</td><td><code>SUM(累计N日advalue) / COUNT(DISTINCT new_user)</code></td><td>N=1/3/7/15/30/60/90/120/180；累积式</td></tr>
+<tr><td>RV LTV(N)</td><td>RV LTV(N)</td><td><code>SUM(累计N日rv_revenue) / COUNT(DISTINCT new_user)</code></td><td>仅激励视频的 LTV</td></tr>
+<tr><td>INT LTV(N)</td><td>INT LTV(N)</td><td><code>SUM(累计N日int_revenue) / COUNT(DISTINCT new_user)</code></td><td>仅插屏的 LTV</td></tr>
+<tr><td>RV eCPM</td><td>RV eCPM</td><td><code>SUM(rv_revenue) * 1000 / NULLIF(SUM(rv_play_cnt), 0)</code></td><td>激励视频单独 eCPM</td></tr>
+<tr><td>INT eCPM</td><td>INT eCPM</td><td><code>SUM(int_revenue) * 1000 / NULLIF(SUM(int_play_cnt), 0)</code></td><td>插屏单独 eCPM</td></tr>
+</table>
+
+<h3>广告数据源（各产品）</h3>
+<div class="note">⚠️ 各产品广告收入字段来源不同，UNO2 需要从明细日志表计算。SKB/UNO2 安卓 advalue 需除以 1000000。</div>
+<table>
+<tr><th>产品</th><th>广告收入数据源</th><th>广告次数数据源</th><th>特殊处理</th></tr>
+<tr><td>UNO</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_reward_cnt_1d</code> / <code>ad_interstitial_cnt_1d</code></td><td>来源: <code>dw_dmdb.advalue_role_date</code>；次数来源: <code>game_client_log</code></td></tr>
+<tr><td>P10</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_view_cnt_1d</code>(RV) / <code>ad_interstitial_cnt_1d</code>(INT)</td><td>⚠️ <code>iaa_sum</code> 已于 2025-06-17 删除，统一用 <code>advalue_sum_1d</code></td></tr>
+<tr><td>SKB</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_reward_cnt_1d</code></td><td>⚠️ 安卓需: <code>IF(platform='IOS', value, value/1000000)</code></td></tr>
+<tr><td>UNO2</td><td>明细表 <code>dw_ods_mn08.c_client_app_ad_log</code> WHERE <code>log_subtype='advalue'</code></td><td>明细表 <code>dw_ods_mn08.c_client_app_ad_log</code> WHERE <code>log_subtype='adplay' AND status=1</code></td><td>⚠️ 安卓需 /1000000；需 FULL OUTER JOIN play 和 value 两张子查询</td></tr>
+</table>
+
+<h3>各产品广告相关字段速查</h3>
+<table>
+<tr><th>字段</th><th>UNO</th><th>P10</th><th>SKB</th><th>UNO2</th><th>含义</th></tr>
+<tr><td>当日总广告收入</td><td><code>advalue_sum_1d</code></td><td><code>advalue_sum_1d</code></td><td><code>advalue_sum_1d</code></td><td>明细聚合</td><td>含 RV + INT + Banner</td></tr>
+<tr><td>当日 RV 收入</td><td><code>advalue_reward_sum_1d</code></td><td><code>advalue_reward_sum_1d</code></td><td><code>advalue_reward_sum_1d</code></td><td>明细 adtype='rewardvideo'</td><td>激励视频收入</td></tr>
+<tr><td>当日 INT 收入</td><td><code>advalue_interstitial_sum_1d</code></td><td><code>advalue_interstitial_sum_1d</code></td><td><code>advalue_interstitial_sum_1d</code></td><td>明细 adtype='interstitial'</td><td>插屏收入</td></tr>
+<tr><td>当日 RV 次数</td><td><code>ad_reward_cnt_1d</code></td><td><code>ad_view_cnt_1d</code></td><td><code>ad_reward_cnt_1d</code></td><td>明细 COUNT</td><td>激励视频播放次数</td></tr>
+<tr><td>当日 INT 次数</td><td><code>ad_interstitial_cnt_1d</code></td><td><code>ad_interstitial_cnt_1d</code></td><td>—</td><td>明细 COUNT</td><td>插屏播放次数</td></tr>
+<tr><td>历史累计广告收入</td><td><code>advalue_sum</code></td><td><code>advalue_sum</code></td><td>—</td><td>—</td><td>注册以来累计</td></tr>
+</table>
+
+<h3>广告类型定义</h3>
+<table>
+<tr><th>类型</th><th>英文缩写</th><th>adtype 过滤值</th><th>说明</th></tr>
+<tr><td>激励视频</td><td>RV</td><td><code>adtype = 'rewardvideo'</code></td><td>用户主动观看，看完获得奖励</td></tr>
+<tr><td>插屏广告</td><td>INT</td><td><code>adtype = 'interstitial'</code></td><td>系统自动弹出，场景间切换触发</td></tr>
+<tr><td>Banner</td><td>BAN</td><td><code>adtype = 'banner'</code></td><td>页面底部固定展示，收入占比极低</td></tr>
+</table>
+
+<h3>IAA LTV 计算口径（生命周期累积式）</h3>
+<div class="note">⚠️ LTV 为累积口径：LT7 包含 Day0~Day6 的所有广告收入，LT30 包含 Day0~Day29，以此类推。不要用分段口径。</div>
+<table>
+<tr><th>生命周期标签</th><th>life_day 范围</th><th>公式</th></tr>
+<tr><td>LT7</td><td><code>life_day BETWEEN 0 AND 6</code></td><td><code>SUM(advalue) / COUNT(DISTINCT new_user)</code></td></tr>
+<tr><td>LT30</td><td><code>life_day BETWEEN 0 AND 29</code></td><td>同上，窗口扩大</td></tr>
+<tr><td>LT60</td><td><code>life_day BETWEEN 0 AND 59</code></td><td>同上</td></tr>
+<tr><td>LT90</td><td><code>life_day BETWEEN 0 AND 89</code></td><td>同上</td></tr>
+<tr><td>LT120</td><td><code>life_day BETWEEN 0 AND 119</code></td><td>同上</td></tr>
+<tr><td>LT180</td><td><code>life_day BETWEEN 0 AND 179</code></td><td>同上</td></tr>
+</table>
+<p style="font-size:12px;color:var(--text-3);">其中 <code>life_day = DATE_DIFF('day', DATE(reg_date), DATE(active_date))</code>；新用户定义：<code>been_reg_days = 1</code></p>
+
+<h3>IAA LTV + eCPM + Freq 分析 SQL 结构（通用模板）</h3>
+<pre>-- 通用 CTE 结构（适用 UNO/P10/SKB/UNO2）:
+-- 1. new_users: 锁定注册窗口内新用户 (been_reg_days=1)
+-- 2. daily_ad_metrics: JOIN 活跃表，计算 life_day、每日 RV/INT 次数和收入
+-- 3. lifecycle_stage: VALUES 表定义 LT 阶段 (LT7~LT180)
+-- 4. user_lt_metrics: 按用户×平台×LT阶段聚合
+-- 5. 最终 SELECT: GROUP BY CUBE(platform) 输出分平台 + ALL
+
+-- 核心计算：
+-- Freq/DAU     = SUM(adplay_cnt) / SUM(active_days)
+-- eCPM         = SUM(ad_revenue) * 1000 / NULLIF(SUM(adplay_cnt), 0)
+-- IAA LTV      = SUM(ad_revenue) / COUNT(DISTINCT user_id)
+
+-- 剔除 Banner 口径:
+-- TOTAL 收入 = advalue_reward_sum_1d + advalue_interstitial_sum_1d  (非 advalue_sum_1d)
+-- TOTAL 次数 = rv_play_cnt + int_play_cnt</pre>
+
+<h3>UNO2 广告数据特殊处理（FULL OUTER JOIN）</h3>
+<pre>-- UNO2 广告数据不在活跃表，需从明细日志表分别取播放次数和收入再合并
+-- 播放次数: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='adplay' AND status=1
+-- 广告收入: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='advalue'
+-- 安卓收入需 /1000000:
+--   CASE WHEN UPPER(platform)='IOS' THEN CAST(value AS DOUBLE)
+--        ELSE CAST(value AS DOUBLE)/1000000 END
+-- 合并方式: FULL OUTER JOIN ON date + role_id + platform
+-- 最终字段: COALESCE(play.rv_cnt, 0), COALESCE(value.rv_revenue, 0) ...</pre>
+
+<h3>常用过滤条件（广告分析专用）</h3>
+<table>
+<tr><th>场景</th><th>SQL</th><th>说明</th></tr>
+<tr><td>只看 APP 端</td><td><code>UPPER(client) = 'APP'</code></td><td>排除测试流量</td></tr>
+<tr><td>双端</td><td><code>UPPER(platform) IN ('IOS', 'ANDROID')</code></td><td>排除 SAMSUNG 等</td></tr>
+<tr><td>成年用户</td><td><code>is_adult = 1</code></td><td>UNO 广告分析需加</td></tr>
+<tr><td>新用户</td><td><code>been_reg_days = 1</code></td><td>LTV 分析用</td></tr>
+<tr><td>去广告用户排除 (SKB)</td><td><code>no_ads = 0</code> 或 <code>no_ads IS NULL</code></td><td>SKB 付费去广告用户不产生广告收入</td></tr>
+<tr><td>剔除 Banner</td><td>用 <code>advalue_reward_sum_1d + advalue_interstitial_sum_1d</code></td><td>不使用 advalue_sum_1d（含 Banner）</td></tr>
+</table>
+
+<h3>注意事项</h3>
+<table>
+<tr><th>产品</th><th>注意点</th></tr>
+<tr><td>P10</td><td><code>iaa_sum</code> 字段已于 2025-06-17 停止维护，必须用 <code>advalue_sum_1d</code>；RV 次数字段名为 <code>ad_view_cnt_1d</code>（非 ad_reward_cnt_1d）</td></tr>
+<tr><td>SKB</td><td>安卓 advalue 单位为微元，需除以 1000000：<code>IF(platform='IOS', value, value/1000000)</code></td></tr>
+<tr><td>UNO</td><td>主键为 <code>role_id</code>；广告收入来源于 <code>dw_dmdb.advalue_role_date</code> 的回刷</td></tr>
+<tr><td>UNO2</td><td>库名是 <code>dw_dmdb</code>（非 dw_ods_mn08）；广告需从明细表 <code>c_client_app_ad_log</code> 取</td></tr>
+<tr><td>通用</td><td>CUBE(platform) 可同时输出分端 + ALL 汇总行；life_day 用 <code>DATE_DIFF('day', ...)</code> 计算</td></tr>
 </table>
 </div>
 
