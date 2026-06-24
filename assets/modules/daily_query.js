@@ -331,7 +331,9 @@ function buildPrompt(d) {
     L.push('');
   }
   if (d.log_refs && d.log_refs.length) {
-    L.push('# 埋点 / 日志参考');
+    L.push('# ⚠️ 埋点 / 日志参考【最高优先级】');
+    L.push('> **重要：编写 SQL 时必须优先参考以下埋点文档中的表名、字段名和口径定义，严禁自行猜测字段。**');
+    L.push('');
     d.log_refs.forEach(r => {
       let line = `- 埋点：${r.log_name}`;
       if (r.doc_url) line += ` | 文档：${r.doc_url}`;
@@ -341,7 +343,9 @@ function buildPrompt(d) {
     L.push('');
   }
   if (d.sql_refs && d.sql_refs.length) {
-    L.push('# 历史 SQL 参考');
+    L.push('# ⚠️ 历史 SQL 参考【最高优先级】');
+    L.push('> **重要：以下历史 SQL 是经过验证可执行的，编写新 SQL 时必须优先参考其中的表名、JOIN 逻辑、字段名和过滤条件，保持口径一致。**');
+    L.push('');
     d.sql_refs.forEach(r => {
       if (r.sql_label) L.push(`## ${r.sql_label}`);
       L.push('```sql'); L.push(r.sql_code); L.push('```');
@@ -349,9 +353,10 @@ function buildPrompt(d) {
     L.push('');
   }
   L.push('# 要求');
-  L.push('1. 输出可直接执行的完整 SQL');
-  L.push('2. 列名用英文蛇形命名');
-  L.push('3. 加简短注释说明每个 CTE 的作用');
+  L.push('1. **必须优先参考上方提供的埋点文档和历史 SQL**，从中获取真实表名、字段名和过滤逻辑，不得自行编造');
+  L.push('2. 输出可直接执行的完整 SQL');
+  L.push('3. 列名用英文蛇形命名');
+  L.push('4. 加简短注释说明每个 CTE 的作用');
   return L.join('\n');
 }
 
