@@ -593,6 +593,12 @@ const FF = (() => {
     const firstCard = cards[0];
     form.insertBefore(progressWrap, firstCard);
 
+    // 已填写内容回顾面板（插在进度条和卡片之间）
+    const recap = document.createElement('div');
+    recap.className = 'wiz-recap';
+    recap.style.display = 'none';
+    form.insertBefore(recap, firstCard);
+
     // 给每个 fcard 注入问答提示（仅在 guide 模式可见）
     cards.forEach((card, i) => {
       if (!steps[i]) return;
@@ -622,6 +628,57 @@ const FF = (() => {
     let current = 0;
     const total = Math.min(cards.length, steps.length);
 
+    // 从一个卡片中提取「已填写」的内容摘要
+    function summarizeCard(card) {
+      const items = [];
+      // 已勾选的 chips（含自定义）
+      const checkedChips = card.querySelectorAll('.chip.checked input:checked, .chip input:checked');
+      const seen = new Set();
+      checkedChips.forEach(inp => {
+        const v = (inp.value || '').trim();
+        if (v && !seen.has(v)) { seen.add(v); items.push(v); }
+      });
+      // 文本 / 数字 / 日期 / 下拉 / textarea
+      card.querySelectorAll('input[type=text], input[type=date], input[type=number], textarea, select').forEach(el => {
+        if (el.classList.contains('chip-add-input')) return;       // 跳过自定义输入框
+        if (el.closest('.wiz-recap')) return;
+        const v = (el.value || '').trim();
+        if (!v) return;
+        // 动态行内字段：合并为一条
+        items.push(v.length > 40 ? v.slice(0, 40) + '…' : v);
+      });
+      return items;
+    }
+
+    function renderRecap() {
+      // 第一步不显示
+      if (current === 0) { recap.style.display = 'none'; return; }
+      const blocks = [];
+      for (let i = 0; i < current; i++) {
+        const card = cards[i];
+        if (!card) continue;
+        const title = (steps[i] && steps[i].title) || `第 ${i + 1} 步`;
+        const items = summarizeCard(card);
+        const inner = items.length
+          ? items.map(t => `<span class="wiz-recap-tag">${esc(t)}</span>`).join('')
+          : `<span class="wiz-recap-empty">（未填）</span>`;
+        blocks.push(
+          `<div class="wiz-recap-row" data-step="${i}">` +
+            `<span class="wiz-recap-step">${i + 1}. ${esc(title)}</span>` +
+            `<span class="wiz-recap-items">${inner}</span>` +
+            `<button type="button" class="wiz-recap-edit" data-step="${i}">修改</button>` +
+          `</div>`
+        );
+      }
+      recap.innerHTML =
+        `<div class="wiz-recap-head">📝 已填写内容</div>` + blocks.join('');
+      recap.style.display = 'block';
+      // 「修改」跳回对应步骤
+      recap.querySelectorAll('.wiz-recap-edit').forEach(btn => {
+        btn.addEventListener('click', () => go(parseInt(btn.dataset.step, 10)));
+      });
+    }
+
     function go(idx) {
       if (idx < 0 || idx >= total) return;
       current = idx;
@@ -633,6 +690,7 @@ const FF = (() => {
       counter.textContent = `${current + 1} / ${total}`;
       btnPrev.disabled = current === 0;
       btnNext.textContent = current === total - 1 ? '✅ 完成并生成' : '下一步 →';
+      renderRecap();
       progressWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // 通知回调
       if (steps[current] && steps[current].onEnter) steps[current].onEnter(current);
