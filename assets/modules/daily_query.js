@@ -372,9 +372,10 @@ function buildPrompt(d) {
   L.push('# 要求');
   L.push('1. **必须先阅读数据口径字典页面**，从中获取真实表名、字段名、过滤条件和指标公式，不得自行编造');
   L.push('2. **必须优先参考上方提供的埋点文档和历史 SQL**，保持口径一致');
-  L.push('3. 输出可直接执行的完整 SQL');
-  L.push('4. 列名用英文蛇形命名');
-  L.push('5. 加简短注释说明每个 CTE 的作用');
+  L.push('3. **统计三方相关指标时，能用三方中间表的尽量用三方中间表**（如 `dm_mnXX_player_3pp_payment_info`），避免直接查 `omni_server_payment` 原始表。中间表每天刷新，字段包含 `third_payment_sum_1d`、`third_ingame_payment_sum_1d`、`third_web_payment_sum_1d` 等，可直接获取三方总收入/内嵌收入/主站收入');
+  L.push('4. 输出可直接执行的完整 SQL');
+  L.push('5. 列名用英文蛇形命名');
+  L.push('6. 加简短注释说明每个 CTE 的作用');
   return L.join('\n');
 }
 
