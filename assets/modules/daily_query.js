@@ -382,6 +382,9 @@ function buildAnalysisTemplate(d) {
   const L = [];
   L.push('# 分析模板');
   L.push('');
+  L.push('> ⚠️ **必须先阅读分析方法论页面，严格按照其中的分析框架和方法论来组织分析思路和输出结构。**');
+  L.push('> 📖 方法论地址：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html');
+  L.push('');
   L.push('## 1. 分析背景');
   L.push(`- 产品：${d.product}`);
   L.push(`- 时间范围：${d.date_range[0] || '不限'} ~ ${d.date_range[1] || '不限'}`);
@@ -428,5 +431,9 @@ function buildAnalysisTemplate(d) {
   L.push('- 确认数据口径与文档一致');
   L.push('- 关注是否有数据缺失或异常值');
   L.push('- 部分期间数据不要和完整期间直接对比');
+  L.push('');
+  L.push('## 6. 分析方法论参考');
+  L.push('分析过程中必须参考以下方法论文档，确保分析框架、归因逻辑和结论格式符合团队标准：');
+  L.push('📖 https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html');
   return L.join('\n');
 }
