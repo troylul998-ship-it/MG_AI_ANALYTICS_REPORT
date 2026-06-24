@@ -348,7 +348,7 @@ function buildPrompt(d) {
     L.push('');
   }
   if (d.log_refs && d.log_refs.length) {
-    L.push('# ⚠️ 埋点 / 日志参考【最高优先级】');
+    L.push('# ⚠️ 埋点 / 日志参考【必须参考】');
     L.push('> **重要：编写 SQL 时必须优先参考以下埋点文档中的表名、字段名和口径定义，严禁自行猜测字段。**');
     L.push('');
     d.log_refs.forEach(r => {
@@ -360,7 +360,7 @@ function buildPrompt(d) {
     L.push('');
   }
   if (d.sql_refs && d.sql_refs.length) {
-    L.push('# ⚠️ 历史 SQL 参考【最高优先级】');
+    L.push('# ⚠️ 历史 SQL 参考【必须参考】');
     L.push('> **重要：以下历史 SQL 是经过验证可执行的，编写新 SQL 时必须优先参考其中的表名、JOIN 逻辑、字段名和过滤条件，保持口径一致。**');
     L.push('');
     d.sql_refs.forEach(r => {
