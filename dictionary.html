@@ -86,30 +86,45 @@
 </table>
 
 <h3>三方支付中间表（各产品）</h3>
+<div class="note">⚠️ 统计三方相关指标时，能用三方中间表的尽量用三方中间表，避免直接查 omni_server_payment 原始表。中间表每天刷新，记录各产品三方付费用户的完整行为数据。</div>
 <table>
-<tr><th>产品</th><th>三方中间表</th><th>库名</th></tr>
-<tr><td>UNO</td><td><code>dm_mn01_player_3pp_payment_info</code></td><td>dw_ods_common_mn01</td></tr>
-<tr><td>P10</td><td><code>dm_mn02_player_3pp_payment_info</code></td><td>dw_ods_common_mn02</td></tr>
-<tr><td>SKB</td><td><code>dm_mn04_player_3pp_payment_info</code></td><td>dw_ods_common_mn04</td></tr>
-<tr><td>UNO2</td><td><code>dm_mn08_player_3pp_payment_info</code></td><td>dw_ods_common_mn08</td></tr>
+<tr><th>产品</th><th>表名</th><th>主键</th></tr>
+<tr><td>UNO</td><td><code>dw_ods_common_mn01.dm_mn01_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
+<tr><td>P10</td><td><code>dw_ods_common_mn02.dm_mn02_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
+<tr><td>SKB</td><td><code>dw_ods_common_mn04.dm_mn04_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
+<tr><td>UNO2</td><td><code>dw_ods_common_mn08.dm_mn08_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
+<tr><td>全产品(汇总)</td><td><code>dw_dmdb.dm_all_player_3pp_payment_info</code></td><td>account_id + game_id + date</td></tr>
 </table>
 
-<h3>三方中间表字段详情</h3>
+<h3>三方中间表字段详情（全字段）</h3>
 <table>
-<tr><th>字段</th><th>类型</th><th>含义</th></tr>
-<tr><td><code>account_id</code></td><td>string</td><td>用户主键</td></tr>
-<tr><td><code>date</code></td><td>string</td><td>日期分区</td></tr>
-<tr><td><code>third_payment_sum</code></td><td>double</td><td>历史累计三方付费金额</td></tr>
-<tr><td><code>third_payment_sum_1d</code></td><td>double</td><td>当日三方付费金额</td></tr>
-<tr><td><code>third_payment_cnt_1d</code></td><td>bigint</td><td>当日三方付费次数</td></tr>
-<tr><td><code>third_ingame_payment_sum_1d</code></td><td>double</td><td>当日内嵌(游戏内)三方付费金额</td></tr>
-<tr><td><code>third_ingame_payment_cnt_1d</code></td><td>bigint</td><td>当日内嵌三方付费次数</td></tr>
-<tr><td><code>third_web_payment_sum_1d</code></td><td>double</td><td>当日主站Web三方付费金额</td></tr>
-<tr><td><code>third_web_payment_cnt_1d</code></td><td>bigint</td><td>当日主站Web三方付费次数</td></tr>
-<tr><td><code>f_third_payment_date</code></td><td>string</td><td>首次三方付费日期</td></tr>
-<tr><td><code>f_third_ingame_payment_date</code></td><td>string</td><td>首次内嵌三方付费日期</td></tr>
-<tr><td><code>f_third_web_payment_date</code></td><td>string</td><td>首次主站三方付费日期</td></tr>
-<tr><td><code>offline_till_today</code></td><td>bigint</td><td>距今离线天数</td></tr>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">基础信息</td></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户主键</td><td></td></tr>
+<tr><td><code>game_id</code></td><td>string</td><td>产品ID</td><td>仅全产品汇总表有此字段</td></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区</td><td>每天刷新</td></tr>
+<tr><td><code>offline_till_today</code></td><td>bigint</td><td>上次在线距今天数</td><td>当天登录则为0</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方付费（全量，含内嵌+主站）</td></tr>
+<tr><td><code>f_third_payment_date</code></td><td>string</td><td>首次三方付费日期</td><td></td></tr>
+<tr><td><code>l_third_payment_date</code></td><td>string</td><td>末次三方付费日期</td><td></td></tr>
+<tr><td><code>third_payment_sum</code></td><td>double</td><td>历史累计三方充值总额</td><td></td></tr>
+<tr><td><code>third_payment_sum_1d</code></td><td>double</td><td>当日三方充值总额</td><td>核心日粒度指标</td></tr>
+<tr><td><code>third_payment_cnt</code></td><td>bigint</td><td>历史累计三方充值次数</td><td></td></tr>
+<tr><td><code>third_payment_cnt_1d</code></td><td>bigint</td><td>当日三方充值次数</td><td></td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方内嵌付费（游戏内嵌入式）</td></tr>
+<tr><td><code>f_third_ingame_payment_date</code></td><td>string</td><td>首次三方内嵌充值日期</td><td></td></tr>
+<tr><td><code>l_third_ingame_payment_date</code></td><td>string</td><td>末次三方内嵌充值日期</td><td></td></tr>
+<tr><td><code>third_ingame_payment_sum</code></td><td>double</td><td>历史累计三方内嵌充值总额</td><td></td></tr>
+<tr><td><code>third_ingame_payment_sum_1d</code></td><td>double</td><td>当日三方内嵌充值总额</td><td></td></tr>
+<tr><td><code>third_ingame_payment_cnt</code></td><td>bigint</td><td>历史累计三方内嵌充值次数</td><td></td></tr>
+<tr><td><code>third_ingame_payment_cnt_1d</code></td><td>bigint</td><td>当日三方内嵌充值次数</td><td></td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方主站付费（Web端）</td></tr>
+<tr><td><code>f_third_web_payment_date</code></td><td>string</td><td>首次三方主站充值日期</td><td></td></tr>
+<tr><td><code>l_third_web_payment_date</code></td><td>string</td><td>末次三方主站充值日期</td><td></td></tr>
+<tr><td><code>third_web_payment_sum</code></td><td>double</td><td>历史累计三方主站充值总额</td><td></td></tr>
+<tr><td><code>third_web_payment_sum_1d</code></td><td>double</td><td>当日三方主站充值总额</td><td></td></tr>
+<tr><td><code>third_web_payment_cnt</code></td><td>bigint</td><td>历史累计三方主站充值次数</td><td></td></tr>
+<tr><td><code>third_web_payment_cnt_1d</code></td><td>bigint</td><td>当日三方主站充值次数</td><td></td></tr>
 </table>
 
 <h3>三方用户分层定义（L1~L8）</h3>
