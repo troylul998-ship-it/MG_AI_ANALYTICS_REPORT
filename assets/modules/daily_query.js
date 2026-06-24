@@ -323,6 +323,23 @@ function buildPrompt(d) {
     L.push(filterText);
     L.push('');
   }
+  // 数据口径字典引用
+  L.push('# ⚠️ 数据口径字典【必须参考】');
+  L.push('> **编写 SQL 前，必须先阅读以下数据口径字典页面的全部内容，严格遵循其中定义的表名、字段名、过滤条件和指标公式。不得自行编造任何字段或过滤逻辑。**');
+  L.push('');
+  L.push('📖 字典地址：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
+  L.push('');
+  L.push('字典涵盖：');
+  L.push('- 各产品数据源总览（表名、主键、广告收入字段）');
+  L.push('- 各产品核心字段定义（UNO/P10/SKB/UNO2）');
+  L.push('- 常用过滤条件标准写法（APP端、双端、新用户、成年人）');
+  L.push('- 生命周期分段（LT7/LT30/LT60/LT90/LT180）');
+  L.push('- 付费分层定义（pay_activity_type 0~7）');
+  L.push('- 广告类型（RV/INT/Banner）');
+  L.push('- 地区分组维度（T地区、Group地区 完整 CASE WHEN）');
+  L.push('- 广告变现指标公式（eCPM/Freq/ARPU/LTV）');
+  L.push('- 三方支付指标口径');
+  L.push('');
   if (d.column_map && d.column_map.length) {
     L.push('# 数据列定义');
     L.push('| 列名 | 含义 | 类型 |');
@@ -353,10 +370,11 @@ function buildPrompt(d) {
     L.push('');
   }
   L.push('# 要求');
-  L.push('1. **必须优先参考上方提供的埋点文档和历史 SQL**，从中获取真实表名、字段名和过滤逻辑，不得自行编造');
-  L.push('2. 输出可直接执行的完整 SQL');
-  L.push('3. 列名用英文蛇形命名');
-  L.push('4. 加简短注释说明每个 CTE 的作用');
+  L.push('1. **必须先阅读数据口径字典页面**，从中获取真实表名、字段名、过滤条件和指标公式，不得自行编造');
+  L.push('2. **必须优先参考上方提供的埋点文档和历史 SQL**，保持口径一致');
+  L.push('3. 输出可直接执行的完整 SQL');
+  L.push('4. 列名用英文蛇形命名');
+  L.push('5. 加简短注释说明每个 CTE 的作用');
   return L.join('\n');
 }
 
