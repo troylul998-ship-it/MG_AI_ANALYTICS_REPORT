@@ -21,11 +21,11 @@
   padding: 18px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
   color: var(--text-2); transition: all .2s; text-align: left; line-height: 1.5;
 }
-.mode-switch button:hover { border-color: var(--brand-1); background: #fafaff; }
+.mode-switch button:hover { border-color: var(--brand-1); background: #fff8f3; }
 .mode-switch button.active {
   border-color: var(--brand-1); color: var(--brand-1);
-  background: linear-gradient(135deg, #f5f3ff 0%, #eef0ff 100%);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: #fff8f3;
+  box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.1);
 }
 @media (max-width: 600px) { .mode-switch { grid-template-columns: 1fr; } }
 .mode-hint {
@@ -78,7 +78,7 @@ input[type=text], input[type=date], input[type=number], select, textarea {
 textarea { resize: vertical; min-height: 64px; line-height: 1.6; }
 input:focus, select:focus, textarea:focus {
   outline: none; border-color: var(--brand-1);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+  box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.12);
 }
 
 /* 多选 chips */
@@ -89,25 +89,33 @@ input:focus, select:focus, textarea:focus {
   font-size: 12px; cursor: pointer; user-select: none; transition: all .15s;
   background: #fdfdfd;
 }
-.chip:hover { border-color: var(--brand-1); background: #f5f5ff; }
+.chip:hover { border-color: var(--brand-1); background: #fff8f3; }
 .chip input { display: none; }
 .chip.checked {
-  background: var(--blue-bg); border-color: var(--blue); color: var(--blue);
-  font-weight: 700; box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.12);
+  background: #fff4ec; border-color: var(--brand-1); color: var(--brand-1);
+  font-weight: 700; box-shadow: 0 0 0 2px rgba(232, 89, 12, 0.12);
 }
 .chip.checked::before {
-  content: '✓'; font-weight: 900; font-size: 12px; color: var(--blue);
+  content: '✓'; font-weight: 900; font-size: 12px; color: var(--brand-1);
   margin-right: -1px;
 }
 .chip-custom { background: #fff8e1; border-color: #f0c97a; }
-.chip-custom.checked { background: var(--blue-bg); border-color: var(--blue); }
+.chip-custom.checked { background: #fff4ec; border-color: var(--brand-1); }
 
 /* 自定义 chip 输入框 */
 .chip-add-wrap { display: inline-flex; align-items: center; }
 .chip-add-input {
-  width: 150px !important; font-size: 12px; padding: 6px 12px !important;
-  border: 1px dashed var(--brand-1) !important; border-radius: 20px !important;
-  background: #fafaff !important;
+  width: 120px !important; font-size: 12px; padding: 7px 13px !important;
+  border: 1px solid var(--border) !important; border-radius: 20px !important;
+  background: #fdfdfd !important; color: var(--text-2);
+  text-align: center;
+}
+.chip-add-input::placeholder { color: var(--text-3); font-size: 12px; }
+.chip-add-input:focus {
+  border-color: var(--brand-1) !important;
+  background: #fff !important;
+  text-align: left;
+  width: 150px !important;
 }
 
 /* 预设/自定义 段切换 */
@@ -121,7 +129,6 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-2); transition: all .15s;
 }
 .seg-switch button.active { background: var(--surface); color: var(--brand-1); box-shadow: var(--shadow); }
-
 /* 单选/多选模式下的 chips 表现（单选时点击互斥由 JS 处理，这里仅样式占位） */
 
 /* CSV 上传/识别 */
@@ -133,9 +140,9 @@ input:focus, select:focus, textarea:focus {
   flex: 1; min-width: 240px;
   border: 1.5px dashed var(--brand-1); border-radius: 8px;
   padding: 12px 16px; font-size: 12.5px; color: var(--text-2);
-  background: #fafaff; cursor: pointer; text-align: center; transition: background .15s;
+  background: #fff8f3; cursor: pointer; text-align: center; transition: background .15s;
 }
-.csv-drop:hover, .csv-drop.drag { background: #f0f0ff; }
+.csv-drop:hover, .csv-drop.drag { background: #fff4ec; }
 .csv-drop b { color: var(--brand-1); }
 .csv-detect .detected { font-size: 12px; color: var(--green); }
 
@@ -154,7 +161,7 @@ input:focus, select:focus, textarea:focus {
   background: none; border: 1px dashed var(--brand-1); border-radius: 7px;
   padding: 7px 14px; cursor: pointer; margin-top: 4px;
 }
-.btn-add:hover { background: #f0f0ff; }
+.btn-add:hover { background: #fff4ec; }
 
 /* 预设按钮 */
 .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -172,7 +179,7 @@ input:focus, select:focus, textarea:focus {
 .question-block .qhead { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .question-block .qhead .qtag {
   font-size: 11px; font-weight: 700; color: var(--brand-1);
-  background: #f0f0ff; padding: 3px 8px; border-radius: 5px;
+  background: #fff4ec; padding: 3px 8px; border-radius: 5px;
 }
 .question-block .qhead .del { margin-left: auto; }
 
@@ -234,8 +241,8 @@ input:focus, select:focus, textarea:focus {
   display: none;
   align-items: center;
   gap: 0;
-  margin: 20px 0 24px;
-  padding: 0 4px;
+  margin: 20px 0 28px;
+  padding: 0 4px 22px;
 }
 body.mode-guide .wizard-progress { display: flex; }
 
@@ -245,47 +252,50 @@ body.mode-guide .wizard-progress { display: flex; }
 }
 .wiz-step-dot:last-child { flex: none; }
 .wiz-step-dot .dot {
-  width: 32px; height: 32px; border-radius: 50%; flex: none;
-  background: #eef0f3; color: var(--text-3);
+  width: 30px; height: 30px; border-radius: 50%; flex: none;
+  background: #eceae5; color: var(--text-3);
   display: grid; place-items: center;
   font-size: 13px; font-weight: 700; transition: all .3s;
   position: relative; z-index: 1;
 }
 .wiz-step-dot .dot-label {
-  position: absolute; top: 38px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 36px; left: 15px; transform: translateX(-50%);
   font-size: 11px; color: var(--text-3); white-space: nowrap; transition: color .3s;
 }
+.wiz-step-dot:last-child .dot-label { left: 50%; }
 .wiz-step-dot .line {
-  flex: 1; height: 3px; background: #eef0f3; margin: 0 4px; transition: background .3s;
+  flex: 1; height: 2px; background: #eceae5; margin: 0 6px; transition: background .3s;
 }
 .wiz-step-dot.done .dot { background: var(--brand-1); color: #fff; }
 .wiz-step-dot.done .line { background: var(--brand-1); }
 .wiz-step-dot.done .dot-label { color: var(--brand-1); }
 .wiz-step-dot.active .dot {
   background: var(--brand-grad); color: #fff;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.18);
+  box-shadow: 0 0 0 4px rgba(232, 89, 12, 0.18);
 }
 .wiz-step-dot.active .dot-label { color: var(--brand-1); font-weight: 600; }
 
 /* 步骤卡片隐藏 */
 body.mode-guide .fcard { display: none; }
 body.mode-guide .fcard.wiz-active { display: block; }
+/* 引导模式：隐藏卡片内重复的「N 标题」徽章，由 wiz-question 充当唯一标题 */
+body.mode-guide .fcard > h3 { display: none; }
 
 /* 步骤内的问答提示 */
 .wiz-question {
-  font-size: 18px; font-weight: 700; color: var(--text-1);
-  margin-bottom: 6px;
+  font-size: 19px; font-weight: 700; color: var(--text-1);
+  margin-bottom: 6px; letter-spacing: -0.01em;
 }
 .wiz-explain {
-  font-size: 13px; color: var(--text-2); margin-bottom: 16px;
-  line-height: 1.7;
+  font-size: 13px; color: var(--text-3); margin-bottom: 18px;
+  line-height: 1.6;
 }
 .wiz-example {
-  font-size: 12px; color: var(--text-3); background: #f7f8fa;
-  border-radius: 8px; padding: 10px 14px; margin-bottom: 18px;
-  border-left: 3px solid var(--brand-1);
+  font-size: 12px; color: var(--text-3);
+  margin-bottom: 20px; padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--brand-1);
 }
-.wiz-example b { color: var(--brand-1); }
+.wiz-example b { color: var(--text-2); font-weight: 600; }
 
 /* 步骤导航按钮 */
 .wiz-nav {

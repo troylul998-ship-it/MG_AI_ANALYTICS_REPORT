@@ -60,7 +60,7 @@ const FF = (() => {
       const name = group.dataset.custom;
       const wrap = document.createElement('span');
       wrap.className = 'chip-add-wrap';
-      wrap.innerHTML = `<input type="text" class="chip-add-input" placeholder="+ 自定义后回车">`;
+      wrap.innerHTML = `<input type="text" class="chip-add-input" placeholder="自定义 ↑">`;
       const input = wrap.querySelector('input');
       const submit = () => {
         const v = input.value.trim();
@@ -312,13 +312,15 @@ const FF = (() => {
     tabs.innerHTML = '';
     body.innerHTML = '';
 
-    // 保存按钮放在产物顶部
+    // 保存按钮 + 人工按钮
     const saveBar = document.createElement('div');
-    saveBar.style.cssText = 'margin-bottom:16px;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#f0fff4;border:1px solid #c6f6d5;border-radius:8px;';
+    saveBar.style.cssText = 'margin-bottom:16px;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#f0fff4;border:1px solid #c6f6d5;border-radius:8px;flex-wrap:wrap;';
     saveBar.innerHTML =
       `<button class="btn btn-primary" id="btn-save-archive" type="button" style="padding:8px 20px;font-size:13px;">💾 保存到历史归档</button>` +
+      `<button class="btn" id="btn-need-human" type="button" style="padding:8px 20px;font-size:13px;background:#fff4ec;border:1px solid #ffd8a8;color:var(--brand-1);font-weight:600;">🙋 需要人工</button>` +
       `<span style="font-size:12px;color:var(--text-3);">保存后可在工作台「历史报告归档」中回看</span>` +
-      `<span id="save-msg" style="font-size:12px;color:var(--green);display:none;margin-left:8px;">✓ 已保存</span>`;
+      `<span id="save-msg" style="font-size:12px;color:var(--green);display:none;margin-left:8px;">✓ 已保存</span>` +
+      `<span id="human-msg" style="font-size:12px;color:var(--brand-1);display:none;margin-left:8px;">✓ 已发送飞书通知</span>`;
     body.appendChild(saveBar);
 
     artifacts.forEach((a, i) => {
@@ -358,6 +360,47 @@ const FF = (() => {
         if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 3000); }
         saveBtn.disabled = true;
         saveBtn.textContent = '✓ 已保存';
+      });
+    }
+
+    // 绑定「需要人工」按钮事件
+    const humanBtn = document.getElementById('btn-need-human');
+    if (humanBtn && opts.collectFn) {
+      humanBtn.addEventListener('click', async () => {
+        const data = opts.collectFn();
+        const summary = [
+          `📊 模块：${data.module || '日常取数'}`,
+          `👤 需求人：${data.owner || '未填写'}`,
+          `🎮 产品：${data.product || '未指定'}`,
+          `📝 需求：${data.goal || data.query_desc || '未填写'}`,
+          `📅 时间：${(data.date_range || []).join(' ~ ') || '未指定'}`,
+          data.dims && data.dims.length ? `📐 维度：${data.dims.join('、')}` : '',
+          data.filter ? `🔍 过滤：${data.filter}` : '',
+        ].filter(Boolean).join('\n');
+
+        const msgContent = `🙋 需要人工协助\n\n${summary}\n\n⏰ ${new Date().toLocaleString('zh-CN')}`;
+
+        // 发送飞书 Webhook 通知
+        try {
+          humanBtn.disabled = true;
+          humanBtn.textContent = '发送中...';
+          await fetch('https://open.feishu.cn/open-apis/bot/v2/hook/c29ef9ff-e3f5-432d-b559-9cf338fdd044', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              msg_type: 'text',
+              content: { text: msgContent }
+            })
+          });
+          const msg = document.getElementById('human-msg');
+          if (msg) { msg.style.display = 'inline'; msg.textContent = '✓ 已发送飞书通知'; setTimeout(() => msg.style.display = 'none', 5000); }
+          humanBtn.textContent = '✓ 已通知';
+        } catch (err) {
+          humanBtn.disabled = false;
+          humanBtn.textContent = '🙋 需要人工';
+          const msg = document.getElementById('human-msg');
+          if (msg) { msg.style.display = 'inline'; msg.textContent = '⚠️ 发送失败，请手动通知'; msg.style.color = 'var(--red)'; setTimeout(() => msg.style.display = 'none', 5000); }
+        }
       });
     }
 
@@ -583,10 +626,12 @@ const FF = (() => {
     steps.forEach((s, i) => {
       const dot = document.createElement('div');
       dot.className = 'wiz-step-dot' + (i === 0 ? ' active' : '');
+      dot.style.cursor = 'pointer';
       dot.innerHTML =
         `<div class="dot">${i + 1}</div>` +
         `<span class="dot-label">${s.title}</span>` +
         (i < steps.length - 1 ? '<div class="line"></div>' : '');
+      dot.addEventListener('click', () => go(i));
       progressWrap.appendChild(dot);
     });
     const form = document.querySelector('form') || document.querySelector('.form-wrap');
@@ -630,24 +675,30 @@ const FF = (() => {
 
     // 从一个卡片中提取「已填写」的内容摘要
     function summarizeCard(card) {
-      const items = [];
+      const raw = [];
       // 已勾选的 chips（含自定义）
-      const checkedChips = card.querySelectorAll('.chip.checked input:checked, .chip input:checked');
-      const seen = new Set();
-      checkedChips.forEach(inp => {
+      card.querySelectorAll('.chip input:checked').forEach(inp => {
         const v = (inp.value || '').trim();
-        if (v && !seen.has(v)) { seen.add(v); items.push(v); }
+        if (v) raw.push(v);
       });
-      // 文本 / 数字 / 日期 / 下拉 / textarea
+      // 文本 / 数字 / 日期 / 下拉 / textarea（跳过隐藏的镜像 select 和自定义输入框）
       card.querySelectorAll('input[type=text], input[type=date], input[type=number], textarea, select').forEach(el => {
-        if (el.classList.contains('chip-add-input')) return;       // 跳过自定义输入框
+        if (el.classList.contains('chip-add-input')) return;
         if (el.closest('.wiz-recap')) return;
+        if (el.tagName === 'SELECT' && el.offsetParent === null) return; // 隐藏镜像 select
         const v = (el.value || '').trim();
-        if (!v) return;
-        // 动态行内字段：合并为一条
-        items.push(v.length > 40 ? v.slice(0, 40) + '…' : v);
+        if (v) raw.push(v);
       });
-      return items;
+      // 去重：完全相同 + 互为子串的只保留较长者
+      const items = [];
+      raw.forEach(v => {
+        if (items.some(x => x === v)) return;            // 完全相同
+        if (items.some(x => x.includes(v))) return;      // v 是已有项子串
+        const subIdx = items.findIndex(x => v.includes(x)); // 已有项是 v 的子串
+        if (subIdx >= 0) { items[subIdx] = v; return; }
+        items.push(v);
+      });
+      return items.map(t => t.length > 40 ? t.slice(0, 40) + '…' : t);
     }
 
     function renderRecap() {

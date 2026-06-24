@@ -301,6 +301,34 @@
 <tr><td>插屏 (INT)</td><td><code>adtype = 'interstitial'</code></td></tr>
 <tr><td>Banner</td><td><code>adtype = 'banner'</code></td></tr>
 </table>
+<h3>地区分组维度</h3>
+<table>
+<tr><th>维度</th><th>分组</th><th>SQL 逻辑</th></tr>
+<tr><td rowspan="4"><b>T地区</b><br>(area_type)</td><td>US</td><td><code>UPPER(country) IN ('US')</code></td></tr>
+<tr><td>T1</td><td><code>UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR')</code></td></tr>
+<tr><td>T2</td><td><code>UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR')</code></td></tr>
+<tr><td>T3</td><td><code>ELSE 'T3'</code> (其余所有国家)</td></tr>
+<tr><td rowspan="4"><b>Group地区</b><br>(area_group)</td><td>US</td><td><code>country = 'US'</code></td></tr>
+<tr><td>GroupA</td><td><code>country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW')</code></td></tr>
+<tr><td>GroupB</td><td><code>country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR')</code></td></tr>
+<tr><td>GroupC</td><td><code>ELSE 'GroupC'</code> (其余所有国家)</td></tr>
+</table>
+<h3>完整 CASE WHEN 模板</h3>
+<pre>-- T地区 (area_type)
+CASE
+  WHEN UPPER(country) IN ('US') THEN 'US'
+  WHEN UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR') THEN 'T1'
+  WHEN UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR') THEN 'T2'
+  ELSE 'T3'
+END AS area_type
+
+-- Group地区 (area_group)
+CASE
+  WHEN country = 'US' THEN 'US'
+  WHEN country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW') THEN 'GroupA'
+  WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB'
+  ELSE 'GroupC'
+END AS area_group</pre>
 <h3>三方支付</h3>
 <table>
 <tr><th>场景</th><th>SQL</th></tr>
