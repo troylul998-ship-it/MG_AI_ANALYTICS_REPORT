@@ -87,11 +87,42 @@
 
 <h3>三方支付中间表（各产品）</h3>
 <table>
-<tr><th>产品</th><th>三方中间表</th><th>核心字段</th></tr>
-<tr><td>UNO</td><td><code>dm_mn01_player_3pp_payment_info</code></td><td>third_payment_sum_1d, third_ingame_payment_sum_1d, third_web_payment_sum_1d, third_payment_cnt_1d</td></tr>
-<tr><td>P10</td><td><code>dm_mn02_player_3pp_payment_info</code></td><td>同上</td></tr>
-<tr><td>SKB</td><td><code>dm_mn04_player_3pp_payment_info</code></td><td>同上</td></tr>
-<tr><td>UNO2</td><td><code>dm_mn08_player_3pp_payment_info</code></td><td>同上</td></tr>
+<tr><th>产品</th><th>三方中间表</th><th>库名</th></tr>
+<tr><td>UNO</td><td><code>dm_mn01_player_3pp_payment_info</code></td><td>dw_ods_common_mn01</td></tr>
+<tr><td>P10</td><td><code>dm_mn02_player_3pp_payment_info</code></td><td>dw_ods_common_mn02</td></tr>
+<tr><td>SKB</td><td><code>dm_mn04_player_3pp_payment_info</code></td><td>dw_ods_common_mn04</td></tr>
+<tr><td>UNO2</td><td><code>dm_mn08_player_3pp_payment_info</code></td><td>dw_ods_common_mn08</td></tr>
+</table>
+
+<h3>三方中间表字段详情</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户主键</td></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区</td></tr>
+<tr><td><code>third_payment_sum</code></td><td>double</td><td>历史累计三方付费金额</td></tr>
+<tr><td><code>third_payment_sum_1d</code></td><td>double</td><td>当日三方付费金额</td></tr>
+<tr><td><code>third_payment_cnt_1d</code></td><td>bigint</td><td>当日三方付费次数</td></tr>
+<tr><td><code>third_ingame_payment_sum_1d</code></td><td>double</td><td>当日内嵌(游戏内)三方付费金额</td></tr>
+<tr><td><code>third_ingame_payment_cnt_1d</code></td><td>bigint</td><td>当日内嵌三方付费次数</td></tr>
+<tr><td><code>third_web_payment_sum_1d</code></td><td>double</td><td>当日主站Web三方付费金额</td></tr>
+<tr><td><code>third_web_payment_cnt_1d</code></td><td>bigint</td><td>当日主站Web三方付费次数</td></tr>
+<tr><td><code>f_third_payment_date</code></td><td>string</td><td>首次三方付费日期</td></tr>
+<tr><td><code>f_third_ingame_payment_date</code></td><td>string</td><td>首次内嵌三方付费日期</td></tr>
+<tr><td><code>f_third_web_payment_date</code></td><td>string</td><td>首次主站三方付费日期</td></tr>
+<tr><td><code>offline_till_today</code></td><td>bigint</td><td>距今离线天数</td></tr>
+</table>
+
+<h3>三方用户分层定义（L1~L8）</h3>
+<table>
+<tr><th>分层</th><th>条件</th><th>典型特征</th></tr>
+<tr><td>L1_极高额高频</td><td>累计≥$100 且 ≥6单</td><td>高额高频型"大R"用户</td></tr>
+<tr><td>L2_高额中频</td><td>累计≥$50</td><td>活动驱动型/收藏家用户</td></tr>
+<tr><td>L3_中额高频</td><td>累计≥$10 且 ≥3单</td><td>小额高频型"稳充"用户</td></tr>
+<tr><td>L4_中额低频</td><td>累计≥$10 且 <3单</td><td>偶尔中额付费</td></tr>
+<tr><td>L5_小额高频</td><td>累计<$10 且 ≥2单</td><td>小额多次</td></tr>
+<tr><td>L6_单次非破冰</td><td>仅1单 且 非当期首付</td><td>历史单次付费</td></tr>
+<tr><td>L7_单次破冰</td><td>仅1单 且 当期首付</td><td>刚破冰的新三方用户</td></tr>
+<tr><td>L8_其他</td><td>不满足以上条件</td><td>—</td></tr>
 </table>
 </div>
 
@@ -241,6 +272,11 @@
 <tr><td>抽奖</td><td><code>scratch_win</code></td><td>支付后抽奖行为</td><td>scratch_action, uuid/aid</td></tr>
 <tr><td>优惠券</td><td><code>server_voucher_writeoff</code></td><td>优惠券核销/使用</td><td>voucher_id, uuid/aid, payment, order_id</td></tr>
 <tr><td>资源投放</td><td><code>p10_3pp_resource</code></td><td>3PP资源投放</td><td>item_arraystr, uuid/aid</td></tr>
+<tr><td>付费交互(P10)</td><td><code>dw_ods_mn02.c_payment_interact</code></td><td>付费界面点击/下单/关闭行为</td><td>action(1打开/2下单/3关闭), action_type, surfacename, actionreason</td></tr>
+<tr><td>主站下单(P10)</td><td><code>dw_ods_gamecenter.c_create_order</code></td><td>三方主站商品下单</td><td>game_aid, product_id, payment, source, isrecommend</td></tr>
+<tr><td>主站订单成功</td><td><code>dw_ods_gamecenter.s_server_web_order_suc</code></td><td>三方主站订单成功</td><td>game_aid, sku, price, item_name, payment_platform, payment_id, ordersubfrom</td></tr>
+<tr><td>付费选择(P10)</td><td><code>dw_ods_mn02.c_payment_choice</code></td><td>RM(Remember Me)勾选状态</td><td>account_id, state(0关/1开), log_time</td></tr>
+<tr><td>满3单领奖</td><td><code>dw_ods_gamecenter.c_purchase_gift</code></td><td>满3单奖励曝光/领取</td><td>gift_show, chest_click, voucher_id, item_id</td></tr>
 </table>
 
 <h3>核心经营指标</h3>
@@ -392,6 +428,66 @@ SELECT DISTINCT
 FROM dw_ods_mn01.c_app_ad_log
 WHERE date = '2026-01-01'
   AND roleid = '目标role_id'</pre>
+<h3>7. 三方中间表：每日3PP付费汇总（P10示例）</h3>
+<pre>-- 数据源: dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
+-- 用途: 统计每日三方付费金额/次数，区分内嵌和主站
+SELECT
+    account_id,
+    date,
+    SUM(COALESCE(third_payment_sum_1d, 0))        AS day_3pp_pay,
+    SUM(COALESCE(third_ingame_payment_sum_1d, 0)) AS day_embedded_pay,
+    SUM(COALESCE(third_web_payment_sum_1d, 0))    AS day_web_pay,
+    SUM(COALESCE(third_payment_cnt_1d, 0))        AS day_3pp_cnt,
+    SUM(COALESCE(third_ingame_payment_cnt_1d, 0)) AS day_embedded_cnt,
+    SUM(COALESCE(third_web_payment_cnt_1d, 0))    AS day_web_cnt
+FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
+WHERE date BETWEEN '2026-02-05' AND '2026-03-04'
+GROUP BY 1, 2</pre>
+<h3>8. 三方破冰用户识别</h3>
+<pre>-- 识别期间内首次三方付费用户（破冰用户）
+-- 同时判断破冰渠道：内嵌 or 主站
+SELECT
+    account_id,
+    MIN(f_third_payment_date) AS first_third_payment_date,
+    IF(MIN(f_third_payment_date) = MIN(f_third_ingame_payment_date),
+       '内嵌破冰', '主站破冰') AS first_break_channel
+FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
+WHERE f_third_payment_date BETWEEN '2026-02-05' AND '2026-03-04'
+GROUP BY account_id</pre>
+<h3>9. 三方转化漏斗（MAU→知道→下单→付费→互动→忠诚）</h3>
+<pre>-- 全链路转化漏斗，以 P10 为例
+-- MAU: 活跃中间表
+-- 知道3PP: avatar_suc(登录主站) OR c_payment_interact(二选一弹窗曝光)
+-- 下单: c_payment_interact(action=2) OR c_create_order(主站下单)
+-- 付费: dm_mn02_player_3pp_payment_info (third_payment_sum_1d > 0)
+-- 互动: 优惠券/抽奖/签到/满3单领奖
+-- 忠诚: 期间完成≥3单
+
+-- 关键表:
+-- dw_ods_gamecenter.c_avatar_suc (game_id=1019, 主站登录)
+-- dw_ods_mn02.c_payment_interact (action=1打开/2下单, surfacename='one_of_two_gift')
+-- dw_ods_gamecenter.c_create_order (game_id=1019, 主站下单)
+-- dw_ods_gamecenter.c_voucher_action (优惠券领取)
+-- dw_ods_gamecenter.c_scratch_win (支付后抽奖)
+-- dw_ods_gamecenter.c_get_daily_rewards (签到领取)
+-- dw_ods_gamecenter.c_purchase_gift (满3单领奖)
+-- dw_ods_gamecenter.s_server_voucher_writeoff (优惠券核销)</pre>
+<h3>10. P10 付费链路全交互日志 (付费漏斗)</h3>
+<pre>-- 数据源: dw_ods_mn02.c_payment_interact
+-- action: 1=click_open, 2=click_pay, 3=click_close
+-- action_type: 1=iap_pay, 2=diamond_pay, 3=ad_pay, 0=no_pay
+-- surfacename: 界面来源
+
+-- 主站订单成功:
+-- dw_ods_gamecenter.s_server_web_order_suc
+-- WHERE game_id=1019 AND payment_id=11 AND TRY_CAST(price AS DOUBLE)>0
+-- sub_order_from 区分: '3ppingame'=内嵌 / NULL=主站
+
+-- P10 商品类型映射 (recharge_type):
+-- 1=钻石, 3=活动礼包, 4=Star pass, 5=道具礼包
+-- 6=去广告, 7=新手礼包, 12=老玩家礼包, 13=链式礼包
+-- 18=保险箱, 20=活动推荐, 21=惊喜礼包, 22=无限体力
+-- 26=PVE旅行箱, 27=8种赠品, 28=回退礼包</pre>
 </div>
 
 <!-- 常用过滤条件 -->
