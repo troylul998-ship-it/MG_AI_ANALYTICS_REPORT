@@ -135,6 +135,9 @@
       <option value="UNO">UNO</option>
       <option value="UNO2">UNO2</option>
     </select>
+    <select id="filter-owner">
+      <option value="">全部需求人</option>
+    </select>
     <input type="text" id="filter-search" placeholder="搜索项目/主题...">
     <button class="filter-btn" onclick="renderList()">筛选</button>
   </div>
@@ -153,20 +156,35 @@ const MODULE_LABELS = { revenue_analysis:'付费/收入', ab_test:'AB实验', fu
 const MODULE_FORMS = { revenue_analysis:'modules/revenue_analysis_form.html', ab_test:'modules/ab_test_form.html', funnel:'modules/funnel_analysis_form.html', retention_ltv:'modules/retention_ltv_form.html', user_seg:'modules/user_segmentation_form.html', causal:'modules/causal_chain_form.html', daily_query:'modules/daily_query_form.html', metric_diag:'modules/metric_diagnostics_form.html' };
 
 document.addEventListener('DOMContentLoaded', () => {
+  populateOwnerFilter();
   renderList();
   document.getElementById('detail-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
   document.getElementById('filter-module').addEventListener('change', renderList);
   document.getElementById('filter-product').addEventListener('change', renderList);
+  document.getElementById('filter-owner').addEventListener('change', renderList);
   document.getElementById('filter-search').addEventListener('input', renderList);
 });
+
+function populateOwnerFilter() {
+  const list = FF.getArchives();
+  const owners = [...new Set(list.map(r => r.data?.owner).filter(Boolean))].sort();
+  const select = document.getElementById('filter-owner');
+  owners.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o; opt.textContent = o;
+    select.appendChild(opt);
+  });
+}
 
 function getFiltered() {
   let list = FF.getArchives();
   const module = document.getElementById('filter-module').value;
   const product = document.getElementById('filter-product').value;
+  const owner = document.getElementById('filter-owner').value;
   const search = document.getElementById('filter-search').value.toLowerCase().trim();
   if (module) list = list.filter(r => r.module === module);
   if (product) list = list.filter(r => r.product === product);
+  if (owner) list = list.filter(r => (r.data?.owner || '') === owner);
   if (search) list = list.filter(r => ((r.project||'')+(r.goal||'')+(r.data?.owner||'')).toLowerCase().includes(search));
   return list;
 }
