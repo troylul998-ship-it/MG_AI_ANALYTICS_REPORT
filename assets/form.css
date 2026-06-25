@@ -105,7 +105,7 @@ input:focus, select:focus, textarea:focus {
 /* 自定义 chip 输入框 */
 .chip-add-wrap { display: inline-flex; align-items: center; }
 .chip-add-input {
-  width: 120px !important; font-size: 12px; padding: 7px 13px !important;
+  width: 90px !important; font-size: 12px; padding: 7px 13px !important;
   border: 1px solid var(--border) !important; border-radius: 20px !important;
   background: #fdfdfd !important; color: var(--text-2);
   text-align: center;
@@ -115,7 +115,7 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--brand-1) !important;
   background: #fff !important;
   text-align: left;
-  width: 150px !important;
+  width: 120px !important;
 }
 
 /* 预设/自定义 段切换 */
