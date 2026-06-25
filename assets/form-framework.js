@@ -482,12 +482,18 @@ const FF = (() => {
     const chipFields = ['metrics', 'user_metrics', 'dims', 'ret_days', 'ltv_type', 'ltv_windows',
       'ret_dims', 'ab_metrics', 'ab_guardrails', 'ab_dims', 'fn_metrics', 'fn_dims',
       'seg_dims', 'seg_metrics', 'diag_metric', 'diag_dims', 'product_type', 'product_cat',
-      'dq_dims', 'cc_confounders'];
+      'dq_dims', 'dq_filter_pre', 'cc_confounders'];
+    // 映射：collect() 存的 key → 实际 DOM input name（处理命名不一致）
+    const chipNameMap = { 'dims': 'dq_dims', 'filter_pre': 'dq_filter_pre' };
     chipFields.forEach(name => {
       const values = data[name];
       if (Array.isArray(values)) {
         values.forEach(v => {
-          const inp = document.querySelector(`input[name="${name}"][value="${CSS.escape(v)}"]`);
+          let inp = document.querySelector(`input[name="${name}"][value="${CSS.escape(v)}"]`);
+          // 若找不到，尝试映射名（如 data.dims → input[name="dq_dims"]）
+          if (!inp && chipNameMap[name]) {
+            inp = document.querySelector(`input[name="${chipNameMap[name]}"][value="${CSS.escape(v)}"]`);
+          }
           if (inp) {
             inp.checked = true;
             const chip = inp.closest('.chip');
@@ -496,6 +502,31 @@ const FF = (() => {
         });
       }
     });
+    // 额外处理：data.dims 实际对应 DOM name="dq_dims"（collect 存 dims，DOM 用 dq_dims）
+    if (Array.isArray(data.dims) && !document.querySelector('input[name="dims"]')) {
+      data.dims.forEach(v => {
+        const inp = document.querySelector(`input[name="dq_dims"][value="${CSS.escape(v)}"]`);
+        if (inp) {
+          inp.checked = true;
+          const chip = inp.closest('.chip');
+          if (chip) chip.classList.add('checked');
+        }
+      });
+    }
+    // 额外处理：过滤条件预设 chips — 根据 dq_filter 文本内容反向勾选对应 chip
+    if (data.filter && typeof data.filter === 'string') {
+      const filterPresets = ['只看APP', '只看成年人', '只看新用户', '剔除机器人(UNO)'];
+      filterPresets.forEach(preset => {
+        if (data.filter.includes(preset)) {
+          const inp = document.querySelector(`input[name="dq_filter_pre"][value="${CSS.escape(preset)}"]`);
+          if (inp) {
+            inp.checked = true;
+            const chip = inp.closest('.chip');
+            if (chip) chip.classList.add('checked');
+          }
+        }
+      });
+    }
     // goal / desc textarea
     if (data.goal) {
       const goal = document.getElementById('goal') || document.getElementById('fn_goal') ||
