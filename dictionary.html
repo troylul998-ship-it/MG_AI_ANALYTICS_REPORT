@@ -83,6 +83,7 @@
 <div class="sidebar-group-title">指标口径</div>
 <div class="sidebar-item" data-panel="p-ad"><span class="icon">📺</span>广告变现指标</div>
 <div class="sidebar-item" data-panel="p-3pp"><span class="icon">💳</span>三方支付指标</div>
+<div class="sidebar-item" data-panel="p-ad-cases"><span class="icon">📋</span>广告取数案例</div>
 </div>
 <div class="sidebar-group">
 <div class="sidebar-group-title">参考</div>
@@ -511,6 +512,134 @@
 <tr><td>SKB</td><td>1000008</td><td>SKB 主键用 account_id / role_id</td></tr>
 <tr><td>UNO2</td><td>1000014</td><td>UNO2 主键用 role_id / sdk_account_id</td></tr>
 </table>
+</div>
+
+<!-- 广告取数案例 -->
+<div class="dict-panel" id="p-ad-cases">
+<h2>📋 广告取数案例</h2>
+<p class="panel-desc">团队广告变现数据需求归档，来源：<a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=175402962" target="_blank">Confluence: 广告变现拉取数据需求归档整理</a></p>
+
+<h3>案例索引</h3>
+<table>
+<tr><th>#</th><th>场景</th><th>产品</th><th>核心表</th><th>关键技术点</th></tr>
+<tr><td>1</td><td>聚合平台分组（奇偶规则）支付率</td><td>UNO</td><td>dm_mn01_player_info, role_login_payment_info_date, advalue_role_date</td><td>role_id 倒数5-6位分组判断聚合平台(admob/max)</td></tr>
+<tr><td>2</td><td>新用户 LTV + 留存 + 广告全指标</td><td>UNO</td><td>dm_mn01_player_info, role_login_payment_info_date, advalue_role_date, game_client_log</td><td>mediation 回溯(json_extract+max_by)；LT窗口累计；organic/paid 区分</td></tr>
+<tr><td>3</td><td>未付费用户广告变现数据</td><td>P10</td><td>c_adplay, c_adpaid, dm_mn02_player_info</td><td>l_payment_date IS NULL 判断免费用户；UNION ALL 合并 play+value</td></tr>
+<tr><td>4</td><td>互推（Cross-Promotion）数据</td><td>UNO/P10/SKB</td><td>crosspromotion_account_id_label_info, server_action, ads_detail_account_cp_date</td><td>标签分层；FULL JOIN iap+iaa；DayN 转化窗口</td></tr>
+<tr><td>5</td><td>付费用户/标签用户广告行为</td><td>P10/SKB</td><td>c_adplay, c_adpaid/c_advalue, s_payment, s_player_label</td><td>P10用s_payment判断付费；SKB用unnest标签列表；UNION ALL 合并</td></tr>
+<tr><td>6</td><td>UA类型（IAA/IAP/Hybrid）用户广告数据</td><td>SKB</td><td>c_adplay, c_advalue, dm_appsflyer_afid_attribute_info</td><td>按 campaign 区分 IAA/IAP/Hybrid；appsflyer_id 设备维度关联</td></tr>
+<tr><td>7</td><td>用户每天第N次广告展示的eCPM</td><td>P10/SKB</td><td>c_adplay, c_adpaid, c_advalue</td><td>row_number() 开窗函数给广告序数编号</td></tr>
+<tr><td>8</td><td>PVE 与广告次数关联分析</td><td>P10</td><td>c_adplay, c_pve_game_record</td><td>row_number() 定位第N次广告；log_time 时序关联 PVE 对局</td></tr>
+<tr><td>9</td><td>标签(UF1/UF2/UF3)广告行为数据</td><td>P10</td><td>s_player_label, ads_custom_logtype_player_date, dm_mn02_player_active_info</td><td>unnest 标签；ads_custom_logtype_player_date 中间表直接取全链路</td></tr>
+<tr><td>10</td><td>UNO 分组礼包广告点位数据(按小时)</td><td>UNO</td><td>client_app_ad_log(原始日志), loginrole/logoutrole</td><td>原始日志 CASE WHEN 解析 log_type；from_unixtime 登录时间；按小时聚合</td></tr>
+<tr><td>11</td><td>UNO2 按RAM分段的eCPM/ARPU</td><td>UNO2</td><td>c_client_app_ad_log, c_device_detail_info, omni_server_login</td><td>设备内存分段(3G以下/以上)；udid 维度；安卓 value/1000000</td></tr>
+<tr><td>12</td><td>分国家梯队单次eCPM分布</td><td>UNO/P10/SKB</td><td>c_app_ad_log, c_adpaid, c_advalue</td><td>每条 advalue 记录即一次展示；CASE WHEN eCPM 分桶；UNION ALL 多产品</td></tr>
+<tr><td>13</td><td>IAA标签新用户D1~D30广告行为</td><td>P10</td><td>s_player_label, ads_custom_logtype_player_date, dm_mn02_player_info</td><td>unnest 标签；date_diff 计算 DayN；累计窗口指标</td></tr>
+<tr><td>14</td><td>iOS 分系统版本广告数据</td><td>UNO/P10/SKB</td><td>c_app_ad_log, s_loginrole, omni_server_login, c_adplay, c_adpaid, c_advalue</td><td>UNION ALL 多产品多埋点；trim(regexp_replace(os_version)) 清洗版本号</td></tr>
+<tr><td>15</td><td>分role group统计广告点位行为</td><td>UNO</td><td>dm_mn01_player_active_info, ads_custom_logtype_player_date</td><td>substr(role_id,-6,2) 分组；entranceid 定位广告位</td></tr>
+<tr><td>16</td><td>SKB 活动/标签/PVE/礼包圈人分析</td><td>SKB</td><td>c_event, c_adplay, c_pvelog, s_payment, c_recharge_popup, mn04_player_label_date</td><td>json_extract 活动字段；多条件圈人（活动参与/标签/PVE/付费）</td></tr>
+</table>
+
+<h3>核心数据表速查</h3>
+<div class="note">⚠️ 以下是广告取数中高频使用的表，区别于活跃中间表，这些是埋点原始表和 BI 构建的中间表。</div>
+<table>
+<tr><th>表名</th><th>产品</th><th>用途</th><th>关键字段</th></tr>
+<tr><td><code>dw_dmdb.advalue_role_date</code></td><td>UNO/P10</td><td>每日每用户广告收入（BI构建）</td><td>date, role_id, project, platform, adtype, revenue, impression</td></tr>
+<tr><td><code>dw_dmdb.ads_custom_logtype_player_date</code></td><td>全产品</td><td>广告全链路行为中间表（BI构建）</td><td>date, role_id, project, log_type, adtype, entranceid, user_times, revenue</td></tr>
+<tr><td><code>dw_dmdb.role_login_payment_info_date</code></td><td>全产品</td><td>每日登录+付费汇总表</td><td>date, role_id, game_id, platform, country, pay_money</td></tr>
+<tr><td><code>dw_dmdb.dm_appsflyer_afid_attribute_info</code></td><td>全产品</td><td>AppsFlyer 设备归因表</td><td>appsflyer_id, f_campaign, project, install_date</td></tr>
+<tr><td><code>dw_ods_mn01.c_app_ad_log</code></td><td>UNO</td><td>UNO 广告全链路原始日志</td><td>roleid, log_type, adtype, entranceid, platform, value, status, mediation</td></tr>
+<tr><td><code>dw_ods_mn02.c_adplay</code></td><td>P10</td><td>P10 广告播放日志</td><td>player_id, adtype, platform, country, entranceid, adchannel, status</td></tr>
+<tr><td><code>dw_ods_mn02.c_adpaid</code></td><td>P10</td><td>P10 广告价值日志</td><td>player_id, adtype, platform, value, os, mediation</td></tr>
+<tr><td><code>dw_ods_mn04.c_adplay</code></td><td>SKB</td><td>SKB 广告播放日志</td><td>account_id, adtype, platform, status, entranceid, appsflyer_id</td></tr>
+<tr><td><code>dw_ods_mn04.c_advalue</code></td><td>SKB</td><td>SKB 广告价值日志</td><td>account_id, adtype, platform, value, mediation</td></tr>
+<tr><td><code>dw_ods_mn08.c_client_app_ad_log</code></td><td>UNO2</td><td>UNO2 广告全链路日志</td><td>role_id, udid, log_subtype, adtype, platform, value, status</td></tr>
+<tr><td><code>dw_dmdb.ad_source_channel_mapping</code></td><td>全产品</td><td>广告渠道映射表</td><td>adsource → 标准渠道名</td></tr>
+<tr><td><code>dw_dmdb.mn02_player_label_date / mn04_player_label_date</code></td><td>P10/SKB</td><td>BI 标签中间表（按日期）</td><td>player_id/account_id, label, date</td></tr>
+<tr><td><code>dw_ods_mn02.s_player_label / dw_ods_mn04.s_player_label</code></td><td>P10/SKB</td><td>标签原始表（labels 为数组）</td><td>player_id/role_id, labels（需 unnest）</td></tr>
+</table>
+
+<h3>关键模式总结</h3>
+
+<h4>1. 广告 log_type 映射标准</h4>
+<pre>-- ads_custom_logtype_player_date / 原始日志中通用的 log_type 映射
+CASE
+  WHEN log_type = 'adinit' AND status = 1 THEN 'init'       -- 广告初始化
+  WHEN log_type = 'adentrance'            THEN 'entrance'    -- 进入广告位
+  WHEN log_type = 'advisit' AND action = 'play' THEN 'click' -- 点击播放
+  WHEN log_type = 'adplay' AND status = 1 THEN 'play'        -- 播放成功
+  WHEN log_type = 'adplay' AND status &lt;&gt; 1 THEN 'playFail'  -- 播放失败
+  WHEN log_type = 'adload' AND status = 1 THEN 'load'        -- 加载成功
+  WHEN log_type = 'adload' AND status &lt;&gt; 1 THEN 'loadFail'  -- 加载失败
+  WHEN log_type = 'adclosed'              THEN 'closed'      -- 关闭
+  WHEN log_type = 'adrewarded'            THEN 'rewarded'    -- 奖励发放
+  WHEN log_type = 'advalue'               THEN 'advalue'     -- 收益回调
+END</pre>
+
+<h4>2. 聚合平台(mediation)获取方式</h4>
+<table>
+<tr><th>产品</th><th>获取方式</th><th>表/字段</th></tr>
+<tr><td>UNO</td><td>从 adinit 日志 JSON 提取</td><td><code>json_extract(extra_game_info, '$.mediation')</code> from game_client_log</td></tr>
+<tr><td>UNO (分组规则)</td><td>role_id 倒数5-6位映射</td><td>特定 ID 段 → admob / max</td></tr>
+<tr><td>P10</td><td>c_adinit 表直接有字段</td><td><code>mediation</code> from dw_ods_mn02.c_adinit</td></tr>
+<tr><td>SKB</td><td>c_advalue 表直接有字段</td><td><code>mediation</code> from dw_ods_mn04.c_advalue</td></tr>
+<tr><td>UNO2</td><td>c_client_app_ad_log 有字段</td><td><code>mediation</code> (log_subtype='adinit')</td></tr>
+</table>
+
+<h4>3. 广告收入统一口径（安卓 /1000000）</h4>
+<pre>-- 所有产品安卓广告收入需除以 1000000
+-- UNO: c_app_ad_log
+CASE WHEN platform = 'IOS' THEN value
+     WHEN platform = 'ANDROID' THEN value / 1000000
+     ELSE 0 END
+
+-- P10: c_adpaid
+IF(os = 'IOS', value, value / 1000000)
+
+-- SKB: c_advalue
+IF(platform = 'IOS', value, value / 1000000)
+
+-- UNO2: c_client_app_ad_log
+CASE WHEN platform = 'IOS' THEN CAST(value AS double)
+     ELSE CAST(value AS double) / 1000000 END</pre>
+
+<h4>4. 标签处理模式</h4>
+<pre>-- 方式1: s_player_label 原始表（labels 为数组，需 unnest）
+SELECT player_id, label
+FROM dw_ods_mn02.s_player_label, unnest(labels) AS t(label)
+WHERE label IN ('UF1', 'UF2', 'IAA1')
+
+-- 方式2: BI 标签中间表（已打平，直接用）
+SELECT player_id, label
+FROM dw_dmdb.mn02_player_label_date
+WHERE label IN ('UF1', 'UF2')
+
+-- SKB 标签
+SELECT role_id, label
+FROM dw_ods_mn04.s_player_label, unnest(labels) AS t(label)
+WHERE label IN ('ADV04', 'ADV05')</pre>
+
+<h4>5. UA归因分析模式（设备维度）</h4>
+<pre>-- SKB 按 campaign 类型(IAA/IAP/Hybrid)拆分用户
+-- 步骤1: 从归因表按 campaign 名称圈出设备ID
+SELECT DISTINCT appsflyer_id AS afid
+FROM dw_dmdb.dm_appsflyer_afid_attribute_info
+WHERE f_campaign IN ('defalut_IAA', 'SkipBo_AND_AppLovin_...')
+  AND project = '1000008'
+
+-- 步骤2: 用 appsflyer_id 关联广告行为表
+JOIN dw_ods_mn04.c_adplay ON appsflyer_id = afid
+
+-- 注意: 也可用 account_id 维度，通过 dm_mn04_player_info.campaign 字段关联</pre>
+
+<h4>6. 开窗函数：广告观看序数</h4>
+<pre>-- 用 row_number() 给每个用户每天的广告观看编号
+row_number() OVER (
+  PARTITION BY date, player_id, adtype, platform
+  ORDER BY log_time
+) AS ad_sequence_num
+
+-- 可用于分析第N次广告的eCPM衰减、边际价值等</pre>
 </div>
 
 <!-- 常用SQL模板 -->
