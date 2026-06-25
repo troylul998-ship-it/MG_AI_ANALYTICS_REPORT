@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -747,12 +747,12 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
     currentIdx = (currentIdx + dir + allMarks.length) % allMarks.length;
     allMarks[currentIdx].style.background = '#ff6b00';
     allMarks[currentIdx].style.color = '#fff';
-    const panel = allMarks[currentIdx].closest('.method-panel');
+    const panel = allMarks[currentIdx].closest('.m-panel');
     if (panel && !panel.classList.contains('active')) {
-      document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active'));
-      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
       panel.classList.add('active');
-      const sideItem = document.querySelector('.method-item[data-panel="' + panel.id + '"]');
+      const sideItem = document.querySelector('.sidebar-item[data-panel="' + panel.id + '"]');
       if (sideItem) sideItem.classList.add('active');
     }
     allMarks[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -763,8 +763,8 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
     document.querySelectorAll('mark.search-hl').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
     allMarks = []; currentIdx = -1;
     if (!q) { countEl.textContent = ''; navWrap.style.display = 'none'; return; }
-    const content = document.querySelector('.method-content') || document.body;
-    const panels = content.querySelectorAll('.method-panel');
+    const content = document.querySelector('.m-content') || document.body;
+    const panels = content.querySelectorAll('.m-panel');
     const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
     (panels.length ? panels : [content]).forEach(function(panel) {
       const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT, null, false);
@@ -785,12 +785,12 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
       currentIdx = 0;
       allMarks[0].style.background = '#ff6b00';
       allMarks[0].style.color = '#fff';
-      const panel = allMarks[0].closest('.method-panel');
+      const panel = allMarks[0].closest('.m-panel');
       if (panel && !panel.classList.contains('active')) {
-        document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active'));
-        document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
         panel.classList.add('active');
-        const sideItem = document.querySelector('.method-item[data-panel="' + panel.id + '"]');
+        const sideItem = document.querySelector('.sidebar-item[data-panel="' + panel.id + '"]');
         if (sideItem) sideItem.classList.add('active');
       }
       allMarks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -799,18 +799,6 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
       countEl.textContent = '0';
       navWrap.style.display = 'none';
     }
-  }
-})();
-</script>
-</body>
-</html>
-    const matches = []; const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-    while (walker.nextNode()) { const node = walker.currentNode; if (node.parentElement.closest('script,style,input,textarea')) continue; if (re.test(node.textContent)) matches.push(node); re.lastIndex = 0; }
-    let count = 0;
-    matches.forEach(node => { const span = document.createElement('span'); span.innerHTML = node.textContent.replace(re, '<mark class="search-hl" style="background:#ffcc02;padding:1px 2px;border-radius:2px;">$1</mark>'); node.parentNode.replaceChild(span, node); count += span.querySelectorAll('mark.search-hl').length; });
-    countEl.textContent = count ? count + ' 处' : '0';
-    const first = document.querySelector('mark.search-hl');
-    if (first) { const panel = first.closest('.method-panel'); if (panel && !panel.classList.contains('active')) { document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active')); document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active')); panel.classList.add('active'); const sideItem = document.querySelector(`.method-item[data-panel="${panel.id}"]`); if (sideItem) sideItem.classList.add('active'); } first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   }
 })();
 </script>
