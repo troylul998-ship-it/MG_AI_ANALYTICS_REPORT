@@ -64,9 +64,9 @@
 <h1>AI 数据分析平台</h1>
 <span class="sub">数据口径字典</span>
 <div style="flex:1;"></div>
-<div style="position:relative;margin-right:16px;">
+<div style="display:flex;align-items:center;gap:8px;margin-right:16px;">
   <input type="text" id="page-search" placeholder="🔍 页内搜索..." style="width:180px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;" onfocus="this.style.width='240px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="this.style.width='180px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'">
-  <span id="page-search-count" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text-3);pointer-events:none;"></span>
+  <span id="page-search-count" style="font-size:11px;color:var(--text-3);white-space:nowrap;min-width:28px;text-align:center;"></span>
 </div>
 <nav><a href="index.html">← 返回工作台</a></nav>
 </div>
@@ -1169,8 +1169,8 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
   // 添加上下切换按钮
   const navWrap = document.createElement('span');
   navWrap.id = 'search-nav';
-  navWrap.style.cssText = 'display:none;margin-left:8px;';
-  navWrap.innerHTML = '<button id="search-prev" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">↑</button> <button id="search-next" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;">↓</button>';
+  navWrap.style.cssText = 'display:none;align-items:center;gap:4px;';
+  navWrap.innerHTML = '<button id="search-prev" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">↑</button><button id="search-next" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">↓</button>';
   input.parentNode.appendChild(navWrap);
 
   let currentIdx = -1;
@@ -1241,7 +1241,7 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
 
     allMarks = Array.from(document.querySelectorAll('mark.search-hl'));
     if (allMarks.length) {
-      navWrap.style.display = 'inline';
+      navWrap.style.display = 'inline-flex';
       currentIdx = 0;
       allMarks[0].style.background = '#ff6b00';
       allMarks[0].style.color = '#fff';
