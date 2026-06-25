@@ -3,26 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>数据口径字典</title>
+<title>数据口径字典 · AI 数据分析平台</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
-.dict-wrap{max-width:1100px;margin:0 auto;padding:28px 24px 80px;}
-.dict-tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;}
-.dict-tab{font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;background:#f4f5f7;color:var(--text-2);}
-.dict-tab.active{background:var(--surface);color:var(--brand-1);border-color:var(--brand-1);}
-.dict-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 8px 8px 8px;padding:24px;overflow-x:auto;}
+/* 左侧边栏布局 */
+.dict-layout{display:flex;max-width:1400px;margin:0 auto;padding:0 24px 80px;gap:0;}
+
+/* 左侧导航 */
+.dict-sidebar{position:sticky;top:70px;width:240px;min-width:240px;height:calc(100vh - 70px);overflow-y:auto;padding:20px 0 40px 0;border-right:1px solid var(--border);}
+.dict-sidebar::-webkit-scrollbar{width:4px;}
+.dict-sidebar::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
+.sidebar-group{margin-bottom:16px;}
+.sidebar-group-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 16px;margin-bottom:2px;}
+.sidebar-item{display:block;font-size:13px;padding:7px 16px 7px 20px;color:var(--text-2);cursor:pointer;border-radius:0 6px 6px 0;border-left:3px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:#f4f3f0;color:var(--text-1);}
+.sidebar-item.active{background:#fff5f0;color:var(--brand-1);border-left-color:var(--brand-1);font-weight:600;}
+.sidebar-item .icon{margin-right:6px;font-size:14px;}
+
+/* 右侧内容 */
+.dict-content{flex:1;min-width:0;padding:24px 0 0 36px;}
+.dict-panel{display:none;animation:fadeIn .2s;}
 .dict-panel.active{display:block;}
-.dict-panel h3{font-size:16px;margin:20px 0 8px;color:var(--text-1);}
-.dict-panel h3:first-child{margin-top:0;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* 内容面板样式 */
+.dict-panel h2{font-size:20px;margin:0 0 6px;color:var(--text-1);letter-spacing:-0.02em;}
+.dict-panel .panel-desc{font-size:13px;color:var(--text-3);margin-bottom:20px;}
+.dict-panel h3{font-size:15px;margin:24px 0 8px;color:var(--text-1);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.dict-panel h3:first-of-type{margin-top:8px;}
+.dict-panel h4{font-size:13px;margin:16px 0 6px;color:var(--brand-1);font-weight:600;}
 .dict-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
-.dict-panel th,.dict-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;}
-.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;}
+.dict-panel th,.dict-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top;}
+.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;}
 .dict-panel td code{background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:11px;}
+.dict-panel pre{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:14px 16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;overflow-x:auto;}
 .note{font-size:12px;color:var(--red);background:var(--red-bg);padding:8px 12px;border-radius:6px;margin-bottom:12px;}
+.info-note{font-size:12px;color:var(--blue);background:var(--blue-bg);padding:8px 12px;border-radius:6px;margin-bottom:12px;}
 .src{font-size:11px;color:var(--text-3);margin-top:4px;}
 .doc-links{background:#f7f8fa;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:12px;}
 .doc-links a{color:#1565c0;text-decoration:underline;}
-.doc-links a:hover{color:#667eea;}
+.doc-links a:hover{color:var(--brand-1);}
+
+/* 响应式 */
+@media(max-width:768px){
+  .dict-layout{flex-direction:column;}
+  .dict-sidebar{position:relative;top:0;width:100%;min-width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;display:flex;flex-wrap:wrap;gap:4px;}
+  .sidebar-group{margin-bottom:4px;display:flex;flex-wrap:wrap;gap:2px;}
+  .sidebar-group-title{display:none;}
+  .sidebar-item{padding:6px 12px;border-radius:6px;border-left:none;font-size:12px;}
+  .dict-content{padding:20px 0 0 0;}
+}
 </style>
 </head>
 <body>
@@ -35,24 +65,40 @@
 </div>
 </header>
 
-<div class="dict-wrap">
-<h2 style="margin-bottom:6px;">📚 数据口径字典</h2>
-<p style="font-size:13px;color:var(--text-3);margin-bottom:20px;">各产品表结构、核心字段、指标口径汇总。来源：Confluence Tech Center 文档。</p>
-
-<div class="dict-tabs">
-<div class="dict-tab active" data-panel="p-overview">概览</div>
-<div class="dict-tab" data-panel="p-uno">UNO (MN01)</div>
-<div class="dict-tab" data-panel="p-p10">P10 (MN02)</div>
-<div class="dict-tab" data-panel="p-skb">SKB (MN04)</div>
-<div class="dict-tab" data-panel="p-uno2">UNO2 (MN08)</div>
-<div class="dict-tab" data-panel="p-ad">广告变现指标</div>
-<div class="dict-tab" data-panel="p-3pp">三方支付指标</div>
-<div class="dict-tab" data-panel="p-sql">常用SQL模板</div>
-<div class="dict-tab" data-panel="p-filters">常用过滤条件</div>
+<div class="dict-layout">
+<!-- 左侧导航 -->
+<aside class="dict-sidebar">
+<div class="sidebar-group">
+<div class="sidebar-group-title">总览</div>
+<div class="sidebar-item active" data-panel="p-overview"><span class="icon">📋</span>数据源总览</div>
 </div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">产品字段</div>
+<div class="sidebar-item" data-panel="p-uno"><span class="icon">🃏</span>UNO (MN01)</div>
+<div class="sidebar-item" data-panel="p-p10"><span class="icon">🧩</span>P10 (MN02)</div>
+<div class="sidebar-item" data-panel="p-skb"><span class="icon">🛹</span>SKB (MN04)</div>
+<div class="sidebar-item" data-panel="p-uno2"><span class="icon">🎴</span>UNO2 (MN08)</div>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">指标口径</div>
+<div class="sidebar-item" data-panel="p-ad"><span class="icon">📺</span>广告变现指标</div>
+<div class="sidebar-item" data-panel="p-3pp"><span class="icon">💳</span>三方支付指标</div>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">参考</div>
+<div class="sidebar-item" data-panel="p-sql"><span class="icon">📝</span>常用SQL模板</div>
+<div class="sidebar-item" data-panel="p-filters"><span class="icon">🔍</span>常用过滤条件</div>
+</div>
+</aside>
+
+<!-- 右侧内容 -->
+<main class="dict-content">
 
 <!-- 概览 -->
 <div class="dict-panel active" id="p-overview">
+<h2>📋 数据源总览</h2>
+<p class="panel-desc">各产品表结构、主键、广告收入字段汇总。来源：Confluence Tech Center 文档。</p>
+
 <h3>产品数据源总览</h3>
 <table>
 <tr><th>产品</th><th>活跃表</th><th>全量表</th><th>主键</th><th>广告收入字段</th><th>特殊说明</th></tr>
@@ -141,8 +187,8 @@
 
 <!-- UNO -->
 <div class="dict-panel" id="p-uno">
-<h3>UNO (MN01) 核心字段</h3>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">Confluence: MN01用户信息表</a></p>
+<h2>🃏 UNO (MN01) 核心字段</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">Confluence: MN01用户信息表</a></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">MN01 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a> |
@@ -171,9 +217,9 @@
 
 <!-- P10 -->
 <div class="dict-panel" id="p-p10">
-<h3>P10 (MN02) 核心字段</h3>
+<h2>🧩 P10 (MN02) 核心字段</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">Confluence: MN02用户信息表</a></p>
 <div class="note">iaa_sum 字段已于 2025-06-17 删除维护逻辑，请用 advalue_sum 替代。</div>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">Confluence: MN02用户信息表</a></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">MN02 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a> |
@@ -198,9 +244,9 @@
 
 <!-- SKB -->
 <div class="dict-panel" id="p-skb">
-<h3>SKB (MN04) 核心字段</h3>
+<h2>🛹 SKB (MN04) 核心字段</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">Confluence: MN04用户信息表</a></p>
 <div class="note">安卓广告收入需: if(platform='IOS', value, value/1000000)</div>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">Confluence: MN04用户信息表</a></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">MN04 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a>
@@ -220,9 +266,9 @@
 
 <!-- UNO2 -->
 <div class="dict-panel" id="p-uno2">
-<h3>UNO2 (MN08) 核心字段</h3>
+<h2>🎴 UNO2 (MN08) 核心字段</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">Confluence: MN08用户信息表</a></p>
 <div class="note">库名是 dw_dmdb (非 dw_ods_mn08); 广告明细在 dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue)</div>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">Confluence: MN08用户信息表</a></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">MN08 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a>
@@ -240,8 +286,8 @@
 
 <!-- 广告变现 -->
 <div class="dict-panel" id="p-ad">
-<h3>广告变现通用指标</h3>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a> | <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">飞书: MG 数据分析 SQL 知识库</a></p>
+<h2>📺 广告变现指标</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a> | <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">飞书: MG 数据分析 SQL 知识库</a></p>
 
 <h3>核心指标公式</h3>
 <table>
@@ -355,8 +401,8 @@
 
 <!-- 三方支付 -->
 <div class="dict-panel" id="p-3pp">
-<h3>三方支付指标口径</h3>
-<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">Confluence: 三方支付所有指标口径</a> | <a href="https://mattel163.feishu.cn/docx/KiLqdlhjqosgsDxPUCuc1lFGnmf" target="_blank">飞书: 三方知识库常用SQL埋点大全</a></p>
+<h2>💳 三方支付指标</h2>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">Confluence: 三方支付所有指标口径</a> | <a href="https://mattel163.feishu.cn/docx/KiLqdlhjqosgsDxPUCuc1lFGnmf" target="_blank">飞书: 三方知识库常用SQL埋点大全</a></p>
 
 <h3>三方支付数据源总览</h3>
 <table>
@@ -468,8 +514,8 @@
 
 <!-- 常用SQL模板 -->
 <div class="dict-panel" id="p-sql">
-<h3>常用 SQL 模板</h3>
-<p style="font-size:12px;color:var(--text-3);margin-bottom:16px;">团队积累的常用取数 SQL，可直接复制使用或作为参考。</p>
+<h2>📝 常用 SQL 模板</h2>
+<p class="panel-desc">团队积累的常用取数 SQL，可直接复制使用或作为参考。</p>
 <div class="doc-links">📎 <b>飞书文档参考链接：</b><br>
 <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">MG 数据分析 SQL 知识库</a> |
 <a href="https://mattel163.feishu.cn/docx/GhMEdzxyIoYGfSxRrGscQYnLnWh" target="_blank">广告变现常用 SQL 合集</a> |
@@ -477,6 +523,7 @@
 <a href="https://mattel163.feishu.cn/wiki/WCqUwwUkGi373VkUBIPcRHQrn7f" target="_blank">通用指标口径与 SQL</a> |
 <a href="https://mattel163.feishu.cn/wiki/RZEhwK0Xki7T47kC3BAcoTWmncO" target="_blank">数据表字段速查表</a>
 </div>
+
 <h3>1. IAA LTV + eCPM + Freq 分析 (全产品通用)</h3>
 <pre>-- CTE 结构：
 -- 1. new_users: 筛选新注册用户 (been_reg_days=1)
@@ -488,6 +535,7 @@
 -- Freq/DAU = SUM(adplay) / SUM(active_days)
 -- eCPM = SUM(revenue) * 1000 / SUM(adplay)
 -- IAA LTV = SUM(revenue) / COUNT(DISTINCT user_id)</pre>
+
 <h3>2. 3PP 支付转化漏斗</h3>
 <pre>-- 各步打点：
 -- Step1 访问: open_recharge (uuid排重)
@@ -498,11 +546,13 @@
 -- Step6 支付成功: omni_server_payment
 --   WHERE pay_channel_id = 11 AND payment > 0
 --   AND status IN (1, 3) AND order_from != 'webPay'</pre>
+
 <h3>3. UNO2 广告数据 (FULL OUTER JOIN)</h3>
 <pre>-- 播放次数: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='adplay' AND status=1
 -- 广告收入: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='advalue'
 -- 安卓需 /1000000: CASE WHEN platform='IOS' THEN value ELSE value/1000000 END
 -- 合并: FULL OUTER JOIN ON date + role_id + platform</pre>
+
 <h3>4. 三方支付：内嵌收入 / 主站收入拆分</h3>
 <pre>-- 数据源: dw_ods_sdk.omni_server_payment
 -- game_id: UNO=1000000, P10=1019, SKB=1000008, UNO2=1000014
@@ -518,6 +568,7 @@ WHERE date = '2026-01-01'
   AND order_from = 'storePay'
   AND status IN (1, 3, 4)
   AND game_id = 1000000  -- 按产品替换 game_id</pre>
+
 <h3>5. 三方支付：二选一弹窗曝光/选择统计 (UNO)</h3>
 <pre>-- 数据源: dw_ods_mn01.c_client_app_payment_selectchannel
 SELECT
@@ -530,6 +581,7 @@ SELECT
 FROM dw_ods_mn01.c_client_app_payment_selectchannel
 WHERE date BETWEEN '2026-01-01' AND '2026-01-07'
 GROUP BY 1, 2</pre>
+
 <h3>6. UNO role_id → account_id 映射</h3>
 <pre>-- UNO 客户端用 role_id，SDK 用 account_id
 -- 通过 c_app_ad_log 表关联获取映射
@@ -539,6 +591,7 @@ SELECT DISTINCT
 FROM dw_ods_mn01.c_app_ad_log
 WHERE date = '2026-01-01'
   AND roleid = '目标role_id'</pre>
+
 <h3>7. 三方中间表：每日3PP付费汇总（P10示例）</h3>
 <pre>-- 数据源: dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
 -- 用途: 统计每日三方付费金额/次数，区分内嵌和主站
@@ -554,6 +607,7 @@ SELECT
 FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
 WHERE date BETWEEN '2026-02-05' AND '2026-03-04'
 GROUP BY 1, 2</pre>
+
 <h3>8. 三方破冰用户识别</h3>
 <pre>-- 识别期间内首次三方付费用户（破冰用户）
 -- 同时判断破冰渠道：内嵌 or 主站
@@ -565,6 +619,7 @@ SELECT
 FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
 WHERE f_third_payment_date BETWEEN '2026-02-05' AND '2026-03-04'
 GROUP BY account_id</pre>
+
 <h3>9. 三方转化漏斗（MAU→知道→下单→付费→互动→忠诚）</h3>
 <pre>-- 全链路转化漏斗，以 P10 为例
 -- MAU: 活跃中间表
@@ -583,6 +638,7 @@ GROUP BY account_id</pre>
 -- dw_ods_gamecenter.c_get_daily_rewards (签到领取)
 -- dw_ods_gamecenter.c_purchase_gift (满3单领奖)
 -- dw_ods_gamecenter.s_server_voucher_writeoff (优惠券核销)</pre>
+
 <h3>10. P10 付费链路全交互日志 (付费漏斗)</h3>
 <pre>-- 数据源: dw_ods_mn02.c_payment_interact
 -- action: 1=click_open, 2=click_pay, 3=click_close
@@ -603,7 +659,9 @@ GROUP BY account_id</pre>
 
 <!-- 常用过滤条件 -->
 <div class="dict-panel" id="p-filters">
-<h3>常用过滤条件大全</h3>
+<h2>🔍 常用过滤条件</h2>
+<p class="panel-desc">团队约定的标准过滤条件，确保口径一致。</p>
+
 <h3>基础过滤</h3>
 <table>
 <tr><th>场景</th><th>SQL</th><th>说明</th></tr>
@@ -612,6 +670,7 @@ GROUP BY account_id</pre>
 <tr><td>新用户</td><td><code>been_reg_days = 1</code></td><td>注册当天</td></tr>
 <tr><td>成年用户</td><td><code>is_adult = 1</code></td><td>UNO 广告分析需加</td></tr>
 </table>
+
 <h3>生命周期分段</h3>
 <table>
 <tr><th>标签</th><th>SQL</th><th>含义</th></tr>
@@ -621,6 +680,7 @@ GROUP BY account_id</pre>
 <tr><td>LT90</td><td><code>life_day BETWEEN 0 AND 89</code></td><td>注册后 90 天内</td></tr>
 <tr><td>LT180</td><td><code>life_day BETWEEN 0 AND 179</code></td><td>注册后 180 天内</td></tr>
 </table>
+
 <h3>付费分层 (pay_activity_type)</h3>
 <table>
 <tr><th>标签</th><th>值</th><th>含义</th></tr>
@@ -633,6 +693,7 @@ GROUP BY account_id</pre>
 <tr><td>沉睡付费</td><td>6</td><td>20天无，21-40天有</td></tr>
 <tr><td>长眠付费</td><td>7</td><td>40天无，历史有</td></tr>
 </table>
+
 <h3>广告类型</h3>
 <table>
 <tr><th>类型</th><th>SQL</th></tr>
@@ -640,6 +701,7 @@ GROUP BY account_id</pre>
 <tr><td>插屏 (INT)</td><td><code>adtype = 'interstitial'</code></td></tr>
 <tr><td>Banner</td><td><code>adtype = 'banner'</code></td></tr>
 </table>
+
 <h3>地区分组维度</h3>
 <table>
 <tr><th>维度</th><th>分组</th><th>SQL 逻辑</th></tr>
@@ -652,6 +714,7 @@ GROUP BY account_id</pre>
 <tr><td>GroupB</td><td><code>country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR')</code></td></tr>
 <tr><td>GroupC</td><td><code>ELSE 'GroupC'</code> (其余所有国家)</td></tr>
 </table>
+
 <h3>完整 CASE WHEN 模板</h3>
 <pre>-- T地区 (area_type)
 CASE
@@ -668,6 +731,7 @@ CASE
   WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB'
   ELSE 'GroupC'
 END AS area_group</pre>
+
 <h3>三方支付</h3>
 <table>
 <tr><th>场景</th><th>SQL</th></tr>
@@ -677,17 +741,22 @@ END AS area_group</pre>
 </table>
 </div>
 
-</div>
+</main><!-- end dict-content -->
+</div><!-- end dict-layout -->
 
 <script>
-document.querySelectorAll('.dict-tab').forEach(tab => {
-  tab.addEventListener('click', (e) => {
+// 左侧导航切换
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    document.querySelectorAll('.dict-tab').forEach(t => t.classList.remove('active'));
+    // 切换 active 状态
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.dict-panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(tab.dataset.panel).classList.add('active');
+    item.classList.add('active');
+    document.getElementById(item.dataset.panel).classList.add('active');
+    // 内容区滚动到顶部
+    document.querySelector('.dict-content').scrollTo(0, 0);
   });
 });
 </script>
