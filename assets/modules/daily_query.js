@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const data = collect();
     FF.renderArtifacts([
       { key: 'sql', label: 'SQL Prompt', content: buildPrompt(data) },
-      { key: 'analysis', label: '分析模板', content: buildAnalysisTemplate(data) },
+      { key: 'analysis', label: '分析 Prompt', content: buildAnalysisTemplate(data) },
       { key: 'json', label: '结构化需求 JSON', content: JSON.stringify(data, null, 2) },
     ], { collectFn: collect });
   });
