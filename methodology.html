@@ -65,11 +65,11 @@
 <h1>AI 数据分析平台</h1>
 <span class="sub">分析方法论</span>
 <div style="flex:1;"></div>
-<div style="display:flex;align-items:center;gap:8px;margin-right:16px;">
+<nav><a href="index.html">← 返回工作台</a></nav>
+<div style="display:flex;align-items:center;gap:8px;margin-left:16px;">
   <input type="text" id="page-search" placeholder="🔍 页内搜索..." style="width:180px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;" onfocus="this.style.width='240px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="this.style.width='180px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'">
   <span id="page-search-count" style="font-size:11px;color:var(--text-3);white-space:nowrap;min-width:28px;text-align:center;"></span>
 </div>
-<nav><a href="index.html">← 返回工作台</a></nav>
 </div>
 </header>
 
@@ -716,20 +716,94 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
   });
 });
 
-// 页内搜索 + 高亮定位
+// 页内搜索 + 高亮定位 + 上下切换
 (function(){
   const input = document.getElementById('page-search');
   const countEl = document.getElementById('page-search-count');
   if (!input) return;
+
+  const navWrap = document.createElement('span');
+  navWrap.id = 'search-nav';
+  navWrap.style.cssText = 'display:none;align-items:center;gap:4px;';
+  navWrap.innerHTML = '<button id="search-prev" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">\u2191</button><button id="search-next" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">\u2193</button>';
+  input.parentNode.appendChild(navWrap);
+
+  let currentIdx = -1;
+  let allMarks = [];
+
   const initSearch = decodeURIComponent(window.location.hash.split('search=')[1] || '');
   if (initSearch) { input.value = initSearch; setTimeout(() => doSearch(initSearch), 300); }
   let debounceTimer;
   input.addEventListener('input', function() { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => doSearch(this.value.trim()), 200); });
+  document.getElementById('search-prev').addEventListener('click', () => navigate(-1));
+  document.getElementById('search-next').addEventListener('click', () => navigate(1));
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); navigate(e.shiftKey ? -1 : 1); }
+  });
+
+  function navigate(dir) {
+    if (!allMarks.length) return;
+    if (allMarks[currentIdx]) { allMarks[currentIdx].style.background = '#ffcc02'; allMarks[currentIdx].style.color = ''; }
+    currentIdx = (currentIdx + dir + allMarks.length) % allMarks.length;
+    allMarks[currentIdx].style.background = '#ff6b00';
+    allMarks[currentIdx].style.color = '#fff';
+    const panel = allMarks[currentIdx].closest('.method-panel');
+    if (panel && !panel.classList.contains('active')) {
+      document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+      panel.classList.add('active');
+      const sideItem = document.querySelector('.method-item[data-panel="' + panel.id + '"]');
+      if (sideItem) sideItem.classList.add('active');
+    }
+    allMarks[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    countEl.textContent = (currentIdx + 1) + '/' + allMarks.length;
+  }
+
   function doSearch(q) {
     document.querySelectorAll('mark.search-hl').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
-    if (!q) { countEl.textContent = ''; return; }
+    allMarks = []; currentIdx = -1;
+    if (!q) { countEl.textContent = ''; navWrap.style.display = 'none'; return; }
     const content = document.querySelector('.method-content') || document.body;
-    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+    const panels = content.querySelectorAll('.method-panel');
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    (panels.length ? panels : [content]).forEach(function(panel) {
+      const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT, null, false);
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        if (node.parentElement.closest('script,style,input,textarea')) continue;
+        if (re.test(node.textContent)) {
+          const span = document.createElement('span');
+          span.innerHTML = node.textContent.replace(re, '<mark class="search-hl" style="background:#ffcc02;padding:1px 2px;border-radius:2px;">$1</mark>');
+          node.parentNode.replaceChild(span, node);
+        }
+        re.lastIndex = 0;
+      }
+    });
+    allMarks = Array.from(document.querySelectorAll('mark.search-hl'));
+    if (allMarks.length) {
+      navWrap.style.display = 'inline-flex';
+      currentIdx = 0;
+      allMarks[0].style.background = '#ff6b00';
+      allMarks[0].style.color = '#fff';
+      const panel = allMarks[0].closest('.method-panel');
+      if (panel && !panel.classList.contains('active')) {
+        document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
+        panel.classList.add('active');
+        const sideItem = document.querySelector('.method-item[data-panel="' + panel.id + '"]');
+        if (sideItem) sideItem.classList.add('active');
+      }
+      allMarks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      countEl.textContent = '1/' + allMarks.length;
+    } else {
+      countEl.textContent = '0';
+      navWrap.style.display = 'none';
+    }
+  }
+})();
+</script>
+</body>
+</html>
     const matches = []; const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
     while (walker.nextNode()) { const node = walker.currentNode; if (node.parentElement.closest('script,style,input,textarea')) continue; if (re.test(node.textContent)) matches.push(node); re.lastIndex = 0; }
     let count = 0;
