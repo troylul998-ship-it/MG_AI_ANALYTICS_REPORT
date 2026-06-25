@@ -19,16 +19,12 @@
       <a href="#flow">工作流程</a>
       <a href="#kb">知识库</a>
     </nav>
+    <div style="position:relative;margin-left:16px;">
+      <input type="text" id="site-search" placeholder="🔍 搜索..." style="width:160px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;transition:all .2s;" onfocus="this.style.width='260px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="setTimeout(()=>{if(!this.value){this.style.width='160px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'}},200)">
+      <div id="search-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;width:380px;max-height:420px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;padding:8px 0;"></div>
+    </div>
   </div>
 </header>
-
-<!-- 右侧悬浮搜索框 -->
-<div id="floating-search" style="position:fixed;top:16px;right:24px;z-index:9999;display:flex;align-items:center;gap:6px;">
-  <div style="position:relative;">
-    <input type="text" id="site-search" placeholder="🔍 搜索..." style="width:160px;padding:8px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:#fff;outline:none;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:all .2s;" onfocus="this.style.width='280px';this.style.borderColor='var(--brand-1)';this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'" onblur="setTimeout(()=>{if(!this.value){this.style.width='160px';this.style.borderColor='var(--border)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'}},200)">
-    <div id="search-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;width:380px;max-height:420px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;padding:8px 0;"></div>
-  </div>
-</div>
 
 <div class="container">
 
