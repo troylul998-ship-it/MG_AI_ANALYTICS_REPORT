@@ -17,8 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wizard
   FF.initWizard([
     { title: '产品', question: '取哪个产品的数据？', explain: '选产品 + 日期范围。', example: '<b>例：</b>P10，最近 7 天' },
-    { title: '需求', question: '你想取什么数据？', explain: '用白话写，或点选常用场景。', example: '<b>例：</b>"帮我拉分平台 DAU 和付费人数"' },
-    { title: '维度', question: '怎么拆分？', explain: '选拆分维度、过滤条件。没有就跳过。', example: '<b>例：</b>按天 + 按平台拆分' },
+    { title: '需求', question: '你想取什么数据？', explain: '用白话写，或点选常用场景。选拆分维度和过滤条件。', example: '<b>例：</b>"帮我拉分平台 DAU 和付费人数"，按天+按平台拆分' },
     { title: '数据源', question: '数据源', explain: '字段、埋点、历史 SQL，填了生成的 SQL 更准。没有就直接生成。', example: '<b>例：</b>字段 dau/付费人数，埋点 pay_success' },
   ]);
 
@@ -96,15 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 第4步时自动生成列
+  // 第3步时自动生成列
   // 使用 wizard 的 onEnter 回调方式：监听 wiz-nav 按钮点击
   document.addEventListener('click', e => {
     const btn = e.target.closest('.btn-next');
     if (!btn) return;
-    // 下一帧检查是否到第4步
+    // 下一帧检查是否到第3步
     setTimeout(() => {
       const cards = document.querySelectorAll('.fcard');
-      if (cards[3] && cards[3].classList.contains('wiz-active')) {
+      if (cards[2] && cards[2].classList.contains('wiz-active')) {
         if (!document.getElementById('dq-map-rows').children.length) autoGenerateColumns();
       }
     }, 100);
