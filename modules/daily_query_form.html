@@ -86,7 +86,7 @@
       </div>
     </div>
 
-    <!-- 2 需求描述 -->
+    <!-- 2 需求描述 + 维度 -->
     <div class="fcard">
       <h3><span class="n">2</span> 你想取什么数据？</h3>
       <div class="field">
@@ -102,13 +102,11 @@
         <textarea id="query_desc" data-required rows="4" placeholder="用白话写，如：&#10;• 帮我拉 P10 最近 7 天分平台的 DAU 和付费人数&#10;• 我要 UNO2 上周每天的广告收入，分 RV 和 INT&#10;• 取 SKB 新用户 D7 留存率，分渠道"></textarea>
         <div class="err-msg">必填</div>
       </div>
-    </div>
 
-    <!-- 3 维度 -->
-    <div class="fcard">
-      <h3><span class="n">3</span> 怎么拆分？ <span class="help" style="font-weight:400">选填</span></h3>
+      <hr style="border:none;border-top:1px dashed var(--border);margin:20px 0;">
+
       <div class="field">
-        <label>输出维度 <span class="help">希望按什么拆分</span></label>
+        <label>输出维度 <span class="help">希望按什么拆分，没有就跳过</span></label>
         <div class="chips" id="chips-dq-dims" data-custom="dq_dims">
           <label class="chip"><input type="checkbox" name="dq_dims" value="date">分天</label>
           <label class="chip"><input type="checkbox" name="dq_dims" value="platform">平台</label>
@@ -130,9 +128,9 @@
       </div>
     </div>
 
-    <!-- 4 数据源 -->
+    <!-- 3 数据源 -->
     <div class="fcard">
-      <h3><span class="n">4</span> 数据源 <span class="help" style="font-weight:400">选填</span></h3>
+      <h3><span class="n">3</span> 数据源 <span class="help" style="font-weight:400">选填</span></h3>
 
       <div class="field">
         <label>📊 数据列 <span class="help">已根据前面选择自动生成，可手动增删</span></label>
