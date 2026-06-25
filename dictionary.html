@@ -906,6 +906,20 @@ GROUP BY account_id</pre>
 <tr><td>LT180</td><td><code>life_day BETWEEN 0 AND 179</code></td><td>注册后 180 天内</td></tr>
 </table>
 
+<h3>注册天数分段 (been_reg_days_type)</h3>
+<pre>CASE
+  WHEN been_reg_days = 1                       THEN '1'
+  WHEN been_reg_days BETWEEN 2   AND 7         THEN '2~7'
+  WHEN been_reg_days BETWEEN 8   AND 15        THEN '8~15'
+  WHEN been_reg_days BETWEEN 16  AND 30        THEN '16~30'
+  WHEN been_reg_days BETWEEN 31  AND 60        THEN '31~60'
+  WHEN been_reg_days BETWEEN 61  AND 90        THEN '61~90'
+  WHEN been_reg_days BETWEEN 91  AND 180       THEN '91~180'
+  WHEN been_reg_days BETWEEN 181 AND 360       THEN '181~360'
+  WHEN been_reg_days >= 361                    THEN '360+'
+  ELSE 'others'
+END AS been_reg_days_type</pre>
+
 <h3>付费分层 (pay_activity_type)</h3>
 <table>
 <tr><th>标签</th><th>值</th><th>含义</th></tr>

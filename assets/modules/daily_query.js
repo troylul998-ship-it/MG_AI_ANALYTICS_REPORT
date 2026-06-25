@@ -346,6 +346,24 @@ function buildPrompt(d) {
       L.push("```");
       L.push('');
     }
+    if (d.dims.includes('reg_days')) {
+      L.push('# reg_days (注册天数分段) SQL 片段');
+      L.push("```sql");
+      L.push("CASE");
+      L.push("  WHEN been_reg_days = 1                       THEN '1'");
+      L.push("  WHEN been_reg_days BETWEEN 2   AND 7         THEN '2~7'");
+      L.push("  WHEN been_reg_days BETWEEN 8   AND 15        THEN '8~15'");
+      L.push("  WHEN been_reg_days BETWEEN 16  AND 30        THEN '16~30'");
+      L.push("  WHEN been_reg_days BETWEEN 31  AND 60        THEN '31~60'");
+      L.push("  WHEN been_reg_days BETWEEN 61  AND 90        THEN '61~90'");
+      L.push("  WHEN been_reg_days BETWEEN 91  AND 180       THEN '91~180'");
+      L.push("  WHEN been_reg_days BETWEEN 181 AND 360       THEN '181~360'");
+      L.push("  WHEN been_reg_days >= 361                    THEN '360+'");
+      L.push("  ELSE 'others'");
+      L.push("END AS been_reg_days_type");
+      L.push("```");
+      L.push('');
+    }
   }
   if (d.filter) {
     L.push('# 额外过滤');
