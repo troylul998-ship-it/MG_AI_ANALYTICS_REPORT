@@ -14,14 +14,15 @@
     <div class="logo">📊</div>
     <h1>AI 数据分析平台</h1>
     <span class="sub">Mobile Growth · 变现 & 三方支付</span>
-    <div style="flex:1;display:flex;justify-content:center;padding:0 20px;">
-      <input type="text" id="site-search" placeholder="🔍 搜索全站关键词..." style="width:100%;max-width:320px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;transition:all .2s;" onfocus="this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="this.style.borderColor='var(--border)';this.style.background='#f7f8fa'">
-    </div>
     <nav>
       <a href="#modules">分析模块</a>
       <a href="#flow">工作流程</a>
       <a href="#kb">知识库</a>
     </nav>
+    <div style="position:relative;margin-left:16px;">
+      <input type="text" id="site-search" placeholder="🔍 搜索..." style="width:180px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;transition:all .2s;" onfocus="this.style.width='260px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="setTimeout(()=>{this.style.width='180px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa)'},200)">
+      <div id="search-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;width:360px;max-height:400px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:999;padding:8px 0;"></div>
+    </div>
   </div>
 </header>
 
@@ -197,6 +198,69 @@
 <footer class="footer">
   AI 数据分析平台 · 内部工具 · 仅供 Mobile Growth 团队使用
 </footer>
+
+<script>
+// 全站搜索
+(function(){
+  const SEARCH_INDEX = [
+    { title: '日常取数', desc: '选产品、描述需求、快速出 SQL', url: 'modules/daily_query_form.html', tags: 'DAU 付费 广告 留存 SQL 取数' },
+    { title: '付费/收入分析', desc: '渠道收入、ARPU、3PP转移与付费漏斗', url: 'modules/revenue_analysis_form.html', tags: '收入 ARPU 付费率 3PP 转移 渠道' },
+    { title: 'AB 实验分析', desc: '实验组 vs 对照组、DID 校正', url: 'modules/ab_test_form.html', tags: 'AB 实验 对照 DID 显著性 p值' },
+    { title: '留存/LTV 分析', desc: 'D1~D180 留存率、IAA LTV', url: 'modules/retention_ltv_form.html', tags: '留存 retention LTV D7 D30 新增' },
+    { title: '漏斗分析', desc: '转化漏斗、各步骤转化率', url: 'modules/funnel_analysis_form.html', tags: '漏斗 转化率 步骤 funnel' },
+    { title: '数据口径字典', desc: '表结构、字段、指标口径汇总', url: 'dictionary.html', tags: '字典 字段 口径 表 advalue payment been_reg_days 三方 广告 eCPM' },
+    { title: '数据口径字典 - UNO', desc: 'UNO (MN01) 活跃表全字段', url: 'dictionary.html#p-uno', tags: 'UNO MN01 role_id match gold diamond' },
+    { title: '数据口径字典 - P10', desc: 'P10 (MN02) 活跃表全字段', url: 'dictionary.html#p-p10', tags: 'P10 MN02 account_id pve pvp chapter wild skip' },
+    { title: '数据口径字典 - SKB', desc: 'SKB (MN04) 活跃表全字段', url: 'dictionary.html#p-skb', tags: 'SKB MN04 pve pvp advalue no_ads ticket' },
+    { title: '数据口径字典 - UNO2', desc: 'UNO2 (MN08) 活跃表全字段', url: 'dictionary.html#p-uno2', tags: 'UNO2 MN08 route pve coin diamond' },
+    { title: '广告变现指标', desc: 'eCPM、Freq、ARPU、LTV 公式', url: 'dictionary.html#p-ad', tags: '广告 eCPM Freq ARPU LTV RV INT Banner advalue' },
+    { title: '三方支付指标', desc: '转移比例、漏斗、SDK、RM埋点', url: 'dictionary.html#p-3pp', tags: '三方 3PP 转移 omni_server_payment pay_channel RM remember 二选一 弹窗' },
+    { title: '常用SQL模板', desc: 'LTV、漏斗、UNION等SQL模板', url: 'dictionary.html#p-sql', tags: 'SQL 模板 CTE UNION LTV 漏斗' },
+    { title: '常用过滤条件', desc: 'APP端、双端、新用户、地区分组', url: 'dictionary.html#p-filters', tags: '过滤 APP platform country area_type area_group been_reg_days 注册天数' },
+    { title: 'SQL处理逻辑', desc: '类型转换、时间函数、JSON处理', url: 'dictionary.html#p-logic', tags: 'SQL cast date_diff json split substr CASE' },
+    { title: '广告取数案例', desc: '16个实战SQL需求归档', url: 'dictionary.html#p-ad-cases', tags: '案例 广告 需求 实战' },
+    { title: '分析方法论', desc: '分析框架、归因逻辑、报告模板', url: 'methodology.html', tags: '方法论 框架 归因 报告 模板' },
+    { title: '历史归档', desc: '历史分析报告归档', url: 'archive.html', tags: '归档 历史 报告' },
+  ];
+
+  const input = document.getElementById('site-search');
+  const dropdown = document.getElementById('search-dropdown');
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { dropdown.style.display = 'none'; return; }
+    const results = SEARCH_INDEX.filter(item => {
+      const text = (item.title + ' ' + item.desc + ' ' + item.tags).toLowerCase();
+      return q.split(/\s+/).every(word => text.includes(word));
+    });
+    if (!results.length) {
+      dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px;">未找到相关内容</div>';
+    } else {
+      dropdown.innerHTML = results.map(r =>
+        `<a href="${r.url}" style="display:block;padding:10px 16px;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background .1s;" onmouseover="this.style.background='#fff5f0'" onmouseout="this.style.background='transparent'">
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);">${highlight(r.title, q)}</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px;">${highlight(r.desc, q)}</div>
+        </a>`
+      ).join('');
+    }
+    dropdown.style.display = 'block';
+  });
+
+  input.addEventListener('blur', () => { setTimeout(() => dropdown.style.display = 'none', 200); });
+  input.addEventListener('focus', () => { if (input.value.trim()) input.dispatchEvent(new Event('input')); });
+
+  function highlight(text, q) {
+    const words = q.split(/\s+/).filter(Boolean);
+    let result = text;
+    words.forEach(w => {
+      const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      result = result.replace(re, '<mark style="background:#ffe0b2;padding:0 1px;border-radius:2px;">$1</mark>');
+    });
+    return result;
+  }
+})();
+</script>
 
 </body>
 </html>
