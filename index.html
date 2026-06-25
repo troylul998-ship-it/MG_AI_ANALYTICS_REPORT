@@ -238,7 +238,7 @@
       dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px;">未找到相关内容</div>';
     } else {
       dropdown.innerHTML = results.map(r =>
-        `<a href="${r.url}" style="display:block;padding:10px 16px;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background .1s;" onmouseover="this.style.background='#fff5f0'" onmouseout="this.style.background='transparent'">
+        `<a href="${r.url}${r.url.includes('#') ? '&' : '#'}search=${encodeURIComponent(q)}" style="display:block;padding:10px 16px;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background .1s;" onmouseover="this.style.background='#fff5f0'" onmouseout="this.style.background='transparent'">
           <div style="font-size:13px;font-weight:600;color:var(--text-1);">${highlight(r.title, q)}</div>
           <div style="font-size:12px;color:var(--text-3);margin-top:2px;">${highlight(r.desc, q)}</div>
         </a>`

@@ -62,6 +62,11 @@
 <div class="logo">📊</div>
 <h1>AI 数据分析平台</h1>
 <span class="sub">分析方法论</span>
+<div style="flex:1;"></div>
+<div style="position:relative;margin-right:16px;">
+  <input type="text" id="page-search" placeholder="🔍 页内搜索..." style="width:180px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;" onfocus="this.style.width='240px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="this.style.width='180px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'">
+  <span id="page-search-count" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--text-3);pointer-events:none;"></span>
+</div>
 <nav><a href="index.html">← 返回工作台</a></nav>
 </div>
 </header>
@@ -708,6 +713,30 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
     document.querySelector('.m-content').scrollTo(0, 0);
   });
 });
+
+// 页内搜索 + 高亮定位
+(function(){
+  const input = document.getElementById('page-search');
+  const countEl = document.getElementById('page-search-count');
+  if (!input) return;
+  const initSearch = decodeURIComponent(window.location.hash.split('search=')[1] || '');
+  if (initSearch) { input.value = initSearch; setTimeout(() => doSearch(initSearch), 300); }
+  let debounceTimer;
+  input.addEventListener('input', function() { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => doSearch(this.value.trim()), 200); });
+  function doSearch(q) {
+    document.querySelectorAll('mark.search-hl').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+    if (!q) { countEl.textContent = ''; return; }
+    const content = document.querySelector('.method-content') || document.body;
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+    const matches = []; const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    while (walker.nextNode()) { const node = walker.currentNode; if (node.parentElement.closest('script,style,input,textarea')) continue; if (re.test(node.textContent)) matches.push(node); re.lastIndex = 0; }
+    let count = 0;
+    matches.forEach(node => { const span = document.createElement('span'); span.innerHTML = node.textContent.replace(re, '<mark class="search-hl" style="background:#ffcc02;padding:1px 2px;border-radius:2px;">$1</mark>'); node.parentNode.replaceChild(span, node); count += span.querySelectorAll('mark.search-hl').length; });
+    countEl.textContent = count ? count + ' 处' : '0';
+    const first = document.querySelector('mark.search-hl');
+    if (first) { const panel = first.closest('.method-panel'); if (panel && !panel.classList.contains('active')) { document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active')); document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active')); panel.classList.add('active'); const sideItem = document.querySelector(`.method-item[data-panel="${panel.id}"]`); if (sideItem) sideItem.classList.add('active'); } first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+})();
 </script>
 </body>
 </html>
