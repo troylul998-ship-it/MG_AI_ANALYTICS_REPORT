@@ -105,7 +105,7 @@ input:focus, select:focus, textarea:focus {
 /* 自定义 chip 输入框 */
 .chip-add-wrap { display: inline-flex; align-items: center; }
 .chip-add-input {
-  width: 90px !important; font-size: 12px; padding: 7px 13px !important;
+  width: auto !important; font-size: 12px; padding: 7px 13px !important;
   border: 1px solid var(--border) !important; border-radius: 20px !important;
   background: #fdfdfd !important; color: var(--text-2);
   text-align: center;
