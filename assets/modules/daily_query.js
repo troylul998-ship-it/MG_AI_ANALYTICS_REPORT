@@ -255,9 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     if (!FF.validate(e.target)) return;
     const data = collect();
+    const sqlPrompt = buildPrompt(data);
+    const analysisPrompt = buildAnalysisTemplate(data);
+    const fullPrompt = buildFullPrompt(data, sqlPrompt, analysisPrompt);
     FF.renderArtifacts([
-      { key: 'sql', label: 'SQL Prompt', content: buildPrompt(data) },
-      { key: 'analysis', label: '分析 Prompt', content: buildAnalysisTemplate(data) },
+      { key: 'full', label: '全能数分 Prompt', content: fullPrompt },
+      { key: 'sql', label: 'SQL Prompt', content: sqlPrompt },
+      { key: 'analysis', label: '分析 Prompt', content: analysisPrompt },
       { key: 'json', label: '结构化需求 JSON', content: JSON.stringify(data, null, 2) },
     ], { collectFn: collect });
   });
@@ -495,5 +499,94 @@ function buildAnalysisTemplate(d) {
   L.push('## 6. 分析方法论参考');
   L.push('分析过程中必须参考以下方法论文档，确保分析框架、归因逻辑和结论格式符合团队标准：');
   L.push('📖 https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html');
+  return L.join('\n');
+}
+
+// 产品名 → MCP sql_query 的 project 参数映射
+const PRODUCT_PROJECT_MAP = {
+  'P10': 'phase10',
+  'SKB': 'skipbo',
+  'UNO': 'uno',
+  'UNO2': 'uno wonder',
+  'ALL': 'uno',
+};
+
+function buildFullPrompt(d, sqlPrompt, analysisPrompt) {
+  const project = PRODUCT_PROJECT_MAP[d.product] || d.product.toLowerCase();
+  const L = [];
+
+  L.push('# 全能数分 Prompt');
+  L.push('');
+  L.push('> 本 Prompt 将引导你逐步完成「生成 SQL → 执行取数 → 数据分析」全流程。');
+  L.push('> 请严格按照以下三个步骤顺序执行，每一步完成后再进入下一步。');
+  L.push('');
+  L.push('---');
+  L.push('');
+
+  // Step 1: SQL Prompt
+  L.push('## 📝 Step 1：生成取数 SQL');
+  L.push('');
+  L.push('请根据以下需求生成可直接执行的 Presto/Trino SQL：');
+  L.push('');
+  L.push(sqlPrompt);
+  L.push('');
+  L.push('---');
+  L.push('');
+
+  // Step 2: Run SQL
+  L.push('## ⚡ Step 2：执行 SQL 取数');
+  L.push('');
+  L.push('SQL 生成完成后，请使用 MCP 工具 `sql_query` 执行上面生成的 SQL。');
+  L.push('');
+  L.push('**执行参数：**');
+  L.push(`- project：\`${project}\``);
+  L.push('- sql：上一步生成的完整 SQL 语句');
+  L.push('');
+  L.push('**执行要求：**');
+  L.push('1. 将 Step 1 生成的 SQL 直接传入 `sql_query` 工具执行');
+  L.push('2. 执行成功后，记录返回的 CSV 文件本地路径');
+  L.push('3. 如果执行报错，根据错误信息修正 SQL 后重新执行（最多重试 2 次）');
+  L.push('4. 执行成功后，读取 CSV 文件内容，展示前 10 行数据预览');
+  L.push('');
+  L.push('---');
+  L.push('');
+
+  // Step 3: Analysis Prompt
+  L.push('## 📊 Step 3：数据分析');
+  L.push('');
+  L.push('SQL 执行成功并获取到数据后，请基于 CSV 结果进行分析：');
+  L.push('');
+  L.push(analysisPrompt);
+  L.push('');
+  L.push('---');
+  L.push('');
+
+  // Final output format
+  L.push('## 📋 最终输出格式');
+  L.push('');
+  L.push('完成以上三步后，请按以下格式整理输出：');
+  L.push('');
+  L.push('### 1. 取数 SQL');
+  L.push('```sql');
+  L.push('（粘贴最终执行成功的 SQL）');
+  L.push('```');
+  L.push('');
+  L.push('### 2. 数据文件');
+  L.push('- CSV 本地路径：`（填入 sql_query 返回的文件路径）`');
+  L.push('- 数据行数：X 行');
+  L.push('- 数据预览：（前 10 行表格）');
+  L.push('');
+  L.push('### 3. 分析结论');
+  L.push('（按 Step 3 的分析框架输出结论）');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('### 4. 是否需要生成分析报告？');
+  L.push('');
+  L.push('> 📄 数据分析已完成。是否需要我进一步生成一份 **可视化分析报告（HTML 格式）**？');
+  L.push('> 报告将包含：数据图表、核心发现、维度拆解、结论建议，可直接在浏览器打开查看或分享给团队。');
+  L.push('');
+  L.push('请回复「需要」或「不需要」。');
+
   return L.join('\n');
 }
