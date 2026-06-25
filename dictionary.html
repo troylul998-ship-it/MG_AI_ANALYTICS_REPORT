@@ -3,56 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>数据口径字典 · AI 数据分析平台</title>
+<title>数据口径字典</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
-/* 左侧边栏布局 */
-.dict-layout{display:flex;max-width:1400px;margin:0 auto;padding:0 24px 80px;gap:0;}
-
-/* 左侧导航 */
-.dict-sidebar{position:sticky;top:70px;width:240px;min-width:240px;height:calc(100vh - 70px);overflow-y:auto;padding:20px 0 40px 0;border-right:1px solid var(--border);}
-.dict-sidebar::-webkit-scrollbar{width:4px;}
-.dict-sidebar::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
-.sidebar-group{margin-bottom:16px;}
-.sidebar-group-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 16px;margin-bottom:2px;}
-.sidebar-item{display:block;font-size:13px;padding:7px 16px 7px 20px;color:var(--text-2);cursor:pointer;border-radius:0 6px 6px 0;border-left:3px solid transparent;transition:all .15s;}
-.sidebar-item:hover{background:#f4f3f0;color:var(--text-1);}
-.sidebar-item.active{background:#fff5f0;color:var(--brand-1);border-left-color:var(--brand-1);font-weight:600;}
-.sidebar-item .icon{margin-right:6px;font-size:14px;}
-
-/* 右侧内容 */
-.dict-content{flex:1;min-width:0;padding:24px 0 0 36px;}
-.dict-panel{display:none;animation:fadeIn .2s;}
+.dict-wrap{max-width:1100px;margin:0 auto;padding:28px 24px 80px;}
+.dict-tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;}
+.dict-tab{font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;background:#f4f5f7;color:var(--text-2);}
+.dict-tab.active{background:var(--surface);color:var(--brand-1);border-color:var(--brand-1);}
+.dict-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 8px 8px 8px;padding:24px;overflow-x:auto;}
 .dict-panel.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-
-/* 内容面板样式 */
-.dict-panel h2{font-size:20px;margin:0 0 6px;color:var(--text-1);letter-spacing:-0.02em;}
-.dict-panel .panel-desc{font-size:13px;color:var(--text-3);margin-bottom:20px;}
-.dict-panel h3{font-size:15px;margin:24px 0 8px;color:var(--text-1);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.dict-panel h3:first-of-type{margin-top:8px;}
-.dict-panel h4{font-size:13px;margin:16px 0 6px;color:var(--brand-1);font-weight:600;}
+.dict-panel h3{font-size:16px;margin:20px 0 8px;color:var(--text-1);}
+.dict-panel h3:first-child{margin-top:0;}
 .dict-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
-.dict-panel th,.dict-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top;}
-.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;}
+.dict-panel th,.dict-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;}
+.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;}
 .dict-panel td code{background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:11px;}
-.dict-panel pre{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:14px 16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;overflow-x:auto;}
 .note{font-size:12px;color:var(--red);background:var(--red-bg);padding:8px 12px;border-radius:6px;margin-bottom:12px;}
-.info-note{font-size:12px;color:var(--blue);background:var(--blue-bg);padding:8px 12px;border-radius:6px;margin-bottom:12px;}
 .src{font-size:11px;color:var(--text-3);margin-top:4px;}
 .doc-links{background:#f7f8fa;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:12px;}
 .doc-links a{color:#1565c0;text-decoration:underline;}
-.doc-links a:hover{color:var(--brand-1);}
-
-/* 响应式 */
-@media(max-width:768px){
-  .dict-layout{flex-direction:column;}
-  .dict-sidebar{position:relative;top:0;width:100%;min-width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;display:flex;flex-wrap:wrap;gap:4px;}
-  .sidebar-group{margin-bottom:4px;display:flex;flex-wrap:wrap;gap:2px;}
-  .sidebar-group-title{display:none;}
-  .sidebar-item{padding:6px 12px;border-radius:6px;border-left:none;font-size:12px;}
-  .dict-content{padding:20px 0 0 0;}
-}
+.doc-links a:hover{color:#667eea;}
 </style>
 </head>
 <body>
@@ -65,42 +35,24 @@
 </div>
 </header>
 
-<div class="dict-layout">
-<!-- 左侧导航 -->
-<aside class="dict-sidebar">
-<div class="sidebar-group">
-<div class="sidebar-group-title">总览</div>
-<div class="sidebar-item active" data-panel="p-overview"><span class="icon">📋</span>数据源总览</div>
-</div>
-<div class="sidebar-group">
-<div class="sidebar-group-title">产品字段</div>
-<div class="sidebar-item" data-panel="p-uno"><span class="icon">🃏</span>UNO (MN01)</div>
-<div class="sidebar-item" data-panel="p-p10"><span class="icon">🧩</span>P10 (MN02)</div>
-<div class="sidebar-item" data-panel="p-skb"><span class="icon">🛹</span>SKB (MN04)</div>
-<div class="sidebar-item" data-panel="p-uno2"><span class="icon">🎴</span>UNO2 (MN08)</div>
-</div>
-<div class="sidebar-group">
-<div class="sidebar-group-title">指标口径</div>
-<div class="sidebar-item" data-panel="p-ad"><span class="icon">📺</span>广告变现指标</div>
-<div class="sidebar-item" data-panel="p-3pp"><span class="icon">💳</span>三方支付指标</div>
-<div class="sidebar-item" data-panel="p-ad-cases"><span class="icon">📋</span>广告取数案例</div>
-</div>
-<div class="sidebar-group">
-<div class="sidebar-group-title">参考</div>
-<div class="sidebar-item" data-panel="p-sql"><span class="icon">📝</span>常用SQL模板</div>
-<div class="sidebar-item" data-panel="p-filters"><span class="icon">🔍</span>常用过滤条件</div>
-<div class="sidebar-item" data-panel="p-sql-logic"><span class="icon">⚙️</span>SQL 处理逻辑</div>
-</div>
-</aside>
+<div class="dict-wrap">
+<h2 style="margin-bottom:6px;">📚 数据口径字典</h2>
+<p style="font-size:13px;color:var(--text-3);margin-bottom:20px;">各产品表结构、核心字段、指标口径汇总。来源：Confluence Tech Center 文档。</p>
 
-<!-- 右侧内容 -->
-<main class="dict-content">
+<div class="dict-tabs">
+<div class="dict-tab active" data-panel="p-overview">概览</div>
+<div class="dict-tab" data-panel="p-uno">UNO (MN01)</div>
+<div class="dict-tab" data-panel="p-p10">P10 (MN02)</div>
+<div class="dict-tab" data-panel="p-skb">SKB (MN04)</div>
+<div class="dict-tab" data-panel="p-uno2">UNO2 (MN08)</div>
+<div class="dict-tab" data-panel="p-ad">广告变现指标</div>
+<div class="dict-tab" data-panel="p-3pp">三方支付指标</div>
+<div class="dict-tab" data-panel="p-sql">常用SQL模板</div>
+<div class="dict-tab" data-panel="p-filters">常用过滤条件</div>
+</div>
 
 <!-- 概览 -->
 <div class="dict-panel active" id="p-overview">
-<h2>📋 数据源总览</h2>
-<p class="panel-desc">各产品表结构、主键、广告收入字段汇总。来源：Confluence Tech Center 文档。</p>
-
 <h3>产品数据源总览</h3>
 <table>
 <tr><th>产品</th><th>活跃表</th><th>全量表</th><th>主键</th><th>广告收入字段</th><th>特殊说明</th></tr>
@@ -128,524 +80,585 @@
 <tr><td>ARPU</td><td><code>总收入 / DAU</code></td><td></td></tr>
 <tr><td>付费率</td><td><code>付费用户数 / DAU</code></td><td></td></tr>
 <tr><td>3PP 转移比例</td><td><code>Web付费收入 / 内购收入</code></td><td>pay_channel_id=11 为三方支付</td></tr>
-<tr><td>3PP ARPU</td><td><code>三方付费收入 / 登录玩家(avatar_suc)</code></td><td></td></tr>
-<tr><td>3PP ARPPU</td><td><code>三方付费收入 / 三方付费玩家数</code></td><td></td></tr>
-<tr><td>登录付费率</td><td><code>付费成功玩家 / 登录玩家(avatar_suc)</code></td><td>STORE 漏斗核心转化率</td></tr>
-</table>
-
-<h3>三方支付中间表（各产品）</h3>
-<div class="note">⚠️ 统计三方相关指标时，能用三方中间表的尽量用三方中间表，避免直接查 omni_server_payment 原始表。中间表每天刷新，记录各产品三方付费用户的完整行为数据。</div>
-<table>
-<tr><th>产品</th><th>表名</th><th>主键</th></tr>
-<tr><td>UNO</td><td><code>dw_ods_common_mn01.dm_mn01_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
-<tr><td>P10</td><td><code>dw_ods_common_mn02.dm_mn02_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
-<tr><td>SKB</td><td><code>dw_ods_common_mn04.dm_mn04_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
-<tr><td>UNO2</td><td><code>dw_ods_common_mn08.dm_mn08_player_3pp_payment_info</code></td><td>account_id + date</td></tr>
-</table>
-
-<h3>三方中间表字段详情（全字段）</h3>
-<table>
-<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
-<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">基础信息</td></tr>
-<tr><td><code>account_id</code></td><td>string</td><td>用户主键</td><td></td></tr>
-<tr><td><code>date</code></td><td>string</td><td>日期分区</td><td>每天刷新</td></tr>
-<tr><td><code>offline_till_today</code></td><td>bigint</td><td>上次在线距今天数</td><td>当天登录则为0</td></tr>
-<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方付费（全量，含内嵌+主站）</td></tr>
-<tr><td><code>f_third_payment_date</code></td><td>string</td><td>首次三方付费日期</td><td></td></tr>
-<tr><td><code>l_third_payment_date</code></td><td>string</td><td>末次三方付费日期</td><td></td></tr>
-<tr><td><code>third_payment_sum</code></td><td>double</td><td>历史累计三方充值总额</td><td></td></tr>
-<tr><td><code>third_payment_sum_1d</code></td><td>double</td><td>当日三方充值总额</td><td>核心日粒度指标</td></tr>
-<tr><td><code>third_payment_cnt</code></td><td>bigint</td><td>历史累计三方充值次数</td><td></td></tr>
-<tr><td><code>third_payment_cnt_1d</code></td><td>bigint</td><td>当日三方充值次数</td><td></td></tr>
-<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方内嵌付费（游戏内嵌入式）</td></tr>
-<tr><td><code>f_third_ingame_payment_date</code></td><td>string</td><td>首次三方内嵌充值日期</td><td></td></tr>
-<tr><td><code>l_third_ingame_payment_date</code></td><td>string</td><td>末次三方内嵌充值日期</td><td></td></tr>
-<tr><td><code>third_ingame_payment_sum</code></td><td>double</td><td>历史累计三方内嵌充值总额</td><td></td></tr>
-<tr><td><code>third_ingame_payment_sum_1d</code></td><td>double</td><td>当日三方内嵌充值总额</td><td></td></tr>
-<tr><td><code>third_ingame_payment_cnt</code></td><td>bigint</td><td>历史累计三方内嵌充值次数</td><td></td></tr>
-<tr><td><code>third_ingame_payment_cnt_1d</code></td><td>bigint</td><td>当日三方内嵌充值次数</td><td></td></tr>
-<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">三方主站付费（Web端）</td></tr>
-<tr><td><code>f_third_web_payment_date</code></td><td>string</td><td>首次三方主站充值日期</td><td></td></tr>
-<tr><td><code>l_third_web_payment_date</code></td><td>string</td><td>末次三方主站充值日期</td><td></td></tr>
-<tr><td><code>third_web_payment_sum</code></td><td>double</td><td>历史累计三方主站充值总额</td><td></td></tr>
-<tr><td><code>third_web_payment_sum_1d</code></td><td>double</td><td>当日三方主站充值总额</td><td></td></tr>
-<tr><td><code>third_web_payment_cnt</code></td><td>bigint</td><td>历史累计三方主站充值次数</td><td></td></tr>
-<tr><td><code>third_web_payment_cnt_1d</code></td><td>bigint</td><td>当日三方主站充值次数</td><td></td></tr>
-</table>
-
-<h3>三方用户分层定义（L1~L8）</h3>
-<table>
-<tr><th>分层</th><th>条件</th><th>典型特征</th></tr>
-<tr><td>L1_极高额高频</td><td>累计≥$100 且 ≥6单</td><td>高额高频型"大R"用户</td></tr>
-<tr><td>L2_高额中频</td><td>累计≥$50</td><td>活动驱动型/收藏家用户</td></tr>
-<tr><td>L3_中额高频</td><td>累计≥$10 且 ≥3单</td><td>小额高频型"稳充"用户</td></tr>
-<tr><td>L4_中额低频</td><td>累计≥$10 且 <3单</td><td>偶尔中额付费</td></tr>
-<tr><td>L5_小额高频</td><td>累计<$10 且 ≥2单</td><td>小额多次</td></tr>
-<tr><td>L6_单次非破冰</td><td>仅1单 且 非当期首付</td><td>历史单次付费</td></tr>
-<tr><td>L7_单次破冰</td><td>仅1单 且 当期首付</td><td>刚破冰的新三方用户</td></tr>
-<tr><td>L8_其他</td><td>不满足以上条件</td><td>—</td></tr>
 </table>
 </div>
 
 <!-- UNO -->
 <div class="dict-panel" id="p-uno">
 <h2>🃏 UNO (MN01) 核心字段</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">Confluence: MN01用户信息表</a></p>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">Confluence: MN01用户信息表</a><br>
+活跃表: <code>dw_ods_mn01.dm_mn01_player_active_info</code> (当天活跃用户，保留全部分区)<br>
+主键: <code>role_id</code></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">MN01 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">三方支付指标口径</a>
 </div>
+<div class="info-note">💡 UNO 的 account_id 格式为 xxx@yyy，与其他表 JOIN 时需 split(account_id, '@')[1]</div>
+
+<h3>基础信息</h3>
 <table>
 <tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>date</td><td>string</td><td>分区字段</td><td>当日活跃玩家</td></tr>
 <tr><td>role_id</td><td>string</td><td>角色ID(主键)</td><td>唯一键</td></tr>
-<tr><td>account_id</td><td>string</td><td>账号ID</td><td></td></tr>
-<tr><td>been_reg_days</td><td>int</td><td>注册天数</td><td>f_login_date到统计日差</td></tr>
-<tr><td>login_days</td><td>int</td><td>在线总天数</td><td></td></tr>
-<tr><td>payment_sum</td><td>double</td><td>历史累计充值总额</td><td>sum(cash)</td></tr>
-<tr><td>payment_sum_1d</td><td>double</td><td>当日充值</td><td></td></tr>
-<tr><td>payment_cnt</td><td>double</td><td>历史充值次数</td><td></td></tr>
-<tr><td>advalue_sum</td><td>double</td><td>历史累计广告收入</td><td>来自 dw_dmdb.advalue_role_date</td></tr>
-<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td></td></tr>
-<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日激励视频收入</td><td>adtype='rewardvideo'</td></tr>
-<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日插屏收入</td><td>adtype='interstitial'</td></tr>
-<tr><td>ad_reward_cnt_1d</td><td>bigint</td><td>当日激励视频次数</td><td>game_client_log, adtype='rewardvideo'</td></tr>
-<tr><td>ad_interstitial_cnt_1d</td><td>bigint</td><td>当日插屏次数</td><td>game_client_log, adtype='interstitial'</td></tr>
-<tr><td>game_match_cnt_1d</td><td>bigint</td><td>当日匹配场数</td><td></td></tr>
+<tr><td>role_name</td><td>string</td><td>角色名</td><td></td></tr>
+<tr><td>account_id</td><td>string</td><td>账号ID</td><td>❗与外表JOIN需split('@')[1]</td></tr>
+<tr><td>appsflyer_id</td><td>string</td><td>当前 appsflyer_id</td><td></td></tr>
+<tr><td>f_appsflyer_id</td><td>string</td><td>首次 appsflyer_id</td><td></td></tr>
+<tr><td>udid</td><td>string</td><td>设备ID</td><td></td></tr>
+<tr><td>gid</td><td>string</td><td>平台ID</td><td></td></tr>
+<tr><td>device_model</td><td>string</td><td>设备名</td><td></td></tr>
+<tr><td>os_ver</td><td>string</td><td>系统版本号</td><td></td></tr>
+<tr><td>client</td><td>string</td><td>客户端</td><td></td></tr>
 <tr><td>platform</td><td>string</td><td>当前平台</td><td></td></tr>
+<tr><td>f_platform</td><td>string</td><td>首次平台</td><td></td></tr>
 <tr><td>country</td><td>string</td><td>当前国家</td><td></td></tr>
+<tr><td>f_country</td><td>string</td><td>首次国家</td><td></td></tr>
+<tr><td>channel</td><td>string</td><td>当前登录渠道</td><td></td></tr>
+<tr><td>f_channel</td><td>string</td><td>首次登录渠道</td><td></td></tr>
+<tr><td>media_source</td><td>string</td><td>当前媒体来源</td><td></td></tr>
+<tr><td>f_media_source</td><td>string</td><td>首次媒体来源</td><td></td></tr>
+<tr><td>campaign</td><td>string</td><td>当前 campaign</td><td></td></tr>
+<tr><td>f_campaign</td><td>string</td><td>首次 campaign</td><td></td></tr>
+<tr><td>age</td><td>string</td><td>年龄</td><td></td></tr>
+<tr><td>is_adult</td><td>int</td><td>是否成年</td><td>can_track</td></tr>
+<tr><td>f_is_adult</td><td>int</td><td>首次是否成年</td><td></td></tr>
+<tr><td>role_level</td><td>int</td><td>等级</td><td></td></tr>
+<tr><td>vip_level</td><td>int</td><td>VIP等级</td><td></td></tr>
+<tr><td>vip_level_before</td><td>int</td><td>当天首次登录的VIP</td><td></td></tr>
+<tr><td>club_id</td><td>bigint</td><td>俱乐部ID</td><td></td></tr>
+<tr><td>packagesource</td><td>string</td><td>包体来源</td><td></td></tr>
+<tr><td>users_type</td><td>string</td><td>玩家类型</td><td></td></tr>
+</table>
+
+<h3>登录相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_login_time</td><td>string</td><td>首次登录时间</td><td></td></tr>
+<tr><td>l_login_time</td><td>string</td><td>最后一次登录时间</td><td></td></tr>
+<tr><td>f_login_date</td><td>string</td><td>首次登录日期</td><td></td></tr>
+<tr><td>last_login_date</td><td>string</td><td>上一次登录日期</td><td></td></tr>
+<tr><td>been_reg_days</td><td>int</td><td>距今注册总天数</td><td>f_login_date到统计日的差</td></tr>
+<tr><td>offline_days</td><td>bigint</td><td>本次登录前流失天数</td><td>last_login_date距今-1</td></tr>
+<tr><td>max_offline_period</td><td>int</td><td>历史最大不在线天数</td><td></td></tr>
+<tr><td>login_days</td><td>int</td><td>在线总天数</td><td></td></tr>
+<tr><td>login_day_set</td><td>string</td><td>登录列表(倒序)</td><td>1=登录,0=未登录</td></tr>
+<tr><td>online_sum_1d</td><td>bigint</td><td>当天在线时长(秒)</td><td></td></tr>
+<tr><td>online_sum</td><td>bigint</td><td>累计在线时长</td><td></td></tr>
+<tr><td>login_cnt_1d</td><td>bigint</td><td>当天登录次数</td><td></td></tr>
+<tr><td>login_cnt</td><td>bigint</td><td>累计登录次数</td><td></td></tr>
+</table>
+
+<h3>充值/付费</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_payment_date</td><td>string</td><td>首次充值日期</td><td></td></tr>
+<tr><td>l_payment_date</td><td>string</td><td>最新充值日期</td><td></td></tr>
+<tr><td>f_payment_time / l_payment_time</td><td>string</td><td>首次/最新充值时间</td><td></td></tr>
+<tr><td>payment_sum_1d</td><td>double</td><td>当日充值总额</td><td>sum(cash)</td></tr>
+<tr><td>payment_sum</td><td>double</td><td>累计充值总额</td><td></td></tr>
+<tr><td>payment_cnt_1d</td><td>double</td><td>当日充值次数</td><td>cash>0</td></tr>
+<tr><td>payment_cnt</td><td>double</td><td>累计充值次数</td><td></td></tr>
+<tr><td>payment_set</td><td>array&lt;double&gt;</td><td>每日充值金额列表(倒序)</td><td></td></tr>
+<tr><td>max_payment / max_payment_1d</td><td>double</td><td>历史/当日最大充值额</td><td></td></tr>
+<tr><td>min_payment / min_payment_1d</td><td>double</td><td>历史/当日最小充值额</td><td></td></tr>
+<tr><td>mode_payment</td><td>double</td><td>充值金额众数</td><td></td></tr>
+<tr><td>payment_cnt_map</td><td>map&lt;bigint,bigint&gt;</td><td>充值金额→次数映射</td><td></td></tr>
+<tr><td>game_charge_dollar_total_num</td><td>double</td><td>累积充值(美金)</td><td>登录日志记录</td></tr>
+</table>
+
+<h3>广告相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td>来源: dw_dmdb.advalue_role_date</td></tr>
+<tr><td>advalue_sum</td><td>double</td><td>累计广告收入</td><td></td></tr>
+<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日RV广告收入</td><td>adtype='rewardvideo'</td></tr>
+<tr><td>advalue_reward_sum</td><td>double</td><td>累计RV广告收入</td><td></td></tr>
+<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日INT广告收入</td><td>adtype='interstitial'</td></tr>
+<tr><td>advalue_interstitial_sum</td><td>double</td><td>累计INT广告收入</td><td></td></tr>
+<tr><td>ad_reward_cnt_1d</td><td>bigint</td><td>当日RV观看次数</td><td>game_client_log, adtype='rewardvideo'</td></tr>
+<tr><td>ad_reward_cnt</td><td>bigint</td><td>累计RV观看次数</td><td></td></tr>
+<tr><td>ad_interstitial_cnt_1d</td><td>bigint</td><td>当日INT观看次数</td><td></td></tr>
+<tr><td>ad_interstitial_cnt</td><td>bigint</td><td>累计INT观看次数</td><td></td></tr>
+</table>
+
+<h3>道具/经济</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>gold_num</td><td>bigint</td><td>当前金币存量</td><td></td></tr>
+<tr><td>gold_consume_sum_1d / gold_consume_sum</td><td>bigint</td><td>当日/累计金币消耗</td><td>gain_count &lt; 0</td></tr>
+<tr><td>gold_acquire_sum_1d / gold_acquire_sum</td><td>bigint</td><td>当日/累计金币获取</td><td>gain_count &gt; 0</td></tr>
+<tr><td>gold_battle_change_1d</td><td>bigint</td><td>当日对局金币变化</td><td>reason in (1013~1016)</td></tr>
+<tr><td>diamond_num</td><td>bigint</td><td>当前钻石存量</td><td></td></tr>
+<tr><td>free_diamond_consume_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计免费钻石消耗</td><td></td></tr>
+<tr><td>paid_diamond_consume_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计付费钻石消耗</td><td></td></tr>
+<tr><td>free_diamond_acquire_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计免费钻石获取</td><td></td></tr>
+<tr><td>paid_diamond_acquire_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计付费钻石获取</td><td></td></tr>
+<tr><td>silver_scratch_consume_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计银刮刮卡消耗</td><td>itemid=12000025</td></tr>
+<tr><td>golden_cratch_consume_sum_1d / 无后缀</td><td>bigint</td><td>当日/累计金刮刮卡消耗</td><td>itemid=12000026</td></tr>
+</table>
+
+<h3>玩法行为</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>game_match_cnt_1d</td><td>bigint</td><td>当日匹配场数</td><td>matchinfo日志总数</td></tr>
+<tr><td>game_match_cnt</td><td>bigint</td><td>累计匹配场数</td><td></td></tr>
+<tr><td>match_num_1d</td><td>bigint</td><td>当天对局次数</td><td></td></tr>
+<tr><td>avg_entrance_fee_1d</td><td>double</td><td>平均对局倍率(门票)</td><td></td></tr>
+<tr><td>trophy_max_num</td><td>bigint</td><td>最大奖杯数</td><td></td></tr>
+<tr><td>bankruptcy_cnt_1d</td><td>bigint</td><td>当日破产次数</td><td>reason=1002</td></tr>
+<tr><td>bankruptcy_cnt</td><td>bigint</td><td>累计破产次数</td><td></td></tr>
+<tr><td>is_play_bankruptcy</td><td>bigint</td><td>破产后是否继续玩</td><td>1=继续,0=不玩</td></tr>
+<tr><td>sticker_csum</td><td>int</td><td>赛季sticker累计收集进度</td><td></td></tr>
+<tr><td>getcard_num_1d</td><td>bigint</td><td>当日获取卡包数</td><td></td></tr>
+<tr><td>collectcard_num_1d</td><td>bigint</td><td>当日集卡数</td><td></td></tr>
+<tr><td>collection_season_round</td><td>bigint</td><td>当前赛季收集轮次</td><td>2025-06-19新增</td></tr>
+<tr><td>coin_expand_ratio</td><td>double</td><td>金币膨胀系数</td><td></td></tr>
+<tr><td>monthly_card_day_num</td><td>bigint</td><td>月卡剩余天数</td><td></td></tr>
+<tr><td>is_fb_bind</td><td>int</td><td>是否绑定FB账号</td><td></td></tr>
 </table>
 </div>
 
 <!-- P10 -->
 <div class="dict-panel" id="p-p10">
 <h2>🧩 P10 (MN02) 核心字段</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">Confluence: MN02用户信息表</a></p>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">Confluence: MN02用户信息表</a><br>
+活跃表: <code>dw_ods_common_mn02.dm_mn02_player_active_info</code><br>
+主键: <code>account_id</code> (同 player_id)</p>
 <div class="note">iaa_sum 字段已于 2025-06-17 删除维护逻辑，请用 advalue_sum 替代。</div>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297376" target="_blank">MN02 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">三方支付指标口径</a>
 </div>
+
+<h3>基础信息</h3>
 <table>
 <tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
-<tr><td>account_id</td><td>string</td><td>账号ID(主键)</td><td></td></tr>
-<tr><td>been_reg_days</td><td>bigint</td><td>注册天数</td><td></td></tr>
-<tr><td>payment_sum</td><td>double</td><td>历史累计充值</td><td></td></tr>
-<tr><td>payment_sum_1d</td><td>double</td><td>当日充值</td><td></td></tr>
-<tr><td>advalue_sum</td><td>double</td><td>历史广告收入</td><td></td></tr>
-<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td></td></tr>
-<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日RV收入</td><td>adtype='rewardvideo'</td></tr>
-<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日INT收入</td><td>adtype='interstitial'</td></tr>
-<tr><td>ad_view_cnt_1d</td><td>bigint</td><td>当日RV观看次数</td><td></td></tr>
-<tr><td>ad_interstitial_cnt_1d</td><td>bigint</td><td>当日INT观看次数</td><td></td></tr>
-<tr><td>pay_activity_type</td><td>int</td><td>付费活跃类型</td><td>0免费/1超R/2大R/3中R/4小R/5瞌睡/6沉睡/7长眠</td></tr>
-<tr><td>platform</td><td>string</td><td>平台</td><td>三星特殊处理</td></tr>
+<tr><td>date</td><td>string</td><td>分区字段</td><td>当日活跃玩家</td></tr>
+<tr><td>player_id</td><td>string</td><td>用户ID(主键)</td><td></td></tr>
+<tr><td>account_id</td><td>string</td><td>account_id</td><td></td></tr>
+<tr><td>appsflyer_id / f_appsflyer_id</td><td>string</td><td>当前/首次 appsflyer_id</td><td></td></tr>
+<tr><td>udid</td><td>string</td><td>设备ID</td><td></td></tr>
+<tr><td>gid</td><td>string</td><td>平台ID</td><td></td></tr>
+<tr><td>device_model</td><td>string</td><td>设备名</td><td></td></tr>
+<tr><td>client</td><td>string</td><td>客户端</td><td></td></tr>
+<tr><td>platform</td><td>string</td><td>平台</td><td>❗三星: if(package_name='com.mattel163.phase10.samsung','SAMSUNG',platform)</td></tr>
+<tr><td>f_platform</td><td>string</td><td>首次平台</td><td></td></tr>
+<tr><td>country / f_country</td><td>string</td><td>当前/首次国家</td><td></td></tr>
+<tr><td>channel / f_channel</td><td>string</td><td>当前/首次渠道</td><td></td></tr>
+<tr><td>age</td><td>string</td><td>年龄</td><td></td></tr>
+<tr><td>is_adult</td><td>int</td><td>是否成年</td><td></td></tr>
+<tr><td>media_source / f_media_source</td><td>string</td><td>当前/首次媒体</td><td></td></tr>
+<tr><td>campaign / f_campaign</td><td>string</td><td>当前/首次 campaign</td><td></td></tr>
+<tr><td>server_labels</td><td>array&lt;string&gt;</td><td>服务器标签组</td><td></td></tr>
+<tr><td>client_labels</td><td>array&lt;string&gt;</td><td>客户端标签组</td><td></td></tr>
+<tr><td>all_labels</td><td>array&lt;string&gt;</td><td>所有打过的标签</td><td></td></tr>
+<tr><td>push_style_id</td><td>int</td><td>付费生命周期标签</td><td></td></tr>
+<tr><td>difficult_tag</td><td>string</td><td>活动标签</td><td></td></tr>
+<tr><td>is_return_player</td><td>int</td><td>是否回流(流失14天后)</td><td></td></tr>
+<tr><td>pay_activity_type</td><td>int</td><td>付费活跃类型</td><td>0免费/1超R/2大R/3中R/4小R/5瘴睡/6沉睡/7长眠</td></tr>
+<tr><td>pay_gift_type</td><td>int</td><td>付费类型(礼包偏好)</td><td>0免费~24各种偏好</td></tr>
+</table>
+
+<h3>登录相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_login_time / l_login_time</td><td>string</td><td>首次/最后登录时间</td><td></td></tr>
+<tr><td>f_login_date</td><td>string</td><td>首次登录日期</td><td></td></tr>
+<tr><td>last_login_date</td><td>string</td><td>上一次登录日期</td><td></td></tr>
+<tr><td>been_reg_days</td><td>bigint</td><td>距今注册总天数</td><td></td></tr>
+<tr><td>offline_days</td><td>bigint</td><td>本次登录前流失天数</td><td></td></tr>
+<tr><td>max_offline_period</td><td>bigint</td><td>历史最大不在线天数</td><td></td></tr>
+<tr><td>login_days / login_days_30d</td><td>bigint</td><td>在线总天数/近30天</td><td></td></tr>
+<tr><td>login_day_set</td><td>string</td><td>登录列表(倒序)</td><td></td></tr>
+<tr><td>online_sum_1d / online_sum / online_sum_30d</td><td>bigint</td><td>当天/累计/30天在线时长</td><td></td></tr>
+</table>
+
+<h3>充值/付费</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_payment_time / l_payment_time</td><td>string</td><td>首次/最新充值时间</td><td></td></tr>
+<tr><td>f_payment_date / l_payment_date</td><td>string</td><td>首次/最新充值日期</td><td></td></tr>
+<tr><td>f_payment / l_payment</td><td>double</td><td>首次/最新充值金额</td><td></td></tr>
+<tr><td>payment_sum_1d / _7d / _30d / 无后缀</td><td>double</td><td>当日/7天/30天/累计充值总额</td><td></td></tr>
+<tr><td>payment_cnt_1d / _7d / _30d / 无后缀</td><td>bigint</td><td>当日/7天/30天/累计充值次数</td><td></td></tr>
+<tr><td>max_payment / _30d</td><td>double</td><td>历史/30天最大充值额</td><td></td></tr>
+<tr><td>min_payment / _30d</td><td>double</td><td>历史/30天最小充值额</td><td></td></tr>
+<tr><td>mode_payment / _30d</td><td>double</td><td>充值众数</td><td></td></tr>
+<tr><td>payment_cnt_map / _1d</td><td>map&lt;double,bigint&gt;</td><td>充值金额→次数</td><td></td></tr>
+<tr><td>payment_days</td><td>bigint</td><td>充值总天数</td><td></td></tr>
+<tr><td>payment_days_list</td><td>array&lt;float&gt;</td><td>每日充值金额(倒序)</td><td></td></tr>
+<tr><td>bag_payment_1d / _30d / 无后缀</td><td>double</td><td>礼包充值额</td><td>is_bag=1</td></tr>
+<tr><td>bag_buy_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>礼包购买次数</td><td></td></tr>
+</table>
+
+<h3>广告相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>advalue_sum_1d / _30d / 无后缀</td><td>double</td><td>当日/30天/累计广告收入</td><td></td></tr>
+<tr><td>advalue_reward_sum_1d / _30d / 无后缀</td><td>double</td><td>RV广告收入</td><td>adtype='rewardvideo'</td></tr>
+<tr><td>advalue_interstitial_sum_1d / _30d / 无后缀</td><td>double</td><td>INT广告收入</td><td>adtype='interstitial'</td></tr>
+<tr><td>ad_view_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>RV观看次数</td><td>❗字段名是 ad_view_cnt(非ad_reward_cnt)</td></tr>
+<tr><td>ad_interstitial_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>INT观看次数</td><td>adtype='interstitial'</td></tr>
+</table>
+
+<h3>道具相关</h3>
+<table>
+<tr><th>字段前缀</th><th>itemid</th><th>道具</th><th>后缀</th></tr>
+<tr><td>gold_</td><td>1000</td><td>金币</td><td>consume_sum_1d/_30d/无, acquire_sum_1d/_30d/无, stocks</td></tr>
+<tr><td>diamond_</td><td>1001(总)</td><td>钻石(总)</td><td>consume_sum_1d/_30d/无, acquire_sum_1d/_30d/无, stocks</td></tr>
+<tr><td>free_diamond_</td><td>1001(free)</td><td>免费钻石</td><td>consume_sum_1d/_30d/无, acquire_sum_1d/_30d/无</td></tr>
+<tr><td>paid_diamond_</td><td>1001(pay)</td><td>付费钻石</td><td>consume_sum_1d/_30d/无, acquire_sum_1d/_30d/无</td></tr>
+<tr><td>wild_</td><td>3000</td><td>Wild道具牌</td><td>consume_sum_1d/_30d/无, acquire_sum_1d/_30d/无</td></tr>
+<tr><td>skip_</td><td>3001</td><td>Skip道具牌</td><td>同上</td></tr>
+<tr><td>replay_</td><td>30101</td><td>重玩道具</td><td>同上</td></tr>
+<tr><td>magic_wild_</td><td>3010</td><td>Magic Wild</td><td>同上</td></tr>
+<tr><td>magic_skip_</td><td>3010</td><td>Magic Skip</td><td>同上</td></tr>
+</table>
+
+<h3>玩法行为</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>max_chapter_id</td><td>bigint</td><td>PVE最大章节</td><td></td></tr>
+<tr><td>max_pve_mode</td><td>bigint</td><td>PVE最大关卡</td><td></td></tr>
+<tr><td>pve_round_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>PVE轮数(小局)</td><td></td></tr>
+<tr><td>pvp_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>PVP次数</td><td></td></tr>
+<tr><td>pve_box_open_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>PVE宝箱打开次数</td><td>strpos(reason,'pveChest')>0</td></tr>
+<tr><td>activity_box_open_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>活动宝箱打开次数</td><td></td></tr>
+<tr><td>activity_complete_list</td><td>array&lt;string&gt;</td><td>活动完成列表</td><td></td></tr>
+<tr><td>activity_complete_cnt</td><td>bigint</td><td>活动完成次数</td><td></td></tr>
+<tr><td>use_wild_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>局前Wild消耗次数</td><td></td></tr>
+<tr><td>use_skip_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>局内Skip消耗次数</td><td></td></tr>
+<tr><td>use_replay_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>Replay消耗次数</td><td></td></tr>
 </table>
 </div>
 
 <!-- SKB -->
 <div class="dict-panel" id="p-skb">
 <h2>🛹 SKB (MN04) 核心字段</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">Confluence: MN04用户信息表</a></p>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">Confluence: MN04用户信息表</a><br>
+全量表: <code>dw_ods_common_mn04.dm_mn04_player_info</code> (全量快照，保留近30天+每月月初)<br>
+活跃表: <code>dw_ods_common_mn04.dm_mn04_player_active_info</code> (当天活跃用户，保留全部分区)</p>
 <div class="note">安卓广告收入需: if(platform='IOS', value, value/1000000)</div>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297507" target="_blank">MN04 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a>
 </div>
+
+<h3>基础信息</h3>
 <table>
 <tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
-<tr><td>account_id</td><td>string</td><td>账号ID(主键)</td><td></td></tr>
-<tr><td>been_reg_days</td><td>bigint</td><td>注册天数</td><td></td></tr>
-<tr><td>payment_sum</td><td>double</td><td>历史充值</td><td></td></tr>
-<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td>c_advalue: if(platform='IOS',value,value/1000000)</td></tr>
-<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日RV收入</td><td>adtype='rewardvideo'</td></tr>
-<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日INT收入</td><td>adtype='interstitial'</td></tr>
-<tr><td>ad_reward_cnt_1d</td><td>bigint</td><td>当日RV次数</td><td>c_adplay adtype='rewardvideo'</td></tr>
-<tr><td>no_ads</td><td>int</td><td>去广告激活</td><td>sum(payment)>19.9 or recharge_id in (30000~30004)</td></tr>
+<tr><td>date</td><td>string</td><td>分区字段</td><td>每个分区为全量/当天活跃玩家</td></tr>
+<tr><td>account_id</td><td>string</td><td>账号ID(主键)</td><td>唯一键</td></tr>
+<tr><td>appsflyer_id</td><td>string</td><td>最新appsflyer_id</td><td>最新登录的appsflyer_id</td></tr>
+<tr><td>f_appsflyer_id</td><td>string</td><td>首次appsflyer_id</td><td>首次登录的appsflyer_id</td></tr>
+<tr><td>udid</td><td>string</td><td>设备ID</td><td>当日最后的udid</td></tr>
+<tr><td>gid</td><td>string</td><td>平台ID</td><td>通过udid关联获取gid</td></tr>
+<tr><td>bind_account</td><td>string</td><td>绑定账号</td><td>最后的sdk_uid</td></tr>
+<tr><td>device_model</td><td>string</td><td>设备名</td><td>最后的device_model</td></tr>
+<tr><td>os_ver</td><td>string</td><td>系统版本号</td><td>最后的os_version</td></tr>
+<tr><td>client_ver</td><td>string</td><td>客户端版本号</td><td>最后的client_version</td></tr>
+<tr><td>client</td><td>string</td><td>client端</td><td>最后的client</td></tr>
+<tr><td>platform</td><td>string</td><td>最后登录平台</td><td></td></tr>
+<tr><td>f_platform</td><td>string</td><td>首次登录平台</td><td></td></tr>
+<tr><td>country</td><td>string</td><td>最后登录国家</td><td></td></tr>
+<tr><td>f_country</td><td>string</td><td>首次登录国家</td><td></td></tr>
+<tr><td>channel</td><td>string</td><td>最后登录来源</td><td>0-Guest,1-Facebook,2-Mattel163,3-AppleSignIn,4-IosGameCenter,5-GooglePlay</td></tr>
+<tr><td>f_channel</td><td>string</td><td>首次登录来源</td><td>同上</td></tr>
+<tr><td>age</td><td>string</td><td>年龄</td><td>最新的age</td></tr>
+<tr><td>media_source</td><td>string</td><td>最新来源媒体</td><td>通过appsflyer_id获取</td></tr>
+<tr><td>f_media_source</td><td>string</td><td>首次来源媒体</td><td></td></tr>
+<tr><td>campaign</td><td>string</td><td>最新来源campaign</td><td>通过appsflyer_id获取</td></tr>
+<tr><td>f_campaign</td><td>string</td><td>首次来源campaign</td><td></td></tr>
+<tr><td>is_adult</td><td>int</td><td>当前是否成年</td><td>最新登录的is_adult</td></tr>
+<tr><td>f_is_adult</td><td>int</td><td>首次是否成年</td><td>首次登录的is_adult</td></tr>
+<tr><td>label</td><td>array&lt;string&gt;</td><td>当前用户标签组</td><td>当前labels</td></tr>
+<tr><td>label_group1~7</td><td>string</td><td>标签分组1~7</td><td>正则提取(Z/J/K/DC/F/L系列)</td></tr>
 </table>
+
+<h3>登录相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_login_time</td><td>string</td><td>首次登录时间</td><td>最早有登录日志的时间</td></tr>
+<tr><td>l_login_time</td><td>string</td><td>最新登录时间</td><td>最新有登录日志的时间</td></tr>
+<tr><td>f_login_date</td><td>string</td><td>首次登录日期</td><td></td></tr>
+<tr><td>l_login_date</td><td>string</td><td>最新登录日期</td><td>全量表有;活跃表用last_login_date</td></tr>
+<tr><td>last_login_date</td><td>string</td><td>上一次登录日期</td><td>仅活跃表</td></tr>
+<tr><td>online_sum_1d</td><td>bigint</td><td>当天在线时长</td><td>游戏记录</td></tr>
+<tr><td>online_sum_30d</td><td>bigint</td><td>近30天在线时长</td><td>仅全量表</td></tr>
+<tr><td>online_sum</td><td>bigint</td><td>累计在线时长</td><td></td></tr>
+<tr><td>login_cnt_1d</td><td>bigint</td><td>当天登录次数</td><td></td></tr>
+<tr><td>login_cnt_30d</td><td>bigint</td><td>近30天登录次数</td><td>仅全量表</td></tr>
+<tr><td>login_cnt</td><td>bigint</td><td>累计登录次数</td><td></td></tr>
+<tr><td>offline_till_today</td><td>bigint</td><td>上次在线距今天数</td><td>当天登录=0;仅全量表</td></tr>
+<tr><td>offline_days</td><td>bigint</td><td>本次登录前流失天数</td><td>last_login_date距今-1;仅活跃表</td></tr>
+<tr><td>max_offline_period</td><td>bigint</td><td>历史最大不在线天数</td><td></td></tr>
+<tr><td>been_reg_days</td><td>bigint</td><td>距今注册总天数</td><td>f_login_date到统计日的差</td></tr>
+<tr><td>login_day_set</td><td>string</td><td>登录列表(倒序)</td><td>1=登录,0=未登录</td></tr>
+<tr><td>login_days</td><td>bigint</td><td>在线总天数</td><td>有登录行为的总天数</td></tr>
+<tr><td>login_days_30d</td><td>bigint</td><td>近30天在线天数</td><td>仅全量表</td></tr>
+<tr><td>return_date</td><td>array&lt;string&gt;</td><td>回归日期分布</td><td>距上次登录&gt;7天再登录</td></tr>
+<tr><td>return_times</td><td>bigint</td><td>回归次数</td><td></td></tr>
+</table>
+
+<h3>充值/付费</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_payment_time / l_payment_time</td><td>string</td><td>首次/最新充值时间</td><td></td></tr>
+<tr><td>f_payment_date / l_payment_date</td><td>string</td><td>首次/最新充值日期</td><td></td></tr>
+<tr><td>payment_days</td><td>bigint</td><td>充值总天数</td><td></td></tr>
+<tr><td>payment_days_list</td><td>array&lt;float&gt;</td><td>每日充值金额(倒序)</td><td></td></tr>
+<tr><td>payment_sum_1d</td><td>double</td><td>当日充值总额</td><td>sum(payment)</td></tr>
+<tr><td>payment_sum_7d / _14d / _30d</td><td>double</td><td>近N天充值总额</td><td>仅全量表</td></tr>
+<tr><td>payment_sum</td><td>double</td><td>累计充值总额</td><td>历史sum(payment)</td></tr>
+<tr><td>payment_cnt_1d</td><td>bigint</td><td>当日充值次数</td><td>payment&gt;0</td></tr>
+<tr><td>payment_cnt_7d / _14d / _30d</td><td>bigint</td><td>近N天充值次数</td><td>仅全量表</td></tr>
+<tr><td>payment_cnt</td><td>bigint</td><td>累计充值次数</td><td></td></tr>
+<tr><td>max_payment_1d / _30d / 无后缀</td><td>double</td><td>最大充值金额(当日/30d/历史)</td><td>max(payment)</td></tr>
+<tr><td>min_payment_1d / _30d / 无后缀</td><td>double</td><td>最小充值金额</td><td>min(payment)</td></tr>
+<tr><td>mode_payment_30d / 无后缀</td><td>double</td><td>充值金额众数</td><td>充值次数最多的金额</td></tr>
+<tr><td>payment_cnt_map_1d / 无后缀</td><td>map&lt;double,bigint&gt;</td><td>充值金额→次数映射</td><td></td></tr>
+<tr><td>f_payment</td><td>double</td><td>首次充值金额</td><td></td></tr>
+<tr><td>l_payment</td><td>double</td><td>最新充值金额</td><td></td></tr>
+<tr><td>no_ads</td><td>int</td><td>去广告是否激活</td><td>sum(payment)&gt;19.9 or recharge_id in (30000~30004)</td></tr>
+</table>
+
+<h3>分场景充值</h3>
+<table>
+<tr><th>字段前缀</th><th>含义</th><th>逻辑</th><th>子字段后缀</th></tr>
+<tr><td>payment_pve_</td><td>PVE充值</td><td>source in ('pve_home','pve_level','pve_ticket_quick','item2002','item2009','item2000','item2003','item2008','starpass')</td><td>_1d/_30d/无后缀/cnt_1d/cnt_30d/cnt</td></tr>
+<tr><td>payment_pvp_</td><td>PVP充值</td><td>source in ('pvp_ticket_online_quick','pvp_home')</td><td>同上</td></tr>
+<tr><td>payment_starpass_</td><td>StarPass充值</td><td>recharge_id between 40000 and 41000</td><td>同上</td></tr>
+<tr><td>payment_event_</td><td>活动礼包充值</td><td>source in ('event')</td><td>同上</td></tr>
+<tr><td>payment_bag_</td><td>礼包充值</td><td>recharge_id between 50000 and 60000</td><td>含max_payment/mode_payment等</td></tr>
+</table>
+
+<h3>广告相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td>if(platform='IOS',value,value/1000000) ⚠️安卓需/1000000</td></tr>
+<tr><td>advalue_sum</td><td>double</td><td>历史累计广告收入</td><td>同上</td></tr>
+<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日RV广告收入</td><td>adtype='rewardvideo'</td></tr>
+<tr><td>advalue_reward_sum</td><td>double</td><td>累计RV广告收入</td><td>同上</td></tr>
+<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日INT广告收入</td><td>adtype='interstitial'</td></tr>
+<tr><td>advalue_interstitial_sum</td><td>double</td><td>累计INT广告收入</td><td>同上</td></tr>
+<tr><td>advalue_banner_sum_1d</td><td>double</td><td>当日Banner广告收入</td><td>adtype='banner'</td></tr>
+<tr><td>advalue_banner_sum</td><td>double</td><td>累计Banner广告收入</td><td>同上</td></tr>
+<tr><td>iaa_sum_1d / iaa_sum</td><td>double</td><td>当日/累计IAA收入(API口径)</td><td>dw_odsdb.ads_revdata_detail_dpcct</td></tr>
+<tr><td>ad_reward_cnt_1d</td><td>bigint</td><td>当日RV观看次数</td><td>c_adplay, adtype='rewardvideo'</td></tr>
+<tr><td>ad_reward_cnt_30d / ad_reward_cnt</td><td>bigint</td><td>近30天/累计RV观看次数</td><td>同上</td></tr>
+<tr><td>ad_interstitial_cnt_1d</td><td>bigint</td><td>当日INT观看次数</td><td>c_adplay, adtype='interstitial'</td></tr>
+<tr><td>ad_interstitial_cnt_30d / ad_interstitial_cnt</td><td>bigint</td><td>近30天/累计INT观看次数</td><td>同上</td></tr>
+<tr><td>ad_banner_cnt_1d</td><td>bigint</td><td>当日Banner观看次数</td><td>c_adplay, adtype='banner'</td></tr>
+<tr><td>ad_banner_cnt_30d / ad_banner_cnt</td><td>bigint</td><td>近30天/累计Banner观看次数</td><td>同上</td></tr>
+</table>
+
+<h3>道具相关</h3>
+<table>
+<tr><th>字段前缀</th><th>item_id</th><th>道具名称</th><th>子字段后缀</th></tr>
+<tr><td>free_coin_</td><td>1000</td><td>免费金币</td><td>get_sum_1d/_30d/无后缀, consume_sum_1d/_30d/无后缀, left_num</td></tr>
+<tr><td>paid_coin_</td><td>1001</td><td>付费金币</td><td>同上</td></tr>
+<tr><td>add_hand_</td><td>2009</td><td>补手牌</td><td>同上</td></tr>
+<tr><td>wild_</td><td>2000</td><td>万能牌</td><td>同上</td></tr>
+<tr><td>revert_</td><td>2002</td><td>撤回道具</td><td>同上</td></tr>
+<tr><td>pve_ticket_</td><td>1002</td><td>门票</td><td>同上</td></tr>
+<tr><td>rand_skipbo_</td><td>2003</td><td>随机skipbo</td><td>同上</td></tr>
+<tr><td>wind_</td><td>2008</td><td>龙卷风</td><td>同上</td></tr>
+<tr><td>pve_energy_</td><td>1004</td><td>体力</td><td>同上</td></tr>
+</table>
+
+<h3>PVE 玩法</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>max_chapter_id</td><td>bigint</td><td>PVE最大解锁章节</td><td>floor((pve_id-10000)/1000)</td></tr>
+<tr><td>max_pve_id</td><td>bigint</td><td>PVE最大解锁关卡</td><td>最大的pve_id</td></tr>
+<tr><td>max_pve_ticket</td><td>bigint</td><td>最大关卡对应门票金币</td><td>最大pve_id时的base_ticket</td></tr>
+<tr><td>pve_cnt_1d / _30d / 无后缀</td><td>bigint</td><td>PVE总局数</td><td>c_pvelog每条日志=1次</td></tr>
+<tr><td>pve_star_1d / 无后缀</td><td>bigint</td><td>PVE获得星数</td><td>每pve_id最大星数之和</td></tr>
+<tr><td>pve_star_chapter_list</td><td>array&lt;int&gt;</td><td>每章节star数</td><td>数组下标对应章节</td></tr>
+<tr><td>pve_pass_cnt_1d / 无后缀</td><td>bigint</td><td>PVE通关次数</td><td>star_num &lt;&gt; '0'</td></tr>
+<tr><td>pve_pass_rate_1d / 无后缀</td><td>float</td><td>PVE通关率</td><td>pve_pass_cnt/pve_cnt</td></tr>
+</table>
+
+<h3>PVP 玩法</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>pvp_online_times_1d / _30d / 无后缀</td><td>bigint</td><td>在线PVP总场次</td><td>pvp_mode='online'</td></tr>
+<tr><td>pvp_online_win_times_1d / _30d / 无后缀</td><td>bigint</td><td>在线PVP胜利场次</td><td>pvp_mode='online' and rank=1</td></tr>
+<tr><td>pvp_online_times_bet_1_1d / _30d / 无后缀</td><td>bigint</td><td>低倍场总场次</td><td>award_id='10003'</td></tr>
+<tr><td>pvp_online_win_times_bet_1_1d / _30d / 无后缀</td><td>bigint</td><td>低倍场胜利场次</td><td>award_id='10003' and rank=1</td></tr>
+<tr><td>pvp_online_times_bet_2_1d / _30d / 无后缀</td><td>bigint</td><td>中倍场总场次</td><td>award_id='10004'</td></tr>
+<tr><td>pvp_online_win_times_bet_2_1d / _30d / 无后缀</td><td>bigint</td><td>中倍场胜利场次</td><td>award_id='10004' and rank=1</td></tr>
+<tr><td>pvp_offline_times_1d / _30d / 无后缀</td><td>bigint</td><td>离线PVP总场次</td><td>pvp_mode='offline'</td></tr>
+<tr><td>pvp_offline_win_times_1d / _30d / 无后缀</td><td>bigint</td><td>离线PVP胜利场次</td><td>pvp_mode='offline' and rank=1</td></tr>
+</table>
+
+<h3>活动相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>activity_join</td><td>string</td><td>当前参与的活动</td><td>event_type in ('progress','load','open','join','award','progress_get') 提取title</td></tr>
+<tr><td>activity_open_cnt</td><td>bigint</td><td>当前活动打开次数</td><td>event_type='open'次数</td></tr>
+<tr><td>activity_join_list</td><td>array&lt;string&gt;</td><td>历史参与活动列表</td><td></td></tr>
+<tr><td>activity_join_cnt</td><td>int</td><td>历史参与活动次数</td><td></td></tr>
+<tr><td>activity_complete_list</td><td>array&lt;string&gt;</td><td>历史完成活动列表</td><td>progress 100% or last_award</td></tr>
+<tr><td>activity_complete_cnt</td><td>int</td><td>历史完成活动次数</td><td></td></tr>
+</table>
+
+<h3>标签与分层</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>pay_lift_tag</td><td>bigint</td><td>付费沉默标签</td><td>3000-3013</td></tr>
+<tr><td>pay_lift_tag_name</td><td>string</td><td>付费沉默标签名称</td><td></td></tr>
+<tr><td>pay_live_tag</td><td>bigint</td><td>生命周期付费沉默标签</td><td>3000-3013</td></tr>
+<tr><td>pay_live_tag_name</td><td>string</td><td>生命周期付费沉默标签名称</td><td></td></tr>
+<tr><td>been_reg_days_tag</td><td>string</td><td>生命周期段</td><td>A.1-30/B.31-90/C.91-180/D.181-300/E.301-600/F.600+</td></tr>
+<tr><td>login_days_tag</td><td>string</td><td>活跃天数段</td><td>同上分段</td></tr>
+<tr><td>server_label</td><td>array&lt;string&gt;</td><td>服务端标签</td><td>最后一组标签</td></tr>
+<tr><td>client_label</td><td>array&lt;string&gt;</td><td>客户端标签</td><td>最后一组标签</td></tr>
+</table>
+
+<div class="info-note">💡 <b>活跃表 vs 全量表差异：</b>活跃表无 _7d/_14d/_30d 窗口字段，新增 last_login_date 和 offline_days 字段。其余字段一致。</div>
 </div>
 
 <!-- UNO2 -->
 <div class="dict-panel" id="p-uno2">
 <h2>🎴 UNO2 (MN08) 核心字段</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">Confluence: MN08用户信息表</a></p>
-<div class="note">库名是 dw_dmdb (非 dw_ods_mn08); 广告明细在 dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue)</div>
+<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">Confluence: MN08用户信息表</a><br>
+活跃表: <code>dw_dmdb.dm_mn08_player_active_info</code><br>
+主键: <code>role_id</code> (同 account_id)</p>
+<div class="note">库名是 dw_dmdb（非 dw_ods_mn08）; 广告明细在 dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue); 安卓需/1000000</div>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=191680333" target="_blank">MN08 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a>
 </div>
+
+<h3>基础信息</h3>
 <table>
 <tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
-<tr><td>role_id</td><td>string</td><td>角色ID(主键)</td><td>和 account_id 相同</td></tr>
-<tr><td>been_reg_days</td><td>int</td><td>注册天数</td><td></td></tr>
-<tr><td>payment_sum</td><td>double</td><td>历史充值</td><td>omni_server_payment</td></tr>
-<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td>c_client_app_ad_log, log_subtype='advalue'</td></tr>
-<tr><td>pve_game_start_1d</td><td>bigint</td><td>当日PVE开局数</td><td>c_pvegame, start_or_end='start'</td></tr>
-<tr><td>main_route_location</td><td>bigint</td><td>主线最后路点</td><td>course_id less than 50500001</td></tr>
+<tr><td>date</td><td>string</td><td>每日分区</td><td></td></tr>
+<tr><td>account_id</td><td>string</td><td>账号ID</td><td>和role_id一样</td></tr>
+<tr><td>role_id</td><td>string</td><td>role_id</td><td></td></tr>
+<tr><td>udid</td><td>string</td><td>设备ID</td><td></td></tr>
+<tr><td>appsflyer_id</td><td>string</td><td>appsflyer_id</td><td></td></tr>
+<tr><td>f_channel</td><td>string</td><td>首次登录渠道</td><td></td></tr>
+<tr><td>client</td><td>string</td><td>客户端</td><td></td></tr>
+<tr><td>platform / f_platform</td><td>string</td><td>当前/首次平台</td><td></td></tr>
+<tr><td>country / f_country</td><td>string</td><td>当前/首次国家</td><td></td></tr>
+<tr><td>is_new</td><td>int</td><td>是否新增用户</td><td>首次登录当日=当日</td></tr>
+<tr><td>is_vip</td><td>int</td><td>是否VIP</td><td></td></tr>
+<tr><td>is_adult</td><td>int</td><td>是否成年</td><td>can_track</td></tr>
+<tr><td>f_media_source</td><td>string</td><td>首次媒体来源</td><td></td></tr>
+<tr><td>f_campaign</td><td>string</td><td>首次campaign</td><td></td></tr>
+</table>
+
+<h3>登录相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_login_time / l_login_time</td><td>string</td><td>首次/最新登录时间</td><td></td></tr>
+<tr><td>f_login_date / l_login_date</td><td>string</td><td>首次/最新登录日期</td><td></td></tr>
+<tr><td>been_reg_days</td><td>int</td><td>距今注册总天数</td><td></td></tr>
+<tr><td>login_cnt_1d / _7d</td><td>bigint</td><td>当天/7天登录次数</td><td></td></tr>
+<tr><td>online_sum_1d / _7d</td><td>bigint</td><td>当天/7天在线时长</td><td></td></tr>
+</table>
+
+<h3>充值/付费</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>f_payment_time / l_payment_time</td><td>string</td><td>首次/末次付费时间</td><td></td></tr>
+<tr><td>f_payment_date / l_payment_date</td><td>string</td><td>首次/末次付费日期</td><td></td></tr>
+<tr><td>payment_sum_1d / _7d / 无后缀</td><td>double</td><td>当日/7天/累计充值总额</td><td></td></tr>
+<tr><td>payment_cnt_1d / _7d / 无后缀</td><td>bigint</td><td>当日/7天/累计充值次数</td><td></td></tr>
+</table>
+
+<h3>广告相关</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>advalue_sum_1d / _7d / 无后缀</td><td>double</td><td>当日/7天/累计广告收入</td><td>c_client_app_ad_log, log_subtype=advalue</td></tr>
+</table>
+
+<h3>PVE 玩法</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>pve_game_start_1d</td><td>bigint</td><td>当日PVE开始局数</td><td>c_pvegame, start_or_end=start</td></tr>
+<tr><td>pve_game_end_1d</td><td>bigint</td><td>当日PVE结算局数</td><td>start_or_end=end</td></tr>
+<tr><td>pve_game_win_1d</td><td>bigint</td><td>当日PVE胜利局数</td><td>end_status=win</td></tr>
+<tr><td>pve_game_start_normal_1d</td><td>bigint</td><td>当日normal PVE开始</td><td>game_type=normal</td></tr>
+<tr><td>pve_game_start_bon_1d</td><td>bigint</td><td>当日bon PVE开始</td><td>game_type=bon</td></tr>
+<tr><td>pve_game_start_boss_1d</td><td>bigint</td><td>当日boss PVE开始</td><td>game_type=boss</td></tr>
+<tr><td>pve_game_start_dive_1d</td><td>bigint</td><td>当日dive PVE开始</td><td>game_type=dive</td></tr>
+</table>
+
+<h3>道具/经济</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>coin_balance</td><td>double</td><td>当日金币余额</td><td>item_id='11000002', 排除offline</td></tr>
+<tr><td>coin_delta_1d</td><td>double</td><td>当日消耗金币</td><td>item_behavior=2</td></tr>
+<tr><td>free_diamond_balance</td><td>double</td><td>当日免费钻石余额</td><td>item_id='11000003'</td></tr>
+<tr><td>free_diamond_delta_1d</td><td>double</td><td>当日消耗免费钻石</td><td></td></tr>
+<tr><td>paid_diamond_balance</td><td>double</td><td>当日付费钻石余额</td><td>item_id='11000004'</td></tr>
+<tr><td>paid_diamond_delta_1d</td><td>double</td><td>当日消耗付费钻石</td><td></td></tr>
+</table>
+
+<h3>路点进度</h3>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
+<tr><td>route_start_1d</td><td>bigint</td><td>当日尝试路点数</td><td>distinct route_id</td></tr>
+<tr><td>route_pass_1d</td><td>bigint</td><td>当日通过路点数</td><td>c_pve_pass_route</td></tr>
+<tr><td>main_route_location</td><td>bigint</td><td>历史最后主线路点</td><td>course_id &lt; 50500001</td></tr>
+<tr><td>side_route_location</td><td>bigint</td><td>历史最后支线路点</td><td>course_id &gt;= 50500001</td></tr>
+<tr><td>route_start_normal_1d / route_pass_normal_1d</td><td>bigint</td><td>normal路点开始/通过</td><td></td></tr>
+<tr><td>route_start_bon_1d / route_pass_bon_1d</td><td>bigint</td><td>bon路点开始/通过</td><td></td></tr>
+<tr><td>route_start_boss_1d / route_pass_boss_1d</td><td>bigint</td><td>boss路点开始/通过</td><td></td></tr>
+<tr><td>route_start_dive_1d / route_pass_dive_1d</td><td>bigint</td><td>dive路点开始/通过</td><td></td></tr>
 </table>
 </div>
 
 <!-- 广告变现 -->
 <div class="dict-panel" id="p-ad">
-<h2>📺 广告变现指标</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a> | <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">飞书: MG 数据分析 SQL 知识库</a></p>
-
-<h3>核心指标公式</h3>
+<h3>广告变现通用指标</h3>
+<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">Confluence: 广告变现通用指标</a></p>
 <table>
 <tr><th>指标</th><th>英文</th><th>公式</th><th>说明</th></tr>
-<tr><td>eCPM (API)</td><td>eCPM</td><td><code>Revenue / Impressions * 1000</code></td><td>渠道API数据，来源广告平台后台</td></tr>
-<tr><td>eCPM (Log)</td><td>eCPM(log)</td><td><code>SUM(advalue) * 1000 / NULLIF(SUM(adplay_cnt), 0)</code></td><td>打点日志数据，按 advalue/adplay 计算</td></tr>
-<tr><td>日人均广告价值</td><td>Ad ARPU</td><td><code>SUM(advalue_sum_1d) / COUNT(DISTINCT user_id)</code></td><td>分母为当日 DAU（adinit 用户）</td></tr>
-<tr><td>Total ARPU</td><td>Total ARPU</td><td><code>(SUM(advalue_sum_1d) + SUM(payment_sum_1d)) / COUNT(DISTINCT user_id)</code></td><td>广告+内购总收入 / DAU</td></tr>
-<tr><td>人均频次</td><td>Freq/DAU</td><td><code>SUM(adplay_cnt) / COUNT(DISTINCT user_id)</code></td><td>日活用户人均广告观看次数</td></tr>
-<tr><td>RV 人均频次</td><td>RV Freq/DAU</td><td><code>SUM(rv_play_cnt) / COUNT(DISTINCT user_id)</code></td><td>激励视频人均频次</td></tr>
-<tr><td>INT 人均频次</td><td>INT Freq/DAU</td><td><code>SUM(int_play_cnt) / COUNT(DISTINCT user_id)</code></td><td>插屏人均频次</td></tr>
-<tr><td>参与率</td><td>ParticipateRate</td><td><code>COUNT(DISTINCT ad_user) / COUNT(DISTINCT dau_user)</code></td><td>有广告行为的用户占 DAU 比例</td></tr>
-<tr><td>填充率</td><td>Fillrate</td><td><code>FilledRequests / Requests</code></td><td>广告请求被填充的比例（API 口径）</td></tr>
-<tr><td>IAA LTV(N)</td><td>IAA LTV(N)</td><td><code>SUM(累计N日advalue) / COUNT(DISTINCT new_user)</code></td><td>N=1/3/7/15/30/60/90/120/180；累积式</td></tr>
-<tr><td>RV LTV(N)</td><td>RV LTV(N)</td><td><code>SUM(累计N日rv_revenue) / COUNT(DISTINCT new_user)</code></td><td>仅激励视频的 LTV</td></tr>
-<tr><td>INT LTV(N)</td><td>INT LTV(N)</td><td><code>SUM(累计N日int_revenue) / COUNT(DISTINCT new_user)</code></td><td>仅插屏的 LTV</td></tr>
-<tr><td>RV eCPM</td><td>RV eCPM</td><td><code>SUM(rv_revenue) * 1000 / NULLIF(SUM(rv_play_cnt), 0)</code></td><td>激励视频单独 eCPM</td></tr>
-<tr><td>INT eCPM</td><td>INT eCPM</td><td><code>SUM(int_revenue) * 1000 / NULLIF(SUM(int_play_cnt), 0)</code></td><td>插屏单独 eCPM</td></tr>
-</table>
-
-<h3>广告数据源（各产品）</h3>
-<div class="note">⚠️ 各产品广告收入字段来源不同，UNO2 需要从明细日志表计算。SKB/UNO2 安卓 advalue 需除以 1000000。</div>
-<table>
-<tr><th>产品</th><th>广告收入数据源</th><th>广告次数数据源</th><th>特殊处理</th></tr>
-<tr><td>UNO</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_reward_cnt_1d</code> / <code>ad_interstitial_cnt_1d</code></td><td>来源: <code>dw_dmdb.advalue_role_date</code>；次数来源: <code>game_client_log</code></td></tr>
-<tr><td>P10</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_view_cnt_1d</code>(RV) / <code>ad_interstitial_cnt_1d</code>(INT)</td><td>⚠️ <code>iaa_sum</code> 已于 2025-06-17 删除，统一用 <code>advalue_sum_1d</code></td></tr>
-<tr><td>SKB</td><td>活跃表 <code>advalue_sum_1d</code> / <code>advalue_reward_sum_1d</code> / <code>advalue_interstitial_sum_1d</code></td><td>活跃表 <code>ad_reward_cnt_1d</code></td><td>⚠️ 安卓需: <code>IF(platform='IOS', value, value/1000000)</code></td></tr>
-<tr><td>UNO2</td><td>明细表 <code>dw_ods_mn08.c_client_app_ad_log</code> WHERE <code>log_subtype='advalue'</code></td><td>明细表 <code>dw_ods_mn08.c_client_app_ad_log</code> WHERE <code>log_subtype='adplay' AND status=1</code></td><td>⚠️ 安卓需 /1000000；需 FULL OUTER JOIN play 和 value 两张子查询</td></tr>
-</table>
-
-<h3>各产品广告相关字段速查</h3>
-<table>
-<tr><th>字段</th><th>UNO</th><th>P10</th><th>SKB</th><th>UNO2</th><th>含义</th></tr>
-<tr><td>当日总广告收入</td><td><code>advalue_sum_1d</code></td><td><code>advalue_sum_1d</code></td><td><code>advalue_sum_1d</code></td><td>明细聚合</td><td>含 RV + INT + Banner</td></tr>
-<tr><td>当日 RV 收入</td><td><code>advalue_reward_sum_1d</code></td><td><code>advalue_reward_sum_1d</code></td><td><code>advalue_reward_sum_1d</code></td><td>明细 adtype='rewardvideo'</td><td>激励视频收入</td></tr>
-<tr><td>当日 INT 收入</td><td><code>advalue_interstitial_sum_1d</code></td><td><code>advalue_interstitial_sum_1d</code></td><td><code>advalue_interstitial_sum_1d</code></td><td>明细 adtype='interstitial'</td><td>插屏收入</td></tr>
-<tr><td>当日 RV 次数</td><td><code>ad_reward_cnt_1d</code></td><td><code>ad_view_cnt_1d</code></td><td><code>ad_reward_cnt_1d</code></td><td>明细 COUNT</td><td>激励视频播放次数</td></tr>
-<tr><td>当日 INT 次数</td><td><code>ad_interstitial_cnt_1d</code></td><td><code>ad_interstitial_cnt_1d</code></td><td>—</td><td>明细 COUNT</td><td>插屏播放次数</td></tr>
-<tr><td>历史累计广告收入</td><td><code>advalue_sum</code></td><td><code>advalue_sum</code></td><td>—</td><td>—</td><td>注册以来累计</td></tr>
-</table>
-
-<h3>广告类型定义</h3>
-<table>
-<tr><th>类型</th><th>英文缩写</th><th>adtype 过滤值</th><th>说明</th></tr>
-<tr><td>激励视频</td><td>RV</td><td><code>adtype = 'rewardvideo'</code></td><td>用户主动观看，看完获得奖励</td></tr>
-<tr><td>插屏广告</td><td>INT</td><td><code>adtype = 'interstitial'</code></td><td>系统自动弹出，场景间切换触发</td></tr>
-<tr><td>Banner</td><td>BAN</td><td><code>adtype = 'banner'</code></td><td>页面底部固定展示，收入占比极低</td></tr>
-</table>
-
-<h3>IAA LTV 计算口径（生命周期累积式）</h3>
-<div class="note">⚠️ LTV 为累积口径：LT7 包含 Day0~Day6 的所有广告收入，LT30 包含 Day0~Day29，以此类推。不要用分段口径。</div>
-<table>
-<tr><th>生命周期标签</th><th>life_day 范围</th><th>公式</th></tr>
-<tr><td>LT7</td><td><code>life_day BETWEEN 0 AND 6</code></td><td><code>SUM(advalue) / COUNT(DISTINCT new_user)</code></td></tr>
-<tr><td>LT30</td><td><code>life_day BETWEEN 0 AND 29</code></td><td>同上，窗口扩大</td></tr>
-<tr><td>LT60</td><td><code>life_day BETWEEN 0 AND 59</code></td><td>同上</td></tr>
-<tr><td>LT90</td><td><code>life_day BETWEEN 0 AND 89</code></td><td>同上</td></tr>
-<tr><td>LT120</td><td><code>life_day BETWEEN 0 AND 119</code></td><td>同上</td></tr>
-<tr><td>LT180</td><td><code>life_day BETWEEN 0 AND 179</code></td><td>同上</td></tr>
-</table>
-<p style="font-size:12px;color:var(--text-3);">其中 <code>life_day = DATE_DIFF('day', DATE(reg_date), DATE(active_date))</code>；新用户定义：<code>been_reg_days = 1</code></p>
-
-<h3>IAA LTV + eCPM + Freq 分析 SQL 结构（通用模板）</h3>
-<pre>-- 通用 CTE 结构（适用 UNO/P10/SKB/UNO2）:
--- 1. new_users: 锁定注册窗口内新用户 (been_reg_days=1)
--- 2. daily_ad_metrics: JOIN 活跃表，计算 life_day、每日 RV/INT 次数和收入
--- 3. lifecycle_stage: VALUES 表定义 LT 阶段 (LT7~LT180)
--- 4. user_lt_metrics: 按用户×平台×LT阶段聚合
--- 5. 最终 SELECT: GROUP BY CUBE(platform) 输出分平台 + ALL
-
--- 核心计算：
--- Freq/DAU     = SUM(adplay_cnt) / SUM(active_days)
--- eCPM         = SUM(ad_revenue) * 1000 / NULLIF(SUM(adplay_cnt), 0)
--- IAA LTV      = SUM(ad_revenue) / COUNT(DISTINCT user_id)
-
--- 剔除 Banner 口径:
--- TOTAL 收入 = advalue_reward_sum_1d + advalue_interstitial_sum_1d  (非 advalue_sum_1d)
--- TOTAL 次数 = rv_play_cnt + int_play_cnt</pre>
-
-<h3>UNO2 广告数据特殊处理（FULL OUTER JOIN）</h3>
-<pre>-- UNO2 广告数据不在活跃表，需从明细日志表分别取播放次数和收入再合并
--- 播放次数: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='adplay' AND status=1
--- 广告收入: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='advalue'
--- 安卓收入需 /1000000:
---   CASE WHEN UPPER(platform)='IOS' THEN CAST(value AS DOUBLE)
---        ELSE CAST(value AS DOUBLE)/1000000 END
--- 合并方式: FULL OUTER JOIN ON date + role_id + platform
--- 最终字段: COALESCE(play.rv_cnt, 0), COALESCE(value.rv_revenue, 0) ...</pre>
-
-<h3>常用过滤条件（广告分析专用）</h3>
-<table>
-<tr><th>场景</th><th>SQL</th><th>说明</th></tr>
-<tr><td>只看 APP 端</td><td><code>UPPER(client) = 'APP'</code></td><td>排除测试流量</td></tr>
-<tr><td>双端</td><td><code>UPPER(platform) IN ('IOS', 'ANDROID')</code></td><td>排除 SAMSUNG 等</td></tr>
-<tr><td>成年用户</td><td><code>is_adult = 1</code></td><td>UNO 广告分析需加</td></tr>
-<tr><td>新用户</td><td><code>been_reg_days = 1</code></td><td>LTV 分析用</td></tr>
-<tr><td>去广告用户排除 (SKB)</td><td><code>no_ads = 0</code> 或 <code>no_ads IS NULL</code></td><td>SKB 付费去广告用户不产生广告收入</td></tr>
-<tr><td>剔除 Banner</td><td>用 <code>advalue_reward_sum_1d + advalue_interstitial_sum_1d</code></td><td>不使用 advalue_sum_1d（含 Banner）</td></tr>
-</table>
-
-<h3>注意事项</h3>
-<table>
-<tr><th>产品</th><th>注意点</th></tr>
-<tr><td>P10</td><td><code>iaa_sum</code> 字段已于 2025-06-17 停止维护，必须用 <code>advalue_sum_1d</code>；RV 次数字段名为 <code>ad_view_cnt_1d</code>（非 ad_reward_cnt_1d）</td></tr>
-<tr><td>SKB</td><td>安卓 advalue 单位为微元，需除以 1000000：<code>IF(platform='IOS', value, value/1000000)</code></td></tr>
-<tr><td>UNO</td><td>主键为 <code>role_id</code>；广告收入来源于 <code>dw_dmdb.advalue_role_date</code> 的回刷</td></tr>
-<tr><td>UNO2</td><td>库名是 <code>dw_dmdb</code>（非 dw_ods_mn08）；广告需从明细表 <code>c_client_app_ad_log</code> 取</td></tr>
-<tr><td>通用</td><td>CUBE(platform) 可同时输出分端 + ALL 汇总行；life_day 用 <code>DATE_DIFF('day', ...)</code> 计算</td></tr>
+<tr><td>eCPM (API)</td><td>eCPM</td><td>Revenue / Impressions * 1000</td><td>渠道API数据</td></tr>
+<tr><td>eCPM (Log)</td><td>eCPM(log)</td><td>Advalue / AdPlayTimes * 1000</td><td>打点日志数据</td></tr>
+<tr><td>日人均广告价值</td><td>AdARPU</td><td>IAA / DAUsum</td><td>DAUsum=adinit用户</td></tr>
+<tr><td>Total ARPU</td><td>Total ARPU</td><td>(Advalue+IAP) / DAUsum</td><td></td></tr>
+<tr><td>人均频次 (Log)</td><td>FrequencyDAU</td><td>AdPlayTimes / DAU</td><td></td></tr>
+<tr><td>参与率</td><td>ParticipateRate</td><td>AdPlayUser / DAU</td><td></td></tr>
+<tr><td>填充率</td><td>Fillrate</td><td>FilledRequests / Requests</td><td></td></tr>
+<tr><td>IAA LTV(N)</td><td>IAALTV(N)</td><td>累计N日IAA / 累计N日新增用户</td><td>N=1/3/7/15/30/60/90</td></tr>
 </table>
 </div>
 
 <!-- 三方支付 -->
 <div class="dict-panel" id="p-3pp">
-<h2>💳 三方支付指标</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">Confluence: 三方支付所有指标口径</a> | <a href="https://mattel163.feishu.cn/docx/KiLqdlhjqosgsDxPUCuc1lFGnmf" target="_blank">飞书: 三方知识库常用SQL埋点大全</a></p>
-
-<h3>三方支付数据源总览</h3>
+<h3>三方支付指标口径</h3>
+<p class="src">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162420600" target="_blank">Confluence: 三方支付所有指标口径</a></p>
 <table>
-<tr><th>类型</th><th>表名</th><th>产品</th><th>核心用途</th></tr>
-<tr><td>三方中间表</td><td><code>dm_mn01_player_3pp_payment_info</code></td><td>UNO</td><td>三方指标中间表：日粒度3PP付费汇总</td></tr>
-<tr><td>三方中间表</td><td><code>dm_mn02_player_3pp_payment_info</code></td><td>P10</td><td>同上</td></tr>
-<tr><td>三方中间表</td><td><code>dm_mn04_player_3pp_payment_info</code></td><td>SKB</td><td>同上</td></tr>
-<tr><td>三方中间表</td><td><code>dm_mn08_player_3pp_payment_info</code></td><td>UNO2</td><td>同上</td></tr>
-<tr><td>核心支付</td><td><code>dw_ods_sdk.omni_server_payment</code></td><td>全产品</td><td>三方支付全量付费核心打点</td></tr>
-<tr><td>订单成功</td><td><code>server_web_order_suc</code></td><td>全产品</td><td>Web端订单成功打点，渠道/订单数据</td></tr>
-<tr><td>SDK支付链路</td><td><code>dw_rawdata_sdk.pay_track</code></td><td>全产品</td><td>IOS/Android支付链路全环节</td></tr>
+<tr><th>指标</th><th>口径</th></tr>
+<tr><td>Web付费玩家</td><td>omni_server_payment, pay_channel_id=11, payment>0, status in (1,3) 排重用户数</td></tr>
+<tr><td>Web付费收入</td><td>同上，累计金额</td></tr>
+<tr><td>Web收入占比</td><td>Web付费收入 / 内购收入</td></tr>
+<tr><td>登录付费率</td><td>付费成功玩家 / 登录玩家(avatar_suc)</td></tr>
+<tr><td>支付成功率</td><td>付费成功玩家 / 选择支付方式玩家(select_payment)</td></tr>
 </table>
-
-<h3>核心埋点与关键字段</h3>
+<h3>STORE 转化漏斗</h3>
 <table>
-<tr><th>日志类型</th><th>表名</th><th>核心用途</th><th>关键字段</th></tr>
-<tr><td>核心支付</td><td><code>omni_server_payment</code></td><td>付费金额/玩家/订单</td><td>pay_channel_id, payment, status, order_from, uuid/aid, sku, price, payment_id</td></tr>
-<tr><td>订单成功</td><td><code>server_web_order_suc</code></td><td>渠道/订单核心数据</td><td>payment_platform, payment_method, order_id, payment</td></tr>
-<tr><td>访问</td><td><code>open_recharge</code></td><td>三方支付页面访问</td><td>uuid</td></tr>
-<tr><td>登录</td><td><code>avatar_suc</code></td><td>三方支付页面登录成功</td><td>uuid/aid</td></tr>
-<tr><td>选择支付</td><td><code>select_payment</code></td><td>选定支付方式</td><td>uuid/aid</td></tr>
-<tr><td>支付链路</td><td><code>pay_track</code></td><td>游戏内Web支付全链路</td><td>step, code, sn, platform, spend_time, sdk_order_id</td></tr>
-<tr><td>下单成功</td><td><code>server_web_create_order_suc</code></td><td>礼包下单成功</td><td>item_name, sku, price, order_id</td></tr>
-<tr><td>抽奖</td><td><code>scratch_win</code></td><td>支付后抽奖行为</td><td>scratch_action, uuid/aid</td></tr>
-<tr><td>优惠券</td><td><code>server_voucher_writeoff</code></td><td>优惠券核销/使用</td><td>voucher_id, uuid/aid, payment, order_id</td></tr>
-<tr><td>资源投放</td><td><code>p10_3pp_resource</code></td><td>3PP资源投放</td><td>item_arraystr, uuid/aid</td></tr>
-<tr><td>付费交互(P10)</td><td><code>dw_ods_mn02.c_payment_interact</code></td><td>付费界面点击/下单/关闭行为</td><td>action(1打开/2下单/3关闭), action_type, surfacename, actionreason</td></tr>
-<tr><td>主站下单(P10)</td><td><code>dw_ods_gamecenter.c_create_order</code></td><td>三方主站商品下单</td><td>game_aid, product_id, payment, source, isrecommend</td></tr>
-<tr><td>主站订单成功</td><td><code>dw_ods_gamecenter.s_server_web_order_suc</code></td><td>三方主站订单成功</td><td>game_aid, sku, price, item_name, payment_platform, payment_id, ordersubfrom</td></tr>
-<tr><td>付费选择(P10)</td><td><code>dw_ods_mn02.c_payment_choice</code></td><td>RM(Remember Me)勾选状态</td><td>account_id, state(0关/1开), log_time</td></tr>
-<tr><td>满3单领奖</td><td><code>dw_ods_gamecenter.c_purchase_gift</code></td><td>满3单奖励曝光/领取</td><td>gift_show, chest_click, voucher_id, item_id</td></tr>
+<tr><th>步骤</th><th>打点</th><th>口径</th></tr>
+<tr><td>1. 访问</td><td>open_recharge</td><td>uuid 排重</td></tr>
+<tr><td>2. 登录</td><td>avatar_suc</td><td>排重用户数</td></tr>
+<tr><td>3. 点击商品</td><td>create_order</td><td>排重用户数</td></tr>
+<tr><td>4. 选择支付</td><td>select_payment</td><td>排重用户数</td></tr>
+<tr><td>5. 渠道下单</td><td>server_web_order_suc</td><td>排重用户数</td></tr>
+<tr><td>6. 支付成功</td><td>omni_server_payment (pay_channel_id=11)</td><td>排重用户数</td></tr>
 </table>
-
-<h3>核心经营指标</h3>
-<table>
-<tr><th>编号</th><th>指标</th><th>定义</th><th>核心口径</th></tr>
-<tr><td>JY001</td><td>内购总收入</td><td>内购付费累计金额</td><td><code>omni_server_payment</code> 且 payment > 0 且 status in (1, 3)</td></tr>
-<tr><td>JY002</td><td>Web 付费总收入</td><td>三方Web全量付费累计金额</td><td><code>omni_server_payment</code> 且 pay_channel_id = 11 且 payment > 0 且 status in (1, 3)</td></tr>
-<tr><td>JY003</td><td>三方付费玩家数</td><td>三方全量付费玩家去重</td><td>符合 JY001 口径，按用户去重</td></tr>
-<tr><td>JY004</td><td>Web 付费玩家数</td><td>Web端付费玩家去重</td><td>符合 JY002 口径，按用户去重</td></tr>
-<tr><td>JY005</td><td>Web 新付费玩家数</td><td>首次Web端付费玩家</td><td>符合 JY004 + 首次三方Web付费</td></tr>
-<tr><td>JY006</td><td>Web 首充收入</td><td>新付费玩家首次付费金额</td><td>JY005 口径对应玩家首次付费金额</td></tr>
-<tr><td>JY007</td><td>Web 收入占比</td><td>Web收入/内购总收入</td><td>JY002 / JY001</td></tr>
-<tr><td>JY008</td><td>Web 付费玩家占比</td><td>Web付费玩家/总付费玩家</td><td>JY004 / JY003</td></tr>
-<tr><td>JY009</td><td>三方支付 ARPU</td><td>登录玩家人均付费</td><td>总付费收入 / avatar_suc 去重数</td></tr>
-<tr><td>JY010</td><td>三方支付 ARPPU</td><td>付费玩家人均付费</td><td>总付费收入 / JY003</td></tr>
-</table>
-
-<h3>漏斗转化指标</h3>
-<table>
-<tr><th>编号</th><th>指标</th><th>计算逻辑</th><th>核心口径</th></tr>
-<tr><td>ZH001</td><td>访问玩家数</td><td>open_recharge uuid 去重</td><td>进入三方支付页面的玩家</td></tr>
-<tr><td>ZH002</td><td>登录玩家数</td><td>avatar_suc 排重</td><td>三方支付页面完成登录</td></tr>
-<tr><td>ZH003</td><td>选择支付玩家数</td><td>select_payment 排重</td><td>选定支付方式</td></tr>
-<tr><td>ZH004</td><td>STORE 付费成功</td><td>omni_server_payment 去重</td><td>pay_channel_id=11, payment>0, status in (1,3), order_from!='webPay'</td></tr>
-<tr><td>ZH005</td><td>游戏内Web付费成功</td><td>omni_server_payment 去重</td><td>pay_channel_id=11, payment>0, status in (1,3), order_from='webPay'</td></tr>
-<tr><td>ZH006</td><td>登录成功率</td><td>ZH002 / ZH001</td><td>访问→登录转化</td></tr>
-<tr><td>ZH007</td><td>STORE 支付成功率</td><td>ZH004 / ZH003</td><td>选支付→付费成功</td></tr>
-<tr><td>ZH008</td><td>游戏内Web支付成功率</td><td>ZH005 / ZH003</td><td>选支付→Web付费成功</td></tr>
-<tr><td>ZH009</td><td>STORE 登录付费率</td><td>ZH004 / ZH002</td><td>登录→STORE付费</td></tr>
-<tr><td>ZH010</td><td>游戏内Web登录付费率</td><td>ZH005 / ZH002</td><td>登录→Web付费</td></tr>
-<tr><td>ZH011</td><td>游戏内Web下单付费率</td><td>ZH005 / pay_track下单数</td><td>step=again_check_webpay_success, code='1'</td></tr>
-</table>
-
-<h3>维度拆解指标</h3>
-<table>
-<tr><th>编号</th><th>指标</th><th>说明</th><th>数据源</th></tr>
-<tr><td>WD001</td><td>各支付渠道收入</td><td>按 payment_platform 维度</td><td>server_web_order_suc</td></tr>
-<tr><td>WD002</td><td>各渠道订单支付率</td><td>支付成功订单/下单数</td><td>server_web_order_suc / omni_server_payment</td></tr>
-<tr><td>WD003</td><td>各支付方式收入占比</td><td>按 payment_id 第二字段</td><td>omni_server_payment</td></tr>
-<tr><td>WD004</td><td>各国家Web付费收入</td><td>JY002 + 按国家拆分</td><td>omni_server_payment</td></tr>
-<tr><td>WD005</td><td>各国家Web付费玩家数</td><td>JY004 + 按国家拆分</td><td>omni_server_payment</td></tr>
-<tr><td>WD007</td><td>各礼包Web付费收入</td><td>JY002 + 按 sku 拆分</td><td>omni_server_payment</td></tr>
-<tr><td>WD009</td><td>核心礼包档位收入占比</td><td>按 price 档位统计</td><td>omni_server_payment</td></tr>
-</table>
-
-<h3>SDK 支付链路指标</h3>
-<table>
-<tr><th>编号</th><th>指标</th><th>计算逻辑</th><th>数据源</th></tr>
-<tr><td>SDK001</td><td>SDK 初始化成功率</td><td>sdk_init_success / sdk_init (udid去重)</td><td>sdk_init / sdk_init_success</td></tr>
-<tr><td>SDK002</td><td>SDK 登录成功率</td><td>notify_login_success / call_login (udid去重)</td><td>call_login / notify_login_success</td></tr>
-<tr><td>SDK003</td><td>IOS 下单成功率</td><td>create_order_success / create_order (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK004</td><td>IOS 渠道支付成功率</td><td>pay_channel_success / pay_channel (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK006</td><td>IOS 支付整体成功率</td><td>verify_order_success / create_order (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK007</td><td>Android 下单成功率</td><td>create_order_success / create_order (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK008</td><td>Android 渠道支付成功率</td><td>pay_channel_success / pay_channel (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK013</td><td>Android 支付整体成功率</td><td>verify_order_success / create_order (sn去重)</td><td>dw_rawdata_sdk.pay_track</td></tr>
-<tr><td>SDK014</td><td>三方支付整体耗时</td><td>全平台 spend_time>0 且<阈值，avg/1000</td><td>dw_rawdata_sdk.pay_track</td></tr>
-</table>
-
-<h3>运营活动指标</h3>
-<table>
-<tr><th>编号</th><th>指标</th><th>计算逻辑</th><th>数据源</th></tr>
-<tr><td>YY001</td><td>抽奖参与率</td><td>scratch_win(scratch_action='scratch') / 可参与用户</td><td>scratch_win / omni_server_payment</td></tr>
-<tr><td>YY002</td><td>奖品优惠券复购率</td><td>server_voucher_writeoff去重 / 抽奖用户</td><td>server_voucher_writeoff / scratch_win</td></tr>
-<tr><td>YY003</td><td>优惠券核销数</td><td>server_voucher_writeoff 排重订单数</td><td>server_voucher_writeoff</td></tr>
-<tr><td>YY008</td><td>7天累计复购率</td><td>7天内复购用户 / 当日付费玩家（剔除俄用户）</td><td>omni_server_payment</td></tr>
-</table>
-
-<h3>game_id 对照表</h3>
-<table>
-<tr><th>产品</th><th>game_id</th><th>说明</th></tr>
-<tr><td>UNO</td><td>1000000</td><td>UNO 主键用 role_id（客户端）或 account_id（SDK）</td></tr>
-<tr><td>P10</td><td>1019</td><td>P10 主键用 account_id / player_id</td></tr>
-<tr><td>SKB</td><td>1000008</td><td>SKB 主键用 account_id / role_id</td></tr>
-<tr><td>UNO2</td><td>1000014</td><td>UNO2 主键用 role_id / sdk_account_id</td></tr>
-</table>
-</div>
-
-<!-- 广告取数案例 -->
-<div class="dict-panel" id="p-ad-cases">
-<h2>📋 广告取数案例</h2>
-<p class="panel-desc">团队广告变现数据需求归档，来源：<a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=175402962" target="_blank">Confluence: 广告变现拉取数据需求归档整理</a></p>
-
-<h3>案例索引</h3>
-<table>
-<tr><th>#</th><th>场景</th><th>产品</th><th>核心表</th><th>关键技术点</th></tr>
-<tr><td>1</td><td>聚合平台分组（奇偶规则）支付率</td><td>UNO</td><td>dm_mn01_player_info, role_login_payment_info_date, advalue_role_date</td><td>role_id 倒数5-6位分组判断聚合平台(admob/max)</td></tr>
-<tr><td>2</td><td>新用户 LTV + 留存 + 广告全指标</td><td>UNO</td><td>dm_mn01_player_info, role_login_payment_info_date, advalue_role_date, game_client_log</td><td>mediation 回溯(json_extract+max_by)；LT窗口累计；organic/paid 区分</td></tr>
-<tr><td>3</td><td>未付费用户广告变现数据</td><td>P10</td><td>c_adplay, c_adpaid, dm_mn02_player_info</td><td>l_payment_date IS NULL 判断免费用户；UNION ALL 合并 play+value</td></tr>
-<tr><td>4</td><td>互推（Cross-Promotion）数据</td><td>UNO/P10/SKB</td><td>crosspromotion_account_id_label_info, server_action, ads_detail_account_cp_date</td><td>标签分层；FULL JOIN iap+iaa；DayN 转化窗口</td></tr>
-<tr><td>5</td><td>付费用户/标签用户广告行为</td><td>P10/SKB</td><td>c_adplay, c_adpaid/c_advalue, s_payment, s_player_label</td><td>P10用s_payment判断付费；SKB用unnest标签列表；UNION ALL 合并</td></tr>
-<tr><td>6</td><td>UA类型（IAA/IAP/Hybrid）用户广告数据</td><td>SKB</td><td>c_adplay, c_advalue, dm_appsflyer_afid_attribute_info</td><td>按 campaign 区分 IAA/IAP/Hybrid；appsflyer_id 设备维度关联</td></tr>
-<tr><td>7</td><td>用户每天第N次广告展示的eCPM</td><td>P10/SKB</td><td>c_adplay, c_adpaid, c_advalue</td><td>row_number() 开窗函数给广告序数编号</td></tr>
-<tr><td>8</td><td>PVE 与广告次数关联分析</td><td>P10</td><td>c_adplay, c_pve_game_record</td><td>row_number() 定位第N次广告；log_time 时序关联 PVE 对局</td></tr>
-<tr><td>9</td><td>标签(UF1/UF2/UF3)广告行为数据</td><td>P10</td><td>s_player_label, ads_custom_logtype_player_date, dm_mn02_player_active_info</td><td>unnest 标签；ads_custom_logtype_player_date 中间表直接取全链路</td></tr>
-<tr><td>10</td><td>UNO 分组礼包广告点位数据(按小时)</td><td>UNO</td><td>client_app_ad_log(原始日志), loginrole/logoutrole</td><td>原始日志 CASE WHEN 解析 log_type；from_unixtime 登录时间；按小时聚合</td></tr>
-<tr><td>11</td><td>UNO2 按RAM分段的eCPM/ARPU</td><td>UNO2</td><td>c_client_app_ad_log, c_device_detail_info, omni_server_login</td><td>设备内存分段(3G以下/以上)；udid 维度；安卓 value/1000000</td></tr>
-<tr><td>12</td><td>分国家梯队单次eCPM分布</td><td>UNO/P10/SKB</td><td>c_app_ad_log, c_adpaid, c_advalue</td><td>每条 advalue 记录即一次展示；CASE WHEN eCPM 分桶；UNION ALL 多产品</td></tr>
-<tr><td>13</td><td>IAA标签新用户D1~D30广告行为</td><td>P10</td><td>s_player_label, ads_custom_logtype_player_date, dm_mn02_player_info</td><td>unnest 标签；date_diff 计算 DayN；累计窗口指标</td></tr>
-<tr><td>14</td><td>iOS 分系统版本广告数据</td><td>UNO/P10/SKB</td><td>c_app_ad_log, s_loginrole, omni_server_login, c_adplay, c_adpaid, c_advalue</td><td>UNION ALL 多产品多埋点；trim(regexp_replace(os_version)) 清洗版本号</td></tr>
-<tr><td>15</td><td>分role group统计广告点位行为</td><td>UNO</td><td>dm_mn01_player_active_info, ads_custom_logtype_player_date</td><td>substr(role_id,-6,2) 分组；entranceid 定位广告位</td></tr>
-<tr><td>16</td><td>SKB 活动/标签/PVE/礼包圈人分析</td><td>SKB</td><td>c_event, c_adplay, c_pvelog, s_payment, c_recharge_popup, mn04_player_label_date</td><td>json_extract 活动字段；多条件圈人（活动参与/标签/PVE/付费）</td></tr>
-</table>
-
-<h3>核心数据表速查</h3>
-<div class="note">⚠️ 以下是广告取数中高频使用的表，区别于活跃中间表，这些是埋点原始表和 BI 构建的中间表。</div>
-<table>
-<tr><th>表名</th><th>产品</th><th>用途</th><th>关键字段</th></tr>
-<tr><td><code>dw_dmdb.advalue_role_date</code></td><td>UNO/P10</td><td>每日每用户广告收入（BI构建）</td><td>date, role_id, project, platform, adtype, revenue, impression</td></tr>
-<tr><td><code>dw_dmdb.ads_custom_logtype_player_date</code></td><td>全产品</td><td>广告全链路行为中间表（BI构建）</td><td>date, role_id, project, log_type, adtype, entranceid, user_times, revenue</td></tr>
-<tr><td><code>dw_dmdb.role_login_payment_info_date</code></td><td>全产品</td><td>每日登录+付费汇总表</td><td>date, role_id, game_id, platform, country, pay_money</td></tr>
-<tr><td><code>dw_dmdb.dm_appsflyer_afid_attribute_info</code></td><td>全产品</td><td>AppsFlyer 设备归因表</td><td>appsflyer_id, f_campaign, project, install_date</td></tr>
-<tr><td><code>dw_ods_mn01.c_app_ad_log</code></td><td>UNO</td><td>UNO 广告全链路原始日志</td><td>roleid, log_type, adtype, entranceid, platform, value, status, mediation</td></tr>
-<tr><td><code>dw_ods_mn02.c_adplay</code></td><td>P10</td><td>P10 广告播放日志</td><td>player_id, adtype, platform, country, entranceid, adchannel, status</td></tr>
-<tr><td><code>dw_ods_mn02.c_adpaid</code></td><td>P10</td><td>P10 广告价值日志</td><td>player_id, adtype, platform, value, os, mediation</td></tr>
-<tr><td><code>dw_ods_mn04.c_adplay</code></td><td>SKB</td><td>SKB 广告播放日志</td><td>account_id, adtype, platform, status, entranceid, appsflyer_id</td></tr>
-<tr><td><code>dw_ods_mn04.c_advalue</code></td><td>SKB</td><td>SKB 广告价值日志</td><td>account_id, adtype, platform, value, mediation</td></tr>
-<tr><td><code>dw_ods_mn08.c_client_app_ad_log</code></td><td>UNO2</td><td>UNO2 广告全链路日志</td><td>role_id, udid, log_subtype, adtype, platform, value, status</td></tr>
-<tr><td><code>dw_dmdb.ad_source_channel_mapping</code></td><td>全产品</td><td>广告渠道映射表</td><td>adsource → 标准渠道名</td></tr>
-<tr><td><code>dw_dmdb.mn02_player_label_date / mn04_player_label_date</code></td><td>P10/SKB</td><td>BI 标签中间表（按日期）</td><td>player_id/account_id, label, date</td></tr>
-<tr><td><code>dw_ods_mn02.s_player_label / dw_ods_mn04.s_player_label</code></td><td>P10/SKB</td><td>标签原始表（labels 为数组）</td><td>player_id/role_id, labels（需 unnest）</td></tr>
-</table>
-
-<h3>关键模式总结</h3>
-
-<h4>1. 广告 log_type 映射标准</h4>
-<pre>-- ads_custom_logtype_player_date / 原始日志中通用的 log_type 映射
-CASE
-  WHEN log_type = 'adinit' AND status = 1 THEN 'init'       -- 广告初始化
-  WHEN log_type = 'adentrance'            THEN 'entrance'    -- 进入广告位
-  WHEN log_type = 'advisit' AND action = 'play' THEN 'click' -- 点击播放
-  WHEN log_type = 'adplay' AND status = 1 THEN 'play'        -- 播放成功
-  WHEN log_type = 'adplay' AND status &lt;&gt; 1 THEN 'playFail'  -- 播放失败
-  WHEN log_type = 'adload' AND status = 1 THEN 'load'        -- 加载成功
-  WHEN log_type = 'adload' AND status &lt;&gt; 1 THEN 'loadFail'  -- 加载失败
-  WHEN log_type = 'adclosed'              THEN 'closed'      -- 关闭
-  WHEN log_type = 'adrewarded'            THEN 'rewarded'    -- 奖励发放
-  WHEN log_type = 'advalue'               THEN 'advalue'     -- 收益回调
-END</pre>
-
-<h4>2. 聚合平台(mediation)获取方式</h4>
-<table>
-<tr><th>产品</th><th>获取方式</th><th>表/字段</th></tr>
-<tr><td>UNO</td><td>从 adinit 日志 JSON 提取</td><td><code>json_extract(extra_game_info, '$.mediation')</code> from game_client_log</td></tr>
-<tr><td>UNO (分组规则)</td><td>role_id 倒数5-6位映射</td><td>特定 ID 段 → admob / max</td></tr>
-<tr><td>P10</td><td>c_adinit 表直接有字段</td><td><code>mediation</code> from dw_ods_mn02.c_adinit</td></tr>
-<tr><td>SKB</td><td>c_advalue 表直接有字段</td><td><code>mediation</code> from dw_ods_mn04.c_advalue</td></tr>
-<tr><td>UNO2</td><td>c_client_app_ad_log 有字段</td><td><code>mediation</code> (log_subtype='adinit')</td></tr>
-</table>
-
-<h4>3. 广告收入统一口径（安卓 /1000000）</h4>
-<pre>-- 所有产品安卓广告收入需除以 1000000
--- UNO: c_app_ad_log
-CASE WHEN platform = 'IOS' THEN value
-     WHEN platform = 'ANDROID' THEN value / 1000000
-     ELSE 0 END
-
--- P10: c_adpaid
-IF(os = 'IOS', value, value / 1000000)
-
--- SKB: c_advalue
-IF(platform = 'IOS', value, value / 1000000)
-
--- UNO2: c_client_app_ad_log
-CASE WHEN platform = 'IOS' THEN CAST(value AS double)
-     ELSE CAST(value AS double) / 1000000 END</pre>
-
-<h4>4. 标签处理模式</h4>
-<pre>-- 方式1: s_player_label 原始表（labels 为数组，需 unnest）
-SELECT player_id, label
-FROM dw_ods_mn02.s_player_label, unnest(labels) AS t(label)
-WHERE label IN ('UF1', 'UF2', 'IAA1')
-
--- 方式2: BI 标签中间表（已打平，直接用）
-SELECT player_id, label
-FROM dw_dmdb.mn02_player_label_date
-WHERE label IN ('UF1', 'UF2')
-
--- SKB 标签
-SELECT role_id, label
-FROM dw_ods_mn04.s_player_label, unnest(labels) AS t(label)
-WHERE label IN ('ADV04', 'ADV05')</pre>
-
-<h4>5. UA归因分析模式（设备维度）</h4>
-<pre>-- SKB 按 campaign 类型(IAA/IAP/Hybrid)拆分用户
--- 步骤1: 从归因表按 campaign 名称圈出设备ID
-SELECT DISTINCT appsflyer_id AS afid
-FROM dw_dmdb.dm_appsflyer_afid_attribute_info
-WHERE f_campaign IN ('defalut_IAA', 'SkipBo_AND_AppLovin_...')
-  AND project = '1000008'
-
--- 步骤2: 用 appsflyer_id 关联广告行为表
-JOIN dw_ods_mn04.c_adplay ON appsflyer_id = afid
-
--- 注意: 也可用 account_id 维度，通过 dm_mn04_player_info.campaign 字段关联</pre>
-
-<h4>6. 开窗函数：广告观看序数</h4>
-<pre>-- 用 row_number() 给每个用户每天的广告观看编号
-row_number() OVER (
-  PARTITION BY date, player_id, adtype, platform
-  ORDER BY log_time
-) AS ad_sequence_num
-
--- 可用于分析第N次广告的eCPM衰减、边际价值等</pre>
 </div>
 
 <!-- 常用SQL模板 -->
 <div class="dict-panel" id="p-sql">
-<h2>📝 常用 SQL 模板</h2>
-<p class="panel-desc">团队积累的常用取数 SQL，可直接复制使用或作为参考。</p>
+<h3>常用 SQL 模板</h3>
+<p style="font-size:12px;color:var(--text-3);margin-bottom:16px;">团队积累的常用取数 SQL，可直接复制使用或作为参考。</p>
 <div class="doc-links">📎 <b>飞书文档参考链接：</b><br>
 <a href="https://mattel163.feishu.cn/wiki/ENifwYm8JiO2wJkaoMTcqqdUnxe" target="_blank">MG 数据分析 SQL 知识库</a> |
 <a href="https://mattel163.feishu.cn/docx/GhMEdzxyIoYGfSxRrGscQYnLnWh" target="_blank">广告变现常用 SQL 合集</a> |
@@ -653,7 +666,6 @@ row_number() OVER (
 <a href="https://mattel163.feishu.cn/wiki/WCqUwwUkGi373VkUBIPcRHQrn7f" target="_blank">通用指标口径与 SQL</a> |
 <a href="https://mattel163.feishu.cn/wiki/RZEhwK0Xki7T47kC3BAcoTWmncO" target="_blank">数据表字段速查表</a>
 </div>
-
 <h3>1. IAA LTV + eCPM + Freq 分析 (全产品通用)</h3>
 <pre>-- CTE 结构：
 -- 1. new_users: 筛选新注册用户 (been_reg_days=1)
@@ -665,7 +677,6 @@ row_number() OVER (
 -- Freq/DAU = SUM(adplay) / SUM(active_days)
 -- eCPM = SUM(revenue) * 1000 / SUM(adplay)
 -- IAA LTV = SUM(revenue) / COUNT(DISTINCT user_id)</pre>
-
 <h3>2. 3PP 支付转化漏斗</h3>
 <pre>-- 各步打点：
 -- Step1 访问: open_recharge (uuid排重)
@@ -676,122 +687,16 @@ row_number() OVER (
 -- Step6 支付成功: omni_server_payment
 --   WHERE pay_channel_id = 11 AND payment > 0
 --   AND status IN (1, 3) AND order_from != 'webPay'</pre>
-
 <h3>3. UNO2 广告数据 (FULL OUTER JOIN)</h3>
 <pre>-- 播放次数: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='adplay' AND status=1
 -- 广告收入: dw_ods_mn08.c_client_app_ad_log WHERE log_subtype='advalue'
 -- 安卓需 /1000000: CASE WHEN platform='IOS' THEN value ELSE value/1000000 END
 -- 合并: FULL OUTER JOIN ON date + role_id + platform</pre>
-
-<h3>4. 三方支付：内嵌收入 / 主站收入拆分</h3>
-<pre>-- 数据源: dw_ods_sdk.omni_server_payment
--- game_id: UNO=1000000, P10=1019, SKB=1000008, UNO2=1000014
-SELECT
-    COUNT(DISTINCT account_id)                      AS pay_user,
-    SUM(payment)                                    AS third_pay_revenue,
-    SUM(IF(sub_order_from = '3ppingame', payment, 0)) AS third_pay_ingame,  -- 内嵌收入
-    SUM(IF(sub_order_from IS NULL, payment, 0))       AS third_pay_web      -- 主站收入
-FROM dw_ods_sdk.omni_server_payment
-WHERE date = '2026-01-01'
-  AND pay_channel_id = 11
-  AND payment > 0
-  AND order_from = 'storePay'
-  AND status IN (1, 3, 4)
-  AND game_id = 1000000  -- 按产品替换 game_id</pre>
-
-<h3>5. 三方支付：二选一弹窗曝光/选择统计 (UNO)</h3>
-<pre>-- 数据源: dw_ods_mn01.c_client_app_payment_selectchannel
-SELECT
-    date,
-    CAST(account_id AS VARCHAR) AS account_id,
-    COUNT(IF(extra_col_action = 'openUI', 1, NULL))    AS open_cnt,       -- 打开弹窗
-    COUNT(IF(extra_col_action = 'close', 1, NULL))     AS close_cnt,      -- 关闭弹窗
-    COUNT(IF(extra_col_action = 'selectIAP', 1, NULL)) AS select_iap_cnt, -- 选择内购
-    COUNT(IF(extra_col_action = 'selectweb', 1, NULL)) AS select_web_cnt  -- 选择三方
-FROM dw_ods_mn01.c_client_app_payment_selectchannel
-WHERE date BETWEEN '2026-01-01' AND '2026-01-07'
-GROUP BY 1, 2</pre>
-
-<h3>6. UNO role_id → account_id 映射</h3>
-<pre>-- UNO 客户端用 role_id，SDK 用 account_id
--- 通过 c_app_ad_log 表关联获取映射
-SELECT DISTINCT
-    roleid AS role_id,
-    account_id
-FROM dw_ods_mn01.c_app_ad_log
-WHERE date = '2026-01-01'
-  AND roleid = '目标role_id'</pre>
-
-<h3>7. 三方中间表：每日3PP付费汇总（P10示例）</h3>
-<pre>-- 数据源: dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
--- 用途: 统计每日三方付费金额/次数，区分内嵌和主站
-SELECT
-    account_id,
-    date,
-    SUM(COALESCE(third_payment_sum_1d, 0))        AS day_3pp_pay,
-    SUM(COALESCE(third_ingame_payment_sum_1d, 0)) AS day_embedded_pay,
-    SUM(COALESCE(third_web_payment_sum_1d, 0))    AS day_web_pay,
-    SUM(COALESCE(third_payment_cnt_1d, 0))        AS day_3pp_cnt,
-    SUM(COALESCE(third_ingame_payment_cnt_1d, 0)) AS day_embedded_cnt,
-    SUM(COALESCE(third_web_payment_cnt_1d, 0))    AS day_web_cnt
-FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
-WHERE date BETWEEN '2026-02-05' AND '2026-03-04'
-GROUP BY 1, 2</pre>
-
-<h3>8. 三方破冰用户识别</h3>
-<pre>-- 识别期间内首次三方付费用户（破冰用户）
--- 同时判断破冰渠道：内嵌 or 主站
-SELECT
-    account_id,
-    MIN(f_third_payment_date) AS first_third_payment_date,
-    IF(MIN(f_third_payment_date) = MIN(f_third_ingame_payment_date),
-       '内嵌破冰', '主站破冰') AS first_break_channel
-FROM dw_ods_common_mn02.dm_mn02_player_3pp_payment_info
-WHERE f_third_payment_date BETWEEN '2026-02-05' AND '2026-03-04'
-GROUP BY account_id</pre>
-
-<h3>9. 三方转化漏斗（MAU→知道→下单→付费→互动→忠诚）</h3>
-<pre>-- 全链路转化漏斗，以 P10 为例
--- MAU: 活跃中间表
--- 知道3PP: avatar_suc(登录主站) OR c_payment_interact(二选一弹窗曝光)
--- 下单: c_payment_interact(action=2) OR c_create_order(主站下单)
--- 付费: dm_mn02_player_3pp_payment_info (third_payment_sum_1d > 0)
--- 互动: 优惠券/抽奖/签到/满3单领奖
--- 忠诚: 期间完成≥3单
-
--- 关键表:
--- dw_ods_gamecenter.c_avatar_suc (game_id=1019, 主站登录)
--- dw_ods_mn02.c_payment_interact (action=1打开/2下单, surfacename='one_of_two_gift')
--- dw_ods_gamecenter.c_create_order (game_id=1019, 主站下单)
--- dw_ods_gamecenter.c_voucher_action (优惠券领取)
--- dw_ods_gamecenter.c_scratch_win (支付后抽奖)
--- dw_ods_gamecenter.c_get_daily_rewards (签到领取)
--- dw_ods_gamecenter.c_purchase_gift (满3单领奖)
--- dw_ods_gamecenter.s_server_voucher_writeoff (优惠券核销)</pre>
-
-<h3>10. P10 付费链路全交互日志 (付费漏斗)</h3>
-<pre>-- 数据源: dw_ods_mn02.c_payment_interact
--- action: 1=click_open, 2=click_pay, 3=click_close
--- action_type: 1=iap_pay, 2=diamond_pay, 3=ad_pay, 0=no_pay
--- surfacename: 界面来源
-
--- 主站订单成功:
--- dw_ods_gamecenter.s_server_web_order_suc
--- WHERE game_id=1019 AND payment_id=11 AND TRY_CAST(price AS DOUBLE)>0
--- sub_order_from 区分: '3ppingame'=内嵌 / NULL=主站
-
--- P10 商品类型映射 (recharge_type):
--- 1=钻石, 3=活动礼包, 4=Star pass, 5=道具礼包
--- 6=去广告, 7=新手礼包, 12=老玩家礼包, 13=链式礼包
--- 18=保险箱, 20=活动推荐, 21=惊喜礼包, 22=无限体力
--- 26=PVE旅行箱, 27=8种赠品, 28=回退礼包</pre>
 </div>
 
 <!-- 常用过滤条件 -->
 <div class="dict-panel" id="p-filters">
-<h2>🔍 常用过滤条件</h2>
-<p class="panel-desc">团队约定的标准过滤条件，确保口径一致。</p>
-
+<h3>常用过滤条件大全</h3>
 <h3>基础过滤</h3>
 <table>
 <tr><th>场景</th><th>SQL</th><th>说明</th></tr>
@@ -800,7 +705,6 @@ GROUP BY account_id</pre>
 <tr><td>新用户</td><td><code>been_reg_days = 1</code></td><td>注册当天</td></tr>
 <tr><td>成年用户</td><td><code>is_adult = 1</code></td><td>UNO 广告分析需加</td></tr>
 </table>
-
 <h3>生命周期分段</h3>
 <table>
 <tr><th>标签</th><th>SQL</th><th>含义</th></tr>
@@ -810,7 +714,6 @@ GROUP BY account_id</pre>
 <tr><td>LT90</td><td><code>life_day BETWEEN 0 AND 89</code></td><td>注册后 90 天内</td></tr>
 <tr><td>LT180</td><td><code>life_day BETWEEN 0 AND 179</code></td><td>注册后 180 天内</td></tr>
 </table>
-
 <h3>付费分层 (pay_activity_type)</h3>
 <table>
 <tr><th>标签</th><th>值</th><th>含义</th></tr>
@@ -823,7 +726,6 @@ GROUP BY account_id</pre>
 <tr><td>沉睡付费</td><td>6</td><td>20天无，21-40天有</td></tr>
 <tr><td>长眠付费</td><td>7</td><td>40天无，历史有</td></tr>
 </table>
-
 <h3>广告类型</h3>
 <table>
 <tr><th>类型</th><th>SQL</th></tr>
@@ -831,37 +733,6 @@ GROUP BY account_id</pre>
 <tr><td>插屏 (INT)</td><td><code>adtype = 'interstitial'</code></td></tr>
 <tr><td>Banner</td><td><code>adtype = 'banner'</code></td></tr>
 </table>
-
-<h3>地区分组维度</h3>
-<table>
-<tr><th>维度</th><th>分组</th><th>SQL 逻辑</th></tr>
-<tr><td rowspan="4"><b>T地区</b><br>(area_type)</td><td>US</td><td><code>UPPER(country) IN ('US')</code></td></tr>
-<tr><td>T1</td><td><code>UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR')</code></td></tr>
-<tr><td>T2</td><td><code>UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR')</code></td></tr>
-<tr><td>T3</td><td><code>ELSE 'T3'</code> (其余所有国家)</td></tr>
-<tr><td rowspan="4"><b>Group地区</b><br>(area_group)</td><td>US</td><td><code>country = 'US'</code></td></tr>
-<tr><td>GroupA</td><td><code>country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW')</code></td></tr>
-<tr><td>GroupB</td><td><code>country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR')</code></td></tr>
-<tr><td>GroupC</td><td><code>ELSE 'GroupC'</code> (其余所有国家)</td></tr>
-</table>
-
-<h3>完整 CASE WHEN 模板</h3>
-<pre>-- T地区 (area_type)
-CASE
-  WHEN UPPER(country) IN ('US') THEN 'US'
-  WHEN UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR') THEN 'T1'
-  WHEN UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR') THEN 'T2'
-  ELSE 'T3'
-END AS area_type
-
--- Group地区 (area_group)
-CASE
-  WHEN country = 'US' THEN 'US'
-  WHEN country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW') THEN 'GroupA'
-  WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB'
-  ELSE 'GroupC'
-END AS area_group</pre>
-
 <h3>三方支付</h3>
 <table>
 <tr><th>场景</th><th>SQL</th></tr>
@@ -871,176 +742,17 @@ END AS area_group</pre>
 </table>
 </div>
 
-<!-- SQL 处理逻辑 -->
-<div class="dict-panel" id="p-sql-logic">
-<h2>⚙️ SQL 处理逻辑</h2>
-<p class="panel-desc">团队 BI 沉淀的 SQL 处理逻辑与实战案例。来源：Confluence Tech Center - SQL 应用系列课程。</p>
-
-<h3>类型转换</h3>
-<table>
-<tr><th>函数</th><th>说明</th><th>示例</th></tr>
-<tr><td><code>typeof(expr)</code></td><td>返回表达式的结果类型</td><td><code>select typeof('123')</code></td></tr>
-<tr><td><code>cast(value AS type)</code></td><td>显式类型转换，失败会报错</td><td><code>cast('123' as double)</code></td></tr>
-<tr><td><code>try_cast(value AS type)</code></td><td>类型转换，失败返回 null</td><td><code>try_cast('a123' as double)</code></td></tr>
-</table>
-<div class="note">⚠️ SKB 广告价值字段 value 在原始表中为字符串类型，使用前需 <code>try_cast(value as double)</code></div>
-<pre>-- SKB 原始广告价值表查询（value 为字符串需转换）
-select date, count(*) as times,
-  sum(if(platform='IOS', try_cast(value as double), try_cast(value as double)/1000000)) as revenue
-from dw_rawdata_clientlogofmn04.advalue
-where date='2025-02-01'
-group by 1</pre>
-
-<h3>条件判断（CASE / IF / COALESCE）</h3>
-<table>
-<tr><th>表达式</th><th>说明</th><th>常用场景</th></tr>
-<tr><td><code>CASE WHEN condition THEN result [ELSE result] END</code></td><td>多分支条件判断</td><td>渠道映射、地区分组、广告类型转换</td></tr>
-<tr><td><code>IF(condition, true_value, false_value)</code></td><td>简单二值条件</td><td>平台判断 <code>IF(platform='IOS', value, value/1000000)</code></td></tr>
-<tr><td><code>COALESCE(value1, value2, ...)</code></td><td>返回第一个非空值</td><td>兜底空值 <code>COALESCE(idfa, idfv, advertising_id)</code></td></tr>
-</table>
-<pre>-- SKB 不同平台广告价值转换（核心口径）
-select date, platform,
-  sum(case when platform='IOS' then value
-           when platform='ANDROID' then value/1000000
-           else 0 end) as revenue
-from dw_ods_mn04.c_advalue
-where date='2025-02-01'
-group by 1, 2
-
--- 设备ID兜底取值（iOS隐私策略下IDFA可能为空）
-select coalesce(
-  if(idfa='', null, idfa),
-  if(idfv='', null, idfv),
-  advertising_id
-) as dev_id
-from dw_ods_mn04.c_adplay</pre>
-
-<h3>逻辑操作符（AND / OR / NOT）</h3>
-<table>
-<tr><th>操作符</th><th>说明</th><th>注意事项</th></tr>
-<tr><td><code>AND</code></td><td>两侧都为 true 才为 true</td><td>优先级高于 OR</td></tr>
-<tr><td><code>OR</code></td><td>任一侧为 true 即为 true</td><td>无括号时 AND 先算</td></tr>
-<tr><td><code>NOT</code></td><td>否定条件</td><td>常与 WHERE 配合</td></tr>
-</table>
-<div class="note">⚠️ 混用 AND/OR 时必须加括号明确优先级，否则逻辑错误！</div>
-<pre>-- ❌ 错误：缺少括号导致逻辑错误
-WHERE client_source='app' AND can_track=1 OR client_source='h5'
--- ✅ 正确：加括号明确优先级
-WHERE (client_source='app' AND can_track=1 OR client_source='h5')
-
--- NULL 与逻辑操作符：NULL AND FALSE = FALSE，NULL OR TRUE = TRUE</pre>
-
-<h3>比较操作符</h3>
-<table>
-<tr><th>操作符</th><th>说明</th><th>注意事项</th></tr>
-<tr><td><code>BETWEEN min AND max</code></td><td>范围判断（闭区间）</td><td>常用于日期范围</td></tr>
-<tr><td><code>IS NULL / IS NOT NULL</code></td><td>判空</td><td>注意空字符串 '' 不等于 NULL</td></tr>
-<tr><td><code>LIKE</code></td><td>模式匹配</td><td><code>%</code> 代表任意字符，<code>_</code> 代表单个字符</td></tr>
-</table>
-<pre>-- 查有登录但无广告行为的用户（LEFT JOIN + IS NULL 模式）
-select t1.account_id
-from dw_ods_mn04.s_login t1
-left join dw_ods_mn04.c_adplay t2
-  on t1.account_id = t2.account_id and t2.date = '2025-02-01'
-where t1.date = '2025-02-01'
-  and t2.account_id is null  -- 关联不上说明没有广告行为
-
--- 注意：IDFA 为空的特殊处理（'' 不等于 NULL）
-where idfa is not null and idfa &lt;&gt; ''</pre>
-
-<h3>字符串函数</h3>
-<table>
-<tr><th>函数</th><th>说明</th><th>常用场景</th></tr>
-<tr><td><code>concat(str1, str2, ...)</code></td><td>字符串拼接</td><td>防止 Excel 科学计数法：<code>concat('a-', account_id)</code></td></tr>
-<tr><td><code>lower(str) / upper(str)</code></td><td>大小写转换</td><td>统一渠道名：<code>lower(adchannel)</code></td></tr>
-<tr><td><code>substr(str, start, length)</code></td><td>截取子串</td><td>UNO role_id 分组：<code>substr(role_id, -6, 2)</code></td></tr>
-<tr><td><code>split_part(str, delimiter, index)</code></td><td>按分隔符拆分</td><td>UNO account_id 处理：<code>split_part(account_id, '@', 1)</code></td></tr>
-<tr><td><code>replace(str, search, replace)</code></td><td>字符替换</td><td>清理空格：<code>replace(str, ' ', '_')</code></td></tr>
-</table>
-<div class="note">⚠️ UNO account_id 格式为 <code>xxx@yyy</code>，与其他表 JOIN 时需先 <code>split_part(account_id, '@', 1)</code></div>
-
-<h3>时间函数</h3>
-<table>
-<tr><th>函数</th><th>说明</th><th>示例</th></tr>
-<tr><td><code>date(x)</code></td><td>转为日期类型</td><td><code>date('2025-01-01')</code></td></tr>
-<tr><td><code>date_add(unit, value, timestamp)</code></td><td>日期加减</td><td><code>date_add('day', -7, current_date)</code></td></tr>
-<tr><td><code>date_diff(unit, ts1, ts2)</code></td><td>时间差</td><td><code>date_diff('day', DATE(reg_date), DATE(active_date))</code></td></tr>
-<tr><td><code>date_trunc(unit, x)</code></td><td>截断到指定精度</td><td><code>date_trunc('hour', cast(log_time as timestamp))</code></td></tr>
-<tr><td><code>from_unixtime(ts)</code></td><td>Unix 时间戳转日期</td><td><code>date(from_unixtime(1595249648))</code></td></tr>
-</table>
-<pre>-- 计算新增账号 48 小时内充值金额
-select f_login_date, count(distinct t1.account_id) as dnu,
-  sum(if(date_diff('minute', t1.log_time, t2.log_time) &lt; 48*60, payment, 0)) as IAP_48h
-from (...新账号...) t1
-left join (...充值记录...) t2 on t1.account_id = t2.account_id
-group by 1
-
--- 留存计算核心逻辑
-date_diff('day', t1.date, t2.date) AS retention_day</pre>
-
-<h3>JSON 处理</h3>
-<table>
-<tr><th>函数</th><th>说明</th><th>返回类型</th></tr>
-<tr><td><code>json_extract(json, path)</code></td><td>提取 JSON 值</td><td>返回 JSON 类型（适合复杂对象）</td></tr>
-<tr><td><code>json_extract_scalar(json, path)</code></td><td>提取 JSON 标量值</td><td>返回字符串（适合简单值）</td></tr>
-</table>
-<pre>-- 提取广告加载失败原因中的错误码
-select json_extract_scalar(reason, '$.responseInfo') as responseInfo,
-       json_extract(reason, '$.errocode') as errocode
-from dw_ods_mn04.c_adload
-where date = '2025-02-26'</pre>
-
-<h3>UNION 合并多数据源</h3>
-<p class="panel-desc" style="margin-top:0;">广告数据分散在不同埋点表（登录/播放/价值），常用 UNION ALL 合并后统一分析。</p>
-<pre>-- SKB 广告分析典型模式：UNION ALL 合并登录+播放+价值
-with user_info as (
-  select date, platform, account_id as role_id, 'login' as log_type, null as revenue
-  from dw_ods_common_mn04.omni_server_login
-  where date between '2025-01-19' and '2025-02-19' and game_id = 1000008
-  union all
-  select date, platform, account_id, 'play', null
-  from dw_ods_mn04.c_adplay
-  where date between '2025-01-19' and '2025-02-19' and status = '1'
-  union all
-  select date, platform, account_id, 'advalue', if(platform='IOS', value, value/1000000)
-  from dw_ods_mn04.c_advalue
-  where date between '2025-01-19' and '2025-02-19'
-)
-select date, platform,
-  count(distinct if(log_type='login', role_id, null)) as DAU,
-  count(distinct if(log_type='play', role_id, null)) as AdPlayUsers,
-  sum(if(log_type='play', 1, 0)) as AdPlayTimes,
-  sum(if(log_type='advalue', revenue, 0)) as Revenue
-from user_info
-group by 1, 2</pre>
-
-<h3>特殊处理技巧</h3>
-<table>
-<tr><th>场景</th><th>处理方式</th><th>说明</th></tr>
-<tr><td>标签列表打平</td><td><code>unnest(labels) as t(label)</code></td><td>SKB 标签表 <code>s_player_label</code> 中 labels 为数组</td></tr>
-<tr><td>设备归因关联</td><td>JOIN <code>afid_install_info</code> 表</td><td>按 <code>appsflyer_id</code> 关联广告行为与归因数据</td></tr>
-<tr><td>全量表取最新</td><td><code>where date = cast(date_add('day', -1, current_date) as varchar)</code></td><td><code>dm_mnXX_player_info</code> 为全量快照，取 T-1 天即可</td></tr>
-<tr><td>免费用户判断</td><td><code>t2.l_payment_date is null</code></td><td>JOIN 全量表判断历史是否有付费记录</td></tr>
-<tr><td>UNO 分组号段</td><td><code>try_cast(substr(role_id, -6, 2) as bigint) between 0 and 9</code></td><td>AB 分流用角色ID倒数5-6位</td></tr>
-</table>
 </div>
 
-</main><!-- end dict-content -->
-</div><!-- end dict-layout -->
-
 <script>
-// 左侧导航切换
-document.querySelectorAll('.sidebar-item').forEach(item => {
-  item.addEventListener('click', (e) => {
+document.querySelectorAll('.dict-tab').forEach(tab => {
+  tab.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // 切换 active 状态
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.dict-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.dict-panel').forEach(p => p.classList.remove('active'));
-    item.classList.add('active');
-    document.getElementById(item.dataset.panel).classList.add('active');
-    // 内容区滚动到顶部
-    document.querySelector('.dict-content').scrollTo(0, 0);
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
   });
 });
 </script>
