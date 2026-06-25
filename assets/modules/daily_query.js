@@ -230,6 +230,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 全局搜索开关
+  const searchToggle = document.getElementById('dq_global_search_toggle');
+  const searchWrap = document.getElementById('dq-search-input-wrap');
+  const searchStatus = document.getElementById('dq-search-status');
+  if (searchToggle) {
+    searchToggle.addEventListener('change', () => {
+      if (searchToggle.checked) {
+        searchWrap.style.display = 'block';
+        searchStatus.textContent = '已启用';
+        searchStatus.style.color = 'var(--brand-1)';
+      } else {
+        searchWrap.style.display = 'none';
+        searchStatus.textContent = '未启用';
+        searchStatus.style.color = 'var(--text-3)';
+      }
+    });
+  }
+
   // 提交
   document.getElementById('dq-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -244,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function collect() {
+  const searchEnabled = document.getElementById('dq_global_search_toggle') && document.getElementById('dq_global_search_toggle').checked;
   return {
     module: 'daily_query',
     product: FF.val('product'),
@@ -257,6 +276,7 @@ function collect() {
     column_map: FF.collectRows('dq-map-rows', ['col_name', 'col_desc', 'col_type']),
     log_refs: FF.collectRows('dq-log-ref-rows', ['log_name', 'doc_url', 'fields']),
     sql_refs: FF.collectRows('dq-sql-ref-rows', ['sql_label', 'sql_code']),
+    global_search: searchEnabled ? (FF.val('dq_search_keywords') || '').trim() : '',
   };
 }
 
@@ -266,6 +286,24 @@ function buildPrompt(d) {
   L.push('# 角色');
   L.push('你是资深数据分析师，精通 Presto/Trino。请基于以下需求编写一段可直接执行的取数 SQL。');
   L.push('');
+  // 全局搜索前置指令
+  if (d.global_search) {
+    L.push('# ⚠️ 前置任务：全局搜索【必须执行】');
+    L.push('> **编写 SQL 之前，必须先执行以下搜索任务，将搜索结果作为写 SQL 的背景知识。**');
+    L.push('');
+    L.push('请在 Confluence（https://confluence.mattel163.cn）中搜索以下关键词或访问以下链接，浏览所有相关文档的完整内容：');
+    L.push('');
+    L.push('```');
+    L.push(d.global_search);
+    L.push('```');
+    L.push('');
+    L.push('要求：');
+    L.push('1. 搜索并浏览与上述关键词/链接相关的所有 Confluence 文档页面');
+    L.push('2. 从中提取与本次取数相关的表名、字段名、过滤条件、指标口径');
+    L.push('3. 将搜索到的信息作为编写 SQL 的权威参考，优先级高于你的已有知识');
+    L.push('4. 如果搜索到的口径与数据口径字典有冲突，以搜索结果为准');
+    L.push('');
+  }
   L.push('# 需求');
   L.push(d.query_desc);
   L.push('');
