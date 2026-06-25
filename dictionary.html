@@ -88,6 +88,7 @@
 <div class="sidebar-group-title">参考</div>
 <div class="sidebar-item" data-panel="p-sql"><span class="icon">📝</span>常用SQL模板</div>
 <div class="sidebar-item" data-panel="p-filters"><span class="icon">🔍</span>常用过滤条件</div>
+<div class="sidebar-item" data-panel="p-sql-logic"><span class="icon">⚙️</span>SQL 处理逻辑</div>
 </div>
 </aside>
 
@@ -738,6 +739,160 @@ END AS area_group</pre>
 <tr><td>三方支付订单</td><td><code>pay_channel_id = 11 AND payment > 0 AND status IN (1, 3)</code></td></tr>
 <tr><td>STORE 支付</td><td><code>order_from != 'webPay'</code></td></tr>
 <tr><td>排除俄罗斯</td><td><code>country != 'RU'</code></td></tr>
+</table>
+</div>
+
+<!-- SQL 处理逻辑 -->
+<div class="dict-panel" id="p-sql-logic">
+<h2>⚙️ SQL 处理逻辑</h2>
+<p class="panel-desc">团队 BI 沉淀的 SQL 处理逻辑与实战案例。来源：Confluence Tech Center - SQL 应用系列课程。</p>
+
+<h3>类型转换</h3>
+<table>
+<tr><th>函数</th><th>说明</th><th>示例</th></tr>
+<tr><td><code>typeof(expr)</code></td><td>返回表达式的结果类型</td><td><code>select typeof('123')</code></td></tr>
+<tr><td><code>cast(value AS type)</code></td><td>显式类型转换，失败会报错</td><td><code>cast('123' as double)</code></td></tr>
+<tr><td><code>try_cast(value AS type)</code></td><td>类型转换，失败返回 null</td><td><code>try_cast('a123' as double)</code></td></tr>
+</table>
+<div class="note">⚠️ SKB 广告价值字段 value 在原始表中为字符串类型，使用前需 <code>try_cast(value as double)</code></div>
+<pre>-- SKB 原始广告价值表查询（value 为字符串需转换）
+select date, count(*) as times,
+  sum(if(platform='IOS', try_cast(value as double), try_cast(value as double)/1000000)) as revenue
+from dw_rawdata_clientlogofmn04.advalue
+where date='2025-02-01'
+group by 1</pre>
+
+<h3>条件判断（CASE / IF / COALESCE）</h3>
+<table>
+<tr><th>表达式</th><th>说明</th><th>常用场景</th></tr>
+<tr><td><code>CASE WHEN condition THEN result [ELSE result] END</code></td><td>多分支条件判断</td><td>渠道映射、地区分组、广告类型转换</td></tr>
+<tr><td><code>IF(condition, true_value, false_value)</code></td><td>简单二值条件</td><td>平台判断 <code>IF(platform='IOS', value, value/1000000)</code></td></tr>
+<tr><td><code>COALESCE(value1, value2, ...)</code></td><td>返回第一个非空值</td><td>兜底空值 <code>COALESCE(idfa, idfv, advertising_id)</code></td></tr>
+</table>
+<pre>-- SKB 不同平台广告价值转换（核心口径）
+select date, platform,
+  sum(case when platform='IOS' then value
+           when platform='ANDROID' then value/1000000
+           else 0 end) as revenue
+from dw_ods_mn04.c_advalue
+where date='2025-02-01'
+group by 1, 2
+
+-- 设备ID兜底取值（iOS隐私策略下IDFA可能为空）
+select coalesce(
+  if(idfa='', null, idfa),
+  if(idfv='', null, idfv),
+  advertising_id
+) as dev_id
+from dw_ods_mn04.c_adplay</pre>
+
+<h3>逻辑操作符（AND / OR / NOT）</h3>
+<table>
+<tr><th>操作符</th><th>说明</th><th>注意事项</th></tr>
+<tr><td><code>AND</code></td><td>两侧都为 true 才为 true</td><td>优先级高于 OR</td></tr>
+<tr><td><code>OR</code></td><td>任一侧为 true 即为 true</td><td>无括号时 AND 先算</td></tr>
+<tr><td><code>NOT</code></td><td>否定条件</td><td>常与 WHERE 配合</td></tr>
+</table>
+<div class="note">⚠️ 混用 AND/OR 时必须加括号明确优先级，否则逻辑错误！</div>
+<pre>-- ❌ 错误：缺少括号导致逻辑错误
+WHERE client_source='app' AND can_track=1 OR client_source='h5'
+-- ✅ 正确：加括号明确优先级
+WHERE (client_source='app' AND can_track=1 OR client_source='h5')
+
+-- NULL 与逻辑操作符：NULL AND FALSE = FALSE，NULL OR TRUE = TRUE</pre>
+
+<h3>比较操作符</h3>
+<table>
+<tr><th>操作符</th><th>说明</th><th>注意事项</th></tr>
+<tr><td><code>BETWEEN min AND max</code></td><td>范围判断（闭区间）</td><td>常用于日期范围</td></tr>
+<tr><td><code>IS NULL / IS NOT NULL</code></td><td>判空</td><td>注意空字符串 '' 不等于 NULL</td></tr>
+<tr><td><code>LIKE</code></td><td>模式匹配</td><td><code>%</code> 代表任意字符，<code>_</code> 代表单个字符</td></tr>
+</table>
+<pre>-- 查有登录但无广告行为的用户（LEFT JOIN + IS NULL 模式）
+select t1.account_id
+from dw_ods_mn04.s_login t1
+left join dw_ods_mn04.c_adplay t2
+  on t1.account_id = t2.account_id and t2.date = '2025-02-01'
+where t1.date = '2025-02-01'
+  and t2.account_id is null  -- 关联不上说明没有广告行为
+
+-- 注意：IDFA 为空的特殊处理（'' 不等于 NULL）
+where idfa is not null and idfa &lt;&gt; ''</pre>
+
+<h3>字符串函数</h3>
+<table>
+<tr><th>函数</th><th>说明</th><th>常用场景</th></tr>
+<tr><td><code>concat(str1, str2, ...)</code></td><td>字符串拼接</td><td>防止 Excel 科学计数法：<code>concat('a-', account_id)</code></td></tr>
+<tr><td><code>lower(str) / upper(str)</code></td><td>大小写转换</td><td>统一渠道名：<code>lower(adchannel)</code></td></tr>
+<tr><td><code>substr(str, start, length)</code></td><td>截取子串</td><td>UNO role_id 分组：<code>substr(role_id, -6, 2)</code></td></tr>
+<tr><td><code>split_part(str, delimiter, index)</code></td><td>按分隔符拆分</td><td>UNO account_id 处理：<code>split_part(account_id, '@', 1)</code></td></tr>
+<tr><td><code>replace(str, search, replace)</code></td><td>字符替换</td><td>清理空格：<code>replace(str, ' ', '_')</code></td></tr>
+</table>
+<div class="note">⚠️ UNO account_id 格式为 <code>xxx@yyy</code>，与其他表 JOIN 时需先 <code>split_part(account_id, '@', 1)</code></div>
+
+<h3>时间函数</h3>
+<table>
+<tr><th>函数</th><th>说明</th><th>示例</th></tr>
+<tr><td><code>date(x)</code></td><td>转为日期类型</td><td><code>date('2025-01-01')</code></td></tr>
+<tr><td><code>date_add(unit, value, timestamp)</code></td><td>日期加减</td><td><code>date_add('day', -7, current_date)</code></td></tr>
+<tr><td><code>date_diff(unit, ts1, ts2)</code></td><td>时间差</td><td><code>date_diff('day', DATE(reg_date), DATE(active_date))</code></td></tr>
+<tr><td><code>date_trunc(unit, x)</code></td><td>截断到指定精度</td><td><code>date_trunc('hour', cast(log_time as timestamp))</code></td></tr>
+<tr><td><code>from_unixtime(ts)</code></td><td>Unix 时间戳转日期</td><td><code>date(from_unixtime(1595249648))</code></td></tr>
+</table>
+<pre>-- 计算新增账号 48 小时内充值金额
+select f_login_date, count(distinct t1.account_id) as dnu,
+  sum(if(date_diff('minute', t1.log_time, t2.log_time) &lt; 48*60, payment, 0)) as IAP_48h
+from (...新账号...) t1
+left join (...充值记录...) t2 on t1.account_id = t2.account_id
+group by 1
+
+-- 留存计算核心逻辑
+date_diff('day', t1.date, t2.date) AS retention_day</pre>
+
+<h3>JSON 处理</h3>
+<table>
+<tr><th>函数</th><th>说明</th><th>返回类型</th></tr>
+<tr><td><code>json_extract(json, path)</code></td><td>提取 JSON 值</td><td>返回 JSON 类型（适合复杂对象）</td></tr>
+<tr><td><code>json_extract_scalar(json, path)</code></td><td>提取 JSON 标量值</td><td>返回字符串（适合简单值）</td></tr>
+</table>
+<pre>-- 提取广告加载失败原因中的错误码
+select json_extract_scalar(reason, '$.responseInfo') as responseInfo,
+       json_extract(reason, '$.errocode') as errocode
+from dw_ods_mn04.c_adload
+where date = '2025-02-26'</pre>
+
+<h3>UNION 合并多数据源</h3>
+<p class="panel-desc" style="margin-top:0;">广告数据分散在不同埋点表（登录/播放/价值），常用 UNION ALL 合并后统一分析。</p>
+<pre>-- SKB 广告分析典型模式：UNION ALL 合并登录+播放+价值
+with user_info as (
+  select date, platform, account_id as role_id, 'login' as log_type, null as revenue
+  from dw_ods_common_mn04.omni_server_login
+  where date between '2025-01-19' and '2025-02-19' and game_id = 1000008
+  union all
+  select date, platform, account_id, 'play', null
+  from dw_ods_mn04.c_adplay
+  where date between '2025-01-19' and '2025-02-19' and status = '1'
+  union all
+  select date, platform, account_id, 'advalue', if(platform='IOS', value, value/1000000)
+  from dw_ods_mn04.c_advalue
+  where date between '2025-01-19' and '2025-02-19'
+)
+select date, platform,
+  count(distinct if(log_type='login', role_id, null)) as DAU,
+  count(distinct if(log_type='play', role_id, null)) as AdPlayUsers,
+  sum(if(log_type='play', 1, 0)) as AdPlayTimes,
+  sum(if(log_type='advalue', revenue, 0)) as Revenue
+from user_info
+group by 1, 2</pre>
+
+<h3>特殊处理技巧</h3>
+<table>
+<tr><th>场景</th><th>处理方式</th><th>说明</th></tr>
+<tr><td>标签列表打平</td><td><code>unnest(labels) as t(label)</code></td><td>SKB 标签表 <code>s_player_label</code> 中 labels 为数组</td></tr>
+<tr><td>设备归因关联</td><td>JOIN <code>afid_install_info</code> 表</td><td>按 <code>appsflyer_id</code> 关联广告行为与归因数据</td></tr>
+<tr><td>全量表取最新</td><td><code>where date = cast(date_add('day', -1, current_date) as varchar)</code></td><td><code>dm_mnXX_player_info</code> 为全量快照，取 T-1 天即可</td></tr>
+<tr><td>免费用户判断</td><td><code>t2.l_payment_date is null</code></td><td>JOIN 全量表判断历史是否有付费记录</td></tr>
+<tr><td>UNO 分组号段</td><td><code>try_cast(substr(role_id, -6, 2) as bigint) between 0 and 9</code></td><td>AB 分流用角色ID倒数5-6位</td></tr>
 </table>
 </div>
 
