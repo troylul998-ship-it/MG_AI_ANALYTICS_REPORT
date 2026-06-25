@@ -512,6 +512,101 @@
 <tr><td>SKB</td><td>1000008</td><td>SKB 主键用 account_id / role_id</td></tr>
 <tr><td>UNO2</td><td>1000014</td><td>UNO2 主键用 role_id / sdk_account_id</td></tr>
 </table>
+<h3>运营活动指标（补充）</h3>
+<table>
+<tr><th>编号</th><th>指标</th><th>计算逻辑</th><th>数据源</th></tr>
+<tr><td>YY004</td><td>优惠券支付用户占比</td><td>优惠券支付用户数 / 三方总支付用户数（剔除俄用户）</td><td>server_voucher_writeoff / omni_server_payment</td></tr>
+<tr><td>YY005</td><td>优惠券支付金额占比</td><td>优惠券支付金额 / 三方总支付金额</td><td>server_voucher_writeoff / omni_server_payment</td></tr>
+<tr><td>YY006</td><td>3PP资源投放总人均量</td><td>资源投放总量 / 登录玩家数(avatar_suc去重)</td><td>p10_3pp_resource / avatar_suc</td></tr>
+<tr><td>YY007</td><td>3PP资源投放参与人均量</td><td>资源投放总量 / 获得道具玩家数</td><td>p10_3pp_resource</td></tr>
+<tr><td>YY009</td><td>7天累计复购金额</td><td>当日付费玩家7天内再次付费累计金额（剔除俄用户）</td><td>omni_server_payment</td></tr>
+</table>
+
+<h3>三方用户分层（L1~L8）</h3>
+<table>
+<tr><th>分层</th><th>条件</th><th>典型特征</th></tr>
+<tr><td>L1_极高额高频</td><td>累计≥$100 且 ≥6单</td><td>高额高频型"大R"用户</td></tr>
+<tr><td>L2_高额中频</td><td>累计≥$50</td><td>活动驱动型/收藏家用户</td></tr>
+<tr><td>L3_中额高频</td><td>累计≥$10 且 ≥3单</td><td>小额高频型"稳充"用户</td></tr>
+<tr><td>L4_中额低频</td><td>累计≥$10 且 &lt;3单</td><td>偶尔中额付费</td></tr>
+<tr><td>L5_小额高频</td><td>累计&lt;$10 且 ≥2单</td><td>小额多次</td></tr>
+<tr><td>L6_单次非破冰</td><td>仅1单 且 非当期首付</td><td>历史单次付费</td></tr>
+<tr><td>L7_单次破冰</td><td>仅1单 且 当期首付</td><td>刚破冰的新三方用户</td></tr>
+<tr><td>L8_其他</td><td>不满足以上条件</td><td>—</td></tr>
+</table>
+
+<h3>内嵌/主站区分口径</h3>
+<pre>-- omni_server_payment 核心过滤条件
+WHERE pay_channel_id = 11
+  AND payment > 0
+  AND order_from = 'storePay'
+  AND status IN (1, 3, 4)
+
+-- 内嵌收入: sub_order_from = '3ppingame'
+-- 主站收入: sub_order_from IS NULL</pre>
+
+<h3>二选一弹窗埋点</h3>
+<h4>UNO 二选一弹窗</h4>
+<table>
+<tr><th>表名</th><th>字段</th><th>含义</th></tr>
+<tr><td rowspan="4"><code>dw_ods_mn01.c_client_app_payment_selectchannel</code></td><td>extra_col_action = 'openUI'</td><td>打开弹窗</td></tr>
+<tr><td>extra_col_action = 'close'</td><td>关闭弹窗</td></tr>
+<tr><td>extra_col_action = 'selectIAP'</td><td>选择内购(Pay in App)</td></tr>
+<tr><td>extra_col_action = 'selectweb'</td><td>选择三方(Pay on Web)</td></tr>
+</table>
+
+<h4>P10 二选一弹窗</h4>
+<table>
+<tr><th>表名</th><th>字段</th><th>含义</th></tr>
+<tr><td rowspan="3"><code>dw_ods_mn02.c_payment_interact</code></td><td>action=1, surfacename='one_of_two_gift'</td><td>二选一弹窗曝光（打开）</td></tr>
+<tr><td>action=2, surfacename='one_of_two_gift'</td><td>二选一弹窗下单（点击购买）</td></tr>
+<tr><td>action=3, surfacename='one_of_two_gift'</td><td>二选一弹窗关闭</td></tr>
+</table>
+
+<h3>Remember Me (RM) 埋点</h3>
+<h4>P10 RM 状态表</h4>
+<table>
+<tr><th>表名</th><th>字段</th><th>类型</th><th>含义</th></tr>
+<tr><td rowspan="3"><code>dw_ods_mn02.c_payment_choice</code></td><td>account_id</td><td>string</td><td>用户主键</td></tr>
+<tr><td>state</td><td>int</td><td><b>1=开启RM</b>（记住我的选择，后续自动跳转3PP）；<b>0=关闭RM</b></td></tr>
+<tr><td>log_time</td><td>timestamp</td><td>操作时间</td></tr>
+</table>
+<h4>RM 常用分析逻辑</h4>
+<pre>-- RM勾选状态分析（末次状态/首次开启日期/开启关闭次数/是否曾开启）
+SELECT
+    account_id,
+    MAX(CASE WHEN rn_desc = 1 THEN state END)    AS rm_last_state,
+    MIN(CASE WHEN state = 1 THEN date END)       AS first_rm_date,
+    COUNT(CASE WHEN state = 1 THEN 1 END)        AS rm_open_cnt,
+    COUNT(CASE WHEN state = 0 THEN 1 END)        AS rm_close_cnt,
+    MAX(CASE WHEN state = 1 THEN 1 ELSE 0 END)  AS ever_rm
+FROM (
+    SELECT account_id, state, log_time, date,
+           ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY log_time DESC) AS rn_desc
+    FROM dw_ods_mn02.c_payment_choice
+    WHERE date BETWEEN '2026-03-05' AND '2026-06-03'
+) pc
+GROUP BY account_id</pre>
+
+<h4>P10 RM AB实验标签</h4>
+<table>
+<tr><th>标签</th><th>含义</th><th>来源表</th></tr>
+<tr><td>U20</td><td>RM实验组（展示上下结构弹窗 + Remember My Choice 功能）</td><td rowspan="3"><code>dw_ods_mn02.s_player_label</code></td></tr>
+<tr><td>T20</td><td>RM对照组（原二选一弹窗）</td></tr>
+<tr><td>V20</td><td>满足实验条件的人群（与U20/T20配合使用）</td></tr>
+</table>
+<p style="font-size:12px;color:var(--text-3);">实验人群：美国IOS + (最近90天3PP收入占总收入≥25% 或 近3笔订单在3PP)，实验组U20+V20(50%)，对照组T20+V20(50%)</p>
+
+<h3>三方转化漏斗（MAU→知道→下单→付费→互动→忠诚）</h3>
+<table>
+<tr><th>阶段</th><th>定义</th><th>核心表/口径</th></tr>
+<tr><td>MAU</td><td>活跃用户</td><td>活跃中间表</td></tr>
+<tr><td>知道3PP</td><td>登录过主站 OR 看到过二选一弹窗</td><td><code>c_avatar_suc</code>(game_id=1019) OR <code>c_payment_interact</code>(action=1, surfacename='one_of_two_gift')</td></tr>
+<tr><td>下单</td><td>在3PP产生下单行为</td><td><code>c_payment_interact</code>(action=2, surfacename='one_of_two_gift') OR <code>c_create_order</code>(game_id=1019)</td></tr>
+<tr><td>付费</td><td>3PP付费成功</td><td><code>dm_mn02_player_3pp_payment_info</code>(third_payment_sum_1d > 0)</td></tr>
+<tr><td>互动</td><td>参与3PP运营活动</td><td>优惠券领取/抽奖/签到/满3单领奖/优惠券核销</td></tr>
+<tr><td>忠诚</td><td>期间完成≥3单</td><td><code>omni_server_payment</code> 或付费漏斗表统计</td></tr>
+</table>
 </div>
 
 <!-- 广告取数案例 -->
