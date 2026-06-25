@@ -6,27 +6,54 @@
 <title>分析方法论 · AI 数据分析平台</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
-.m-wrap{max-width:1100px;margin:0 auto;padding:28px 24px 80px;}
-.m-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0;}
-.m-tab{font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;background:#f4f3f0;color:var(--text-2);}
-.m-tab.active{background:var(--surface);color:var(--brand-1);border-color:var(--brand-1);}
-.m-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:0 12px 12px 12px;padding:28px;}
+/* 左侧边栏布局 */
+.m-layout{display:flex;max-width:1400px;margin:0 auto;padding:0 24px 80px;gap:0;}
+
+/* 左侧导航 */
+.m-sidebar{position:sticky;top:70px;width:240px;min-width:240px;height:calc(100vh - 70px);overflow-y:auto;padding:20px 0 40px 0;border-right:1px solid var(--border);}
+.m-sidebar::-webkit-scrollbar{width:4px;}
+.m-sidebar::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
+.sidebar-group{margin-bottom:16px;}
+.sidebar-group-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 16px;margin-bottom:2px;}
+.sidebar-item{display:block;font-size:13px;padding:7px 16px 7px 20px;color:var(--text-2);cursor:pointer;border-radius:0 6px 6px 0;border-left:3px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:#f4f3f0;color:var(--text-1);}
+.sidebar-item.active{background:#fff5f0;color:var(--brand-1);border-left-color:var(--brand-1);font-weight:600;}
+.sidebar-item .icon{margin-right:6px;font-size:14px;}
+
+/* 右侧内容 */
+.m-content{flex:1;min-width:0;padding:24px 0 0 36px;}
+.m-panel{display:none;animation:fadeIn .2s;}
 .m-panel.active{display:block;}
-.m-panel h3{font-size:17px;margin:24px 0 10px;color:var(--text-1);letter-spacing:-0.01em;}
-.m-panel h3:first-child{margin-top:0;}
-.m-panel h4{font-size:14px;margin:18px 0 8px;color:var(--brand-1);font-weight:600;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* 内容面板样式 */
+.m-panel h2{font-size:20px;margin:0 0 6px;color:var(--text-1);letter-spacing:-0.02em;}
+.m-panel .panel-desc{font-size:13px;color:var(--text-3);margin-bottom:20px;}
+.m-panel h3{font-size:15px;margin:24px 0 8px;color:var(--text-1);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.m-panel h3:first-of-type{margin-top:8px;}
+.m-panel h4{font-size:13px;margin:16px 0 6px;color:var(--brand-1);font-weight:600;}
 .m-panel p{font-size:13.5px;color:var(--text-2);margin-bottom:10px;line-height:1.7;}
 .m-panel ul{padding-left:20px;margin-bottom:12px;}
 .m-panel li{font-size:13px;color:var(--text-2);margin:5px 0;line-height:1.6;}
-.m-panel table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:16px;}
-.m-panel th,.m-panel td{border:1px solid var(--border);padding:7px 10px;text-align:left;vertical-align:top;}
-.m-panel th{background:#faf9f6;font-weight:600;}
+.m-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
+.m-panel th,.m-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top;}
+.m-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;}
 .m-panel code{background:#f1f0ec;padding:1px 5px;border-radius:4px;font-size:12px;}
 .m-lead{font-size:13px;color:var(--text-3);background:#faf9f6;border-left:3px solid var(--brand-1);padding:10px 14px;border-radius:6px;margin-bottom:18px;}
 .step-box{background:#faf9f6;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
 .step-box .num{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--text-1);color:#fff;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px;}
 .step-box b{font-size:13px;}
 .tmpl{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;}
+
+/* 响应式 */
+@media(max-width:768px){
+  .m-layout{flex-direction:column;}
+  .m-sidebar{position:relative;top:0;width:100%;min-width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;display:flex;flex-wrap:wrap;gap:4px;}
+  .sidebar-group{margin-bottom:4px;display:flex;flex-wrap:wrap;gap:2px;}
+  .sidebar-group-title{display:none;}
+  .sidebar-item{padding:6px 12px;border-radius:6px;border-left:none;font-size:12px;}
+  .m-content{padding:20px 0 0 0;}
+}
 </style>
 </head>
 <body>
@@ -39,24 +66,32 @@
 </div>
 </header>
 
-<div class="m-wrap">
-<h2 style="margin-bottom:6px;letter-spacing:-0.02em;">🧠 分析方法论</h2>
-<p style="font-size:13px;color:var(--text-3);margin-bottom:20px;">沉淀自团队实战的分析方法论：从付费/广告根因定位，到数据质量、KPI、可视化与报告交付的完整体系。</p>
-
-<div class="m-tabs">
-<div class="m-tab active" data-panel="m-pay">💰 付费根因定位</div>
-<div class="m-tab" data-panel="m-ad">📺 广告漏斗分析</div>
-<div class="m-tab" data-panel="m-flow">🔄 分析工作流</div>
-<div class="m-tab" data-panel="m-assist">🤖 AI 探索助手</div>
-<div class="m-tab" data-panel="m-simpson">🧪 辛普森悖论 & AB实验</div>
-<div class="m-tab" data-panel="m-quality">数据质量评估</div>
-<div class="m-tab" data-panel="m-diag">指标诊断 & KPI</div>
-<div class="m-tab" data-panel="m-kpi">KPI 设计 & 市场估算</div>
-<div class="m-tab" data-panel="m-viz">数据可视化</div>
-<div class="m-tab" data-panel="m-report">分析报告 & 仪表盘</div>
+<div class="m-layout">
+<!-- 左侧导航 -->
+<aside class="m-sidebar">
+<div class="sidebar-group">
+<div class="sidebar-group-title">根因分析</div>
+<div class="sidebar-item active" data-panel="m-pay"><span class="icon">💰</span>付费根因定位</div>
+<div class="sidebar-item" data-panel="m-ad"><span class="icon">📺</span>广告漏斗分析</div>
+<div class="sidebar-item" data-panel="m-diag"><span class="icon">🔬</span>指标诊断 & KPI</div>
 </div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">分析方法</div>
+<div class="sidebar-item" data-panel="m-simpson"><span class="icon">🧪</span>辛普森悖论 & AB实验</div>
+<div class="sidebar-item" data-panel="m-quality"><span class="icon">✅</span>数据质量评估</div>
+<div class="sidebar-item" data-panel="m-flow"><span class="icon">🔄</span>分析工作流</div>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">工具与输出</div>
+<div class="sidebar-item" data-panel="m-assist"><span class="icon">🤖</span>AI 探索助手</div>
+<div class="sidebar-item" data-panel="m-kpi"><span class="icon">🎯</span>KPI 设计 & 市场估算</div>
+<div class="sidebar-item" data-panel="m-viz"><span class="icon">📊</span>数据可视化</div>
+<div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
+</div>
+</aside>
 
-<!-- 付费根因定位 6 步法 -->
+<!-- 右侧内容 -->
+<main class="m-content">
 <div class="m-panel active" id="m-pay">
 <div class="m-lead">付费收入波动的系统化根因定位方法。核心思路：先看整体趋势，再层层拆解，定位到具体维度和用户行为，最后排除外部因素得出可行动结论。</div>
 
@@ -656,14 +691,21 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 
 </div>
 
+
+</main><!-- end m-content -->
+</div><!-- end m-layout -->
+
 <script>
-document.querySelectorAll('.m-tab').forEach(tab => {
-  tab.addEventListener('click', (e) => {
+// 左侧导航切换
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', (e) => {
     e.preventDefault();
-    document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+    e.stopPropagation();
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(tab.dataset.panel).classList.add('active');
+    item.classList.add('active');
+    document.getElementById(item.dataset.panel).classList.add('active');
+    document.querySelector('.m-content').scrollTo(0, 0);
   });
 });
 </script>
