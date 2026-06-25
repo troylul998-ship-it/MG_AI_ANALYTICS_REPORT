@@ -72,15 +72,15 @@
       </div>
       <div class="field" style="margin-top:16px;">
         <label>🔍 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
           <label class="toggle-switch">
             <input type="checkbox" id="dq_global_search_toggle">
             <span class="toggle-slider"></span>
           </label>
-          <span style="font-size:12px;color:var(--text-3);" id="dq-search-status">未启用</span>
+          <span style="font-size:13px;font-weight:500;" id="dq-search-status">未启用</span>
         </div>
         <div id="dq-search-input-wrap" style="display:none;">
-          <input type="text" id="dq_search_keywords" placeholder="输入关键词或 Confluence 链接，如：三方支付、广告eCPM、https://confluence.mattel163.cn/...">
+          <input type="text" id="dq_search_keywords" placeholder="输入关键词或 Confluence 链接，如：三方支付、广告eCPM、https://confluence.mattel163.cn/..." style="width:100%;">
           <p style="font-size:11px;color:var(--text-3);margin-top:4px;">AI 生成 SQL 前会先查阅 Confluence 中与该关键词/链接相关的所有文档，确保口径准确。</p>
         </div>
       </div>

@@ -240,10 +240,13 @@ document.addEventListener('DOMContentLoaded', () => {
         searchWrap.style.display = 'block';
         searchStatus.textContent = '已启用';
         searchStatus.style.color = 'var(--brand-1)';
+        searchStatus.style.fontWeight = '600';
+        document.getElementById('dq_search_keywords').focus();
       } else {
         searchWrap.style.display = 'none';
         searchStatus.textContent = '未启用';
         searchStatus.style.color = 'var(--text-3)';
+        searchStatus.style.fontWeight = '500';
       }
     });
   }
