@@ -259,9 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const analysisPrompt = buildAnalysisTemplate(data);
     const fullPrompt = buildFullPrompt(data, sqlPrompt, analysisPrompt);
     FF.renderArtifacts([
-      { key: 'full', label: '全能数分 Prompt', content: fullPrompt },
       { key: 'sql', label: 'SQL Prompt', content: sqlPrompt },
       { key: 'analysis', label: '分析 Prompt', content: analysisPrompt },
+      { key: 'full', label: '全能数分 Prompt', content: fullPrompt },
       { key: 'json', label: '结构化需求 JSON', content: JSON.stringify(data, null, 2) },
     ], { collectFn: collect });
   });
