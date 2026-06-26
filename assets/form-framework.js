@@ -228,6 +228,7 @@ const FF = (() => {
           ).join('') +
           '<br><span style="font-size:11px;color:#999;">点击上方字段名可直接定位</span>';
         summary.classList.add('show');
+        showToast('请检查必填项', 'error', 4000);
 
         // 定位按钮点击
         summary.querySelectorAll('.err-locate').forEach((a, idx) => {
@@ -280,6 +281,7 @@ const FF = (() => {
       navigator.clipboard.writeText(pre.textContent).then(() => {
         const old = btn.textContent;
         btn.textContent = '✓ 已复制';
+        showToast('已复制到剪贴板', 'success', 2000);
         setTimeout(() => (btn.textContent = old), 1500);
       });
     });
@@ -296,6 +298,27 @@ const FF = (() => {
       tab.classList.add('active');
       document.getElementById(tab.dataset.panel).classList.remove('hidden');
     });
+  }
+
+  /* ---------- Toast 通知 ---------- */
+  function showToast(message, type = 'success', duration = 3000) {
+    // 确保容器存在
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    const icons = { success: '✓', error: '✗', info: 'ℹ' };
+    toast.className = `toast toast-${type}`;
+    toast.textContent = `${icons[type] || ''} ${message}`;
+    container.appendChild(toast);
+    // 自动消失
+    setTimeout(() => {
+      toast.classList.add('toast-out');
+      toast.addEventListener('animationend', () => toast.remove());
+    }, duration);
   }
 
   /* ---------- 工具 ---------- */
@@ -360,6 +383,7 @@ const FF = (() => {
         if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 3000); }
         saveBtn.disabled = true;
         saveBtn.textContent = '✓ 已保存';
+        showToast('已保存到历史归档', 'success');
       });
     }
 
@@ -395,11 +419,13 @@ const FF = (() => {
           const msg = document.getElementById('human-msg');
           if (msg) { msg.style.display = 'inline'; msg.textContent = '✓ 已发送飞书通知'; setTimeout(() => msg.style.display = 'none', 5000); }
           humanBtn.textContent = '✓ 已通知';
+          showToast('已发送飞书通知', 'success');
         } catch (err) {
           humanBtn.disabled = false;
           humanBtn.textContent = '🙋 需要人工';
           const msg = document.getElementById('human-msg');
           if (msg) { msg.style.display = 'inline'; msg.textContent = '⚠️ 发送失败，请手动通知'; msg.style.color = 'var(--red)'; setTimeout(() => msg.style.display = 'none', 5000); }
+          showToast('发送失败，请手动通知', 'error', 5000);
         }
       });
     }
@@ -879,7 +905,7 @@ const FF = (() => {
 
   return {
     init, initDynamic, collectRows, clearContainer, getCheckedChips, validate,
-    renderArtifacts, val, esc, nonEmpty,
+    renderArtifacts, val, esc, nonEmpty, showToast,
     initSegToggle, addCustomChip, parseCsvHeader, wireChip, initWizard,
     getArchives, saveArchive, deleteArchive, getRestoreData, restoreForm,
   };

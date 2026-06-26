@@ -463,3 +463,45 @@ body.mode-guide .submit-bar { display: none; }
   .wiz-nav .btn-wiz { flex: 1; text-align: center; }
   .wiz-nav .wiz-counter { width: 100%; text-align: center; order: -1; }
 }
+
+/* ============================================================
+   Toast 通知条
+   ============================================================ */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: toast-in .3s ease;
+  max-width: 360px;
+}
+.toast.toast-out {
+  animation: toast-out .25s ease forwards;
+}
+.toast-success { background: var(--green-bg); color: var(--green); border: 1px solid #c6f6d5; }
+.toast-error { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+.toast-info { background: var(--blue-bg); color: var(--blue); border: 1px solid #bfdbfe; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(40px); }
+}
