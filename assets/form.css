@@ -276,8 +276,14 @@ body.mode-guide .wizard-progress { display: flex; }
 .wiz-step-dot.active .dot {
   background: var(--brand-grad); color: #fff;
   box-shadow: 0 0 0 4px rgba(232, 89, 12, 0.18);
+  animation: pulse-dot 2s infinite;
 }
 .wiz-step-dot.active .dot-label { color: var(--brand-1); font-weight: 600; }
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(232, 89, 12, 0.18); }
+  50% { box-shadow: 0 0 0 8px rgba(232, 89, 12, 0.08); }
+}
 
 /* 步骤卡片隐藏 */
 body.mode-guide .fcard { display: none; }
