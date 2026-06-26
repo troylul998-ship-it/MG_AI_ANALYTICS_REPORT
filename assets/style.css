@@ -324,3 +324,79 @@ a { color: inherit; text-decoration: none; }
   font-size: 12px;
   border-top: 1px solid var(--border);
 }
+
+/* ============================================================
+   移动端响应式适配
+   ============================================================ */
+
+/* Tablet: 768px - 1024px */
+@media (max-width: 1024px) {
+  .topbar-inner { padding: 12px 16px; }
+  .topbar nav { gap: 16px; }
+  .topbar nav a { font-size: 12px; }
+  .container { padding: 28px 16px 60px; }
+  .hero { padding: 36px 28px; }
+  .hero h2 { font-size: 1.6rem; }
+  .flow-steps { flex-wrap: wrap; }
+  .flow-step { min-width: 90px; }
+}
+
+/* Mobile: < 768px */
+@media (max-width: 768px) {
+  .topbar-inner {
+    padding: 10px 12px;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .topbar h1 { font-size: 14px; }
+  .topbar .sub { display: none; }
+  .topbar nav { gap: 12px; }
+  .topbar nav a { font-size: 11px; }
+  
+  /* 搜索框和下拉框移动端适配 */
+  #site-search { width: 120px !important; }
+  #search-dropdown { width: calc(100vw - 24px) !important; right: -40px !important; max-width: 380px; }
+  
+  .container { padding: 20px 12px 60px; }
+  
+  .hero {
+    padding: 28px 20px;
+    margin-bottom: 24px;
+  }
+  .hero h2 { font-size: 1.35rem; }
+  .hero p { font-size: 13px; }
+  
+  .section-head h3 { font-size: 17px; }
+  
+  .flow { padding: 16px; margin-bottom: 24px; }
+  .flow-steps { gap: 0; flex-wrap: wrap; justify-content: center; }
+  .flow-step { min-width: 80px; padding: 0 4px; margin-bottom: 12px; }
+  .flow-step:not(:last-child)::after { display: none; }
+  .flow-step .num { width: 30px; height: 30px; font-size: 12px; }
+  .flow-step .label { font-size: 11px; }
+  .flow-step .who { font-size: 10px; }
+  
+  .module-card { padding: 18px 16px; }
+  .module-card .icon { width: 36px; height: 36px; font-size: 17px; }
+  .module-card h4 { font-size: 14px; }
+  .module-card p { font-size: 12px; }
+}
+
+/* Small phone: < 480px */
+@media (max-width: 480px) {
+  .topbar-inner { padding: 8px 10px; }
+  .topbar h1 { font-size: 13px; }
+  .topbar nav a { font-size: 10px; }
+  #site-search { width: 100px !important; font-size: 12px; padding: 6px 10px; }
+  #search-dropdown { width: calc(100vw - 24px) !important; right: -10px !important; }
+  
+  .hero { padding: 22px 16px; border-radius: 12px; }
+  .hero h2 { font-size: 1.2rem; }
+  .modes { gap: 10px; }
+  .mode-card { padding: 14px 16px; }
+  .mode-card h4 { font-size: 13px; }
+  .mode-card p { font-size: 11px; }
+  
+  .grid { gap: 12px; }
+  .module-card { padding: 16px 14px; gap: 8px; }
+}
