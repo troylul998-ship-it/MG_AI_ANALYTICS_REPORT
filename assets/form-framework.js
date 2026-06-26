@@ -637,11 +637,68 @@ const FF = (() => {
     initCustomChips();
     initCopy();
     initOutputTabs();
+    initRealTimeValidation();
     // 检查是否从归档恢复
     setTimeout(() => {
       const record = getRestoreData();
       if (record && record.data) restoreForm(record.data);
     }, 300);
+  }
+
+  /* ---------- 实时校验 ---------- */
+  function initRealTimeValidation() {
+    // 必填文本/日期/select 字段：blur 时校验
+    document.querySelectorAll('[data-required]').forEach(el => {
+      el.addEventListener('blur', () => validateField(el));
+      el.addEventListener('input', () => {
+        // 输入时如果之前是错误状态，实时清除
+        const field = el.closest('.field') || el.closest('.fcard');
+        if (field && field.classList.contains('error')) {
+          if (el.value && el.value.trim()) {
+            field.classList.remove('error');
+            field.classList.add('valid');
+          }
+        }
+      });
+    });
+
+    // 日期范围校验：开始日期 < 结束日期
+    initDateRangeValidation();
+  }
+
+  function validateField(el) {
+    const field = el.closest('.field') || el.closest('.fcard');
+    if (!field) return;
+    const empty = !el.value || !el.value.trim();
+    field.classList.toggle('error', empty);
+    field.classList.toggle('valid', !empty);
+    // 更新错误提示文字
+    const errMsg = field.querySelector('.err-msg');
+    if (errMsg) errMsg.textContent = empty ? '此项为必填' : '';
+  }
+
+  function initDateRangeValidation() {
+    const startIds = ['date_start', 'cohort_start', 'focus_start'];
+    const endIds = ['date_end', 'cohort_end', 'focus_end'];
+    startIds.forEach((sid, i) => {
+      const startEl = document.getElementById(sid);
+      const endEl = document.getElementById(endIds[i]);
+      if (!startEl || !endEl) return;
+      // 联动：开始日期改变时限制结束日期的 min
+      startEl.addEventListener('change', () => {
+        if (startEl.value) endEl.min = startEl.value;
+        if (endEl.value && startEl.value && endEl.value < startEl.value) {
+          endEl.value = startEl.value;
+        }
+      });
+      // 联动：结束日期改变时限制开始日期的 max
+      endEl.addEventListener('change', () => {
+        if (endEl.value) startEl.max = endEl.value;
+        if (startEl.value && endEl.value && startEl.value > endEl.value) {
+          startEl.value = endEl.value;
+        }
+      });
+    });
   }
 
   /* ---------- Wizard 引导模式 ---------- */
@@ -783,6 +840,26 @@ const FF = (() => {
         const submitBtn = form.querySelector('[type=submit]');
         if (submitBtn) submitBtn.click();
       } else {
+        // 校验当前步骤的必填项
+        const currentCard = cards[current];
+        let stepOk = true;
+        if (currentCard) {
+          currentCard.querySelectorAll('[data-required]').forEach(el => {
+            const empty = !el.value || !el.value.trim();
+            const field = el.closest('.field') || el.closest('.fcard');
+            if (field) {
+              field.classList.toggle('error', empty);
+              field.classList.toggle('valid', !empty);
+            }
+            if (empty) stepOk = false;
+          });
+        }
+        if (!stepOk) {
+          // 滚动到第一个错误字段
+          const firstErr = currentCard.querySelector('.field.error');
+          if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return; // 阻止跳转
+        }
         go(current + 1);
       }
     });

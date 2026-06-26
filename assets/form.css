@@ -223,9 +223,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* 校验错误 */
-.field.error input, .field.error select, .field.error textarea { border-color: var(--red); }
+.field.error input, .field.error select, .field.error textarea { border-color: var(--red); box-shadow: 0 0 0 3px rgba(201,42,42,0.08); }
 .field .err-msg { display: none; font-size: 11px; color: var(--red); margin-top: 4px; }
 .field.error .err-msg { display: block; }
+/* 实时校验：成功状态 */
+.field.valid input, .field.valid select, .field.valid textarea { border-color: var(--green); }
+/* chips 组错误 */
+.chips.error { border: 1px dashed var(--red); border-radius: 8px; padding: 6px; }
 .form-error-summary {
   background: var(--red-bg); color: var(--red); border-radius: 8px;
   padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none;
