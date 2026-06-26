@@ -38,7 +38,9 @@
 .dict-panel h4{font-size:13px;margin:16px 0 6px;color:var(--brand-1);font-weight:600;}
 .dict-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
 .dict-panel th,.dict-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top;}
-.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;}
+.dict-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;position:sticky;top:0;z-index:1;}
+.dict-panel tr:nth-child(even){background:#fafaf8;}
+.dict-panel tr:hover{background:#fff4ec;}
 .dict-panel td code{background:#f0f0f0;padding:1px 4px;border-radius:3px;font-size:11px;}
 .dict-panel pre{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:14px 16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;overflow-x:auto;}
 .note{font-size:12px;color:var(--red);background:var(--red-bg);padding:8px 12px;border-radius:6px;margin-bottom:12px;}
@@ -1416,6 +1418,23 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
       navWrap.style.display = 'none';
     }
   }
-})();</script>
+})();
+
+// 代码块复制按钮
+document.querySelectorAll('.dict-panel pre').forEach(pre => {
+  pre.style.position = 'relative';
+  const btn = document.createElement('button');
+  btn.textContent = '📋 复制';
+  btn.style.cssText = 'position:absolute;top:6px;right:6px;font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:5px;background:#fff;cursor:pointer;opacity:0.7;transition:opacity .2s;';
+  btn.addEventListener('mouseenter', () => btn.style.opacity = '1');
+  btn.addEventListener('mouseleave', () => btn.style.opacity = '0.7');
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(pre.textContent.replace('📋 复制', '').trim());
+    btn.textContent = '✓ 已复制';
+    setTimeout(() => btn.textContent = '📋 复制', 1500);
+  });
+  pre.appendChild(btn);
+});
+</script>
 </body>
 </html>
