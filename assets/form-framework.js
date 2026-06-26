@@ -664,11 +664,82 @@ const FF = (() => {
     initCopy();
     initOutputTabs();
     initRealTimeValidation();
+    initDraftAutoSave();
     // 检查是否从归档恢复
     setTimeout(() => {
       const record = getRestoreData();
       if (record && record.data) restoreForm(record.data);
     }, 300);
+  }
+
+  /* ---------- 草稿自动保存 ---------- */
+  function initDraftAutoSave() {
+    const form = document.querySelector('form');
+    if (!form) return;
+    const pageKey = 'draft_' + location.pathname.replace(/[^a-z0-9]/gi, '_');
+
+    // 检查是否有草稿（排除归档恢复的情况）
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('restore')) {
+      const saved = localStorage.getItem(pageKey);
+      if (saved) {
+        try {
+          const draft = JSON.parse(saved);
+          const age = Date.now() - (draft._ts || 0);
+          if (age < 7 * 24 * 3600 * 1000) { // 7天内有效
+            const ago = age < 60000 ? '刚刚' : age < 3600000 ? Math.floor(age/60000) + '分钟前' : Math.floor(age/3600000) + '小时前';
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background:#fff8e1;color:#b8860b;padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
+            banner.innerHTML = `⚠️ 检测到未完成的草稿（${ago}保存）<button id="draft-restore" style="padding:5px 14px;border-radius:6px;border:1px solid #b8860b;background:#fff;color:#b8860b;font-size:12px;font-weight:600;cursor:pointer;">恢复填写</button><button id="draft-discard" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text-3);font-size:12px;cursor:pointer;">放弃草稿</button>`;
+            const wrap = document.querySelector('.form-wrap') || form.parentNode;
+            wrap.insertBefore(banner, wrap.children[2] || wrap.firstChild);
+            document.getElementById('draft-restore').addEventListener('click', () => {
+              restoreForm(draft);
+              banner.remove();
+            });
+            document.getElementById('draft-discard').addEventListener('click', () => {
+              localStorage.removeItem(pageKey);
+              banner.remove();
+            });
+          } else {
+            localStorage.removeItem(pageKey); // 过期清理
+          }
+        } catch(e) { localStorage.removeItem(pageKey); }
+      }
+    }
+
+    // 自动保存：监听表单变化，防抖 2 秒后存 localStorage
+    let saveTimer;
+    const autoSave = () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const data = {};
+        form.querySelectorAll('input, textarea, select').forEach(el => {
+          if (!el.id && !el.name) return;
+          const key = el.id || el.name;
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            if (el.checked) data[key] = el.value;
+          } else if (el.value && el.value.trim()) {
+            data[key] = el.value;
+          }
+        });
+        // 保存选中的 chips
+        form.querySelectorAll('.chip input:checked').forEach(inp => {
+          const name = inp.name;
+          if (!data['_chips_' + name]) data['_chips_' + name] = [];
+          data['_chips_' + name].push(inp.value);
+        });
+        data._ts = Date.now();
+        localStorage.setItem(pageKey, JSON.stringify(data));
+      }, 2000);
+    };
+    form.addEventListener('input', autoSave);
+    form.addEventListener('change', autoSave);
+
+    // 提交成功后清除草稿
+    form.addEventListener('submit', () => {
+      setTimeout(() => localStorage.removeItem(pageKey), 500);
+    });
   }
 
   /* ---------- 实时校验 ---------- */
