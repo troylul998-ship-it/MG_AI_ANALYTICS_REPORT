@@ -665,6 +665,7 @@ const FF = (() => {
     initOutputTabs();
     initRealTimeValidation();
     initDraftAutoSave();
+    initBackToTop();
     // 检查是否从归档恢复
     setTimeout(() => {
       const record = getRestoreData();
@@ -739,6 +740,21 @@ const FF = (() => {
     // 提交成功后清除草稿
     form.addEventListener('submit', () => {
       setTimeout(() => localStorage.removeItem(pageKey), 500);
+    });
+  }
+
+  /* ---------- 回到顶部 ---------- */
+  function initBackToTop() {
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.innerHTML = '↑';
+    btn.title = '回到顶部';
+    document.body.appendChild(btn);
+    window.addEventListener('scroll', () => {
+      btn.classList.toggle('show', window.scrollY > 400);
+    });
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 

@@ -4,9 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>因果链验证 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/causal_chain_form.html">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
   <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="../assets/style.css" as="style">
+  <link rel="preload" href="../assets/form.css" as="style">
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/form.css">
 </head>
@@ -46,7 +49,7 @@
   </form>
   <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
 </div>
-<script src="../assets/form-framework.js"></script>
+<script src="../assets/form-framework.js" defer></script>
 <script>
 const CC_PRESETS = {
   rm_pay: [{treatment:'RM弹窗展示',mediator:'3PP点击/跳转',outcome:'付费成功'}],
