@@ -511,3 +511,18 @@ body.mode-guide .submit-bar { display: none; }
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(40px); }
 }
+
+/* 日期快捷按钮 */
+.date-quick {
+  font-size: 11px; padding: 4px 10px; border-radius: 14px;
+  border: 1px solid var(--border); background: #fdfdfd; color: var(--text-2);
+  cursor: pointer; transition: all .15s; font-weight: 500;
+}
+.date-quick:hover { border-color: var(--brand-1); color: var(--brand-1); background: #fff8f3; }
+.date-quick.active { background: #fff4ec; border-color: var(--brand-1); color: var(--brand-1); font-weight: 600; }
+
+/* 动态行拖拽 */
+.dyn-row { cursor: grab; }
+.dyn-row:active { cursor: grabbing; }
+.dyn-row.dragging { opacity: 0.4; background: #f0f0f0; }
+.dyn-row.drag-over { border-top: 2px solid var(--brand-1); }

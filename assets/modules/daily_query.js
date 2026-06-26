@@ -21,6 +21,31 @@ document.addEventListener('DOMContentLoaded', () => {
     { title: '数据源', question: '数据源', explain: '字段、埋点、历史 SQL，填了生成的 SQL 更准。没有就直接生成。', example: '<b>例：</b>字段 dau/付费人数，埋点 pay_success' },
   ]);
 
+  // 日期快捷按钮
+  document.querySelectorAll('.date-quick').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const range = btn.dataset.range;
+      const today = new Date();
+      const fmt = d => d.toISOString().slice(0, 10);
+      let start, end;
+      if (range === 'month') {
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+        end = today;
+      } else if (range === 'lastmonth') {
+        start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        end = new Date(today.getFullYear(), today.getMonth(), 0);
+      } else {
+        const days = parseInt(range);
+        start = new Date(today); start.setDate(today.getDate() - days + 1);
+        end = today;
+      }
+      document.getElementById('date_start').value = fmt(start);
+      document.getElementById('date_end').value = fmt(end);
+      document.querySelectorAll('.date-quick').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
   // 产品 radio → 同步 select
   document.querySelectorAll('#chips-product-dq .chip').forEach(chip => {
     const inp = chip.querySelector('input');

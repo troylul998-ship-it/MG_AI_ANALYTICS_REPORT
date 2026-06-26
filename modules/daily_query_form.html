@@ -76,6 +76,13 @@
           <input type="date" id="date_end">
         </div>
       </div>
+      <div class="date-shortcuts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        <button type="button" class="date-quick" data-range="7">近7天</button>
+        <button type="button" class="date-quick" data-range="14">近14天</button>
+        <button type="button" class="date-quick" data-range="30">近30天</button>
+        <button type="button" class="date-quick" data-range="month">本月</button>
+        <button type="button" class="date-quick" data-range="lastmonth">上月</button>
+      </div>
       <div class="field" style="margin-top:16px;">
         <label>🔍 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
         <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">

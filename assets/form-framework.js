@@ -119,9 +119,16 @@ const FF = (() => {
     const addRow = (data) => {
       const div = document.createElement('div');
       div.className = opts.rowClass || 'dyn-row';
+      div.draggable = true;
       div.innerHTML = rowHtmlFn(data) +
         '<button type="button" class="del" title="删除">×</button>';
       div.querySelector('.del').addEventListener('click', () => div.remove());
+      // Drag-and-drop
+      div.addEventListener('dragstart', e => { div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      div.addEventListener('dragend', () => { div.classList.remove('dragging'); container.querySelectorAll('.dyn-row').forEach(r => r.classList.remove('drag-over')); });
+      div.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; div.classList.add('drag-over'); });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', e => { e.preventDefault(); div.classList.remove('drag-over'); const dragging = container.querySelector('.dragging'); if (dragging && dragging !== div) container.insertBefore(dragging, div); });
       container.appendChild(div);
       return div;
     };
