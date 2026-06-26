@@ -196,8 +196,9 @@
 
 <!-- UNO -->
 <div class="dict-panel" id="p-uno">
-<h2>🃏 UNO (MN01) 核心字段</h2>
-<p class="panel-desc">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">Confluence: MN01用户信息表</a></p>
+<h2>🃏 UNO (MN01) 每日活跃用户表</h2>
+<p class="panel-desc">来源: Confluence: MN01用户信息表 | 表名: dm_mn01_player_active_info (每日活跃用户表)</p>
+<p>📎 相关文档：<a href='https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374' target='_blank'>MN01用户信息表(全字段)</a></p>
 <div class="doc-links">📎 <b>相关文档：</b>
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=122297374" target="_blank">MN01 用户信息表(全字段)</a> |
 <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=162417980" target="_blank">广告变现通用指标</a> |
@@ -205,22 +206,172 @@
 </div>
 <table>
 <tr><th>字段</th><th>类型</th><th>含义</th><th>逻辑</th></tr>
-<tr><td>role_id</td><td>string</td><td>角色ID(主键)</td><td>唯一键</td></tr>
-<tr><td>account_id</td><td>string</td><td>账号ID</td><td></td></tr>
-<tr><td>been_reg_days</td><td>int</td><td>注册天数</td><td>f_login_date到统计日差</td></tr>
-<tr><td>login_days</td><td>int</td><td>在线总天数</td><td></td></tr>
-<tr><td>payment_sum</td><td>double</td><td>历史累计充值总额</td><td>sum(cash)</td></tr>
-<tr><td>payment_sum_1d</td><td>double</td><td>当日充值</td><td></td></tr>
-<tr><td>payment_cnt</td><td>double</td><td>历史充值次数</td><td></td></tr>
-<tr><td>advalue_sum</td><td>double</td><td>历史累计广告收入</td><td>来自 dw_dmdb.advalue_role_date</td></tr>
-<tr><td>advalue_sum_1d</td><td>double</td><td>当日广告收入</td><td></td></tr>
-<tr><td>advalue_reward_sum_1d</td><td>double</td><td>当日激励视频收入</td><td>adtype='rewardvideo'</td></tr>
-<tr><td>advalue_interstitial_sum_1d</td><td>double</td><td>当日插屏收入</td><td>adtype='interstitial'</td></tr>
-<tr><td>ad_reward_cnt_1d</td><td>bigint</td><td>当日激励视频次数</td><td>game_client_log, adtype='rewardvideo'</td></tr>
-<tr><td>ad_interstitial_cnt_1d</td><td>bigint</td><td>当日插屏次数</td><td>game_client_log, adtype='interstitial'</td></tr>
-<tr><td>game_match_cnt_1d</td><td>bigint</td><td>当日匹配场数</td><td></td></tr>
-<tr><td>platform</td><td>string</td><td>当前平台</td><td></td></tr>
-<tr><td>country</td><td>string</td><td>当前国家</td><td></td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">基础信息</td></tr>
+<tr><td><code>role_id</code></td><td>string</td><td>角色ID(主键)</td><td>唯一键</td></tr>
+<tr><td><code>role_name</code></td><td>string</td><td>角色名</td><td>最新的role_name</td></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>账号ID</td><td>最新的account_id</td></tr>
+<tr><td><code>appsflyer_id</code></td><td>string</td><td>当前的appsflyer_id</td><td>最新的appsflyer_id</td></tr>
+<tr><td><code>f_appsflyer_id</code></td><td>string</td><td>最初的appsflyer_id</td><td>最初的appsflyer_id</td></tr>
+<tr><td><code>udid</code></td><td>string</td><td>设备id</td><td>通过appsflyer_id获取sdk的最新的udid</td></tr>
+<tr><td><code>gid</code></td><td>string</td><td>平台id</td><td>最新的gid</td></tr>
+<tr><td><code>device_model</code></td><td>string</td><td>设备名</td><td>最新的device_model</td></tr>
+<tr><td><code>os_ver</code></td><td>string</td><td>版本号</td><td>最新的系统版本号</td></tr>
+<tr><td><code>packagesource</code></td><td>string</td><td>当前的包体来源</td><td>最新的包体来源</td></tr>
+<tr><td><code>f_packagesource</code></td><td>string</td><td>最初的包体来源</td><td>最初的包体来源</td></tr>
+<tr><td><code>client</code></td><td>string</td><td>客户端</td><td>最新的client</td></tr>
+<tr><td><code>platform</code></td><td>string</td><td>当前的平台</td><td>最新的platform</td></tr>
+<tr><td><code>f_platform</code></td><td>string</td><td>最初的平台</td><td>最初的platform</td></tr>
+<tr><td><code>country</code></td><td>string</td><td>当前的国家代码</td><td>最新的country</td></tr>
+<tr><td><code>f_country</code></td><td>string</td><td>最初的国家代码</td><td>最初的country</td></tr>
+<tr><td><code>channel</code></td><td>string</td><td>当前的登录渠道</td><td>最新的channel</td></tr>
+<tr><td><code>f_channel</code></td><td>string</td><td>最初的登录渠道</td><td>最初的channel</td></tr>
+<tr><td><code>media_source</code></td><td>string</td><td>当前的媒体来源</td><td>通过appsflyer_id获取最新的media_source</td></tr>
+<tr><td><code>f_media_source</code></td><td>string</td><td>最初的媒体来源</td><td>最初的media_source</td></tr>
+<tr><td><code>campaign</code></td><td>string</td><td>当前的campaign来源</td><td>通过appsflyer_id获取最新的campaign</td></tr>
+<tr><td><code>f_campaign</code></td><td>string</td><td>最初的campaign来源</td><td>最初的campaign</td></tr>
+<tr><td><code>age</code></td><td>string</td><td>年龄</td><td>最新的age</td></tr>
+<tr><td><code>is_adult</code></td><td>int</td><td>当前是否成年</td><td>can_track</td></tr>
+<tr><td><code>f_is_adult</code></td><td>int</td><td>最初是否成年</td><td>can_track</td></tr>
+<tr><td><code>role_level</code></td><td>int</td><td>等级</td><td>最新的role_level</td></tr>
+<tr><td><code>vip_level</code></td><td>int</td><td>vip等级</td><td>最新的vip_level</td></tr>
+<tr><td><code>club_id</code></td><td>bigint</td><td>俱乐部id</td><td>最新的club_id</td></tr>
+<tr><td><code>create_time</code></td><td>string</td><td>创建账号的时间</td><td>create_time</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">登录相关</td></tr>
+<tr><td><code>f_login_time</code></td><td>string</td><td>首次登录时间</td><td>首次登录时间</td></tr>
+<tr><td><code>l_login_time</code></td><td>string</td><td>最后一次登录时间</td><td>最后一次登录时间</td></tr>
+<tr><td><code>f_login_date</code></td><td>string</td><td>首次登录日期</td><td>最早一次有登录日志的日期</td></tr>
+<tr><td><code>last_login_date</code></td><td>string</td><td>上一次登录日期</td><td>上一次登录日期</td></tr>
+<tr><td><code>been_reg_days</code></td><td>int</td><td>距今注册总天数</td><td>f_login_date到统计日期的时间差</td></tr>
+<tr><td><code>offline_days</code></td><td>bigint</td><td>本次登录前流失天数</td><td>last_login_date距今天数-1</td></tr>
+<tr><td><code>login_day_set</code></td><td>string</td><td>日期倒序的登录列表</td><td>1.登录，0.未登录</td></tr>
+<tr><td><code>max_offline_period</code></td><td>int</td><td>历史最大不在线天数</td><td>连续不在线天数的最大值</td></tr>
+<tr><td><code>login_days</code></td><td>int</td><td>在线总天数</td><td>有登录行为的总天数</td></tr>
+<tr><td><code>online_sum</code></td><td>bigint</td><td>累积在线时长（秒）</td><td>游戏记录的累计在线时长</td></tr>
+<tr><td><code>online_sum_1d</code></td><td>bigint</td><td>当天在线时长（秒）</td><td>游戏记录统计日在线总时长</td></tr>
+<tr><td><code>login_cnt</code></td><td>bigint</td><td>历史总登陆次数</td><td>总登录次数</td></tr>
+<tr><td><code>login_cnt_1d</code></td><td>bigint</td><td>当天登陆次数</td><td>统计日的登录次数</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">充值相关</td></tr>
+<tr><td><code>f_payment_date</code></td><td>string</td><td>首次充值日期</td><td>最早一次有充值日志的日期</td></tr>
+<tr><td><code>l_payment_date</code></td><td>string</td><td>最新充值日期</td><td>最新一次有充值日志的日期</td></tr>
+<tr><td><code>f_payment_time</code></td><td>string</td><td>首次充值时间</td><td>最早一次有充值日志的时间</td></tr>
+<tr><td><code>l_payment_time</code></td><td>string</td><td>最新充值时间</td><td>最新一次有充值日志的时间</td></tr>
+<tr><td><code>payment_sum</code></td><td>double</td><td>历史累计充值总额</td><td>sum(cash)</td></tr>
+<tr><td><code>payment_sum_1d</code></td><td>double</td><td>当日累计充值总额</td><td>当日sum(cash)</td></tr>
+<tr><td><code>payment_cnt</code></td><td>double</td><td>历史累计充值次数</td><td>cash&gt;0</td></tr>
+<tr><td><code>payment_cnt_1d</code></td><td>double</td><td>当日累计充值次数</td><td>当日cash&gt;0</td></tr>
+<tr><td><code>max_payment</code></td><td>double</td><td>单次最大充值额</td><td>max(cash)</td></tr>
+<tr><td><code>max_payment_cnt</code></td><td>bigint</td><td>最大充值金额出现次数</td><td>最大金额的充值次数</td></tr>
+<tr><td><code>max_payment_1d</code></td><td>double</td><td>当日单次最大充值额</td><td>当日max(cash)</td></tr>
+<tr><td><code>min_payment</code></td><td>double</td><td>单次最小充值额</td><td>min(cash)</td></tr>
+<tr><td><code>min_payment_cnt</code></td><td>bigint</td><td>最小充值额出现次数</td><td>最小金额的充值次数</td></tr>
+<tr><td><code>min_payment_1d</code></td><td>double</td><td>当日单次最小充值额</td><td>当日min(cash)</td></tr>
+<tr><td><code>payment_cnt_map</code></td><td>map</td><td>单笔充值金额对应次数</td><td>历史单笔金额→次数映射</td></tr>
+<tr><td><code>mode_payment</code></td><td>double</td><td>充值金额众数</td><td>充值次数最多的金额</td></tr>
+<tr><td><code>mode_payment_cnt</code></td><td>bigint</td><td>众数出现次数</td><td>充值次数最多的金额的次数</td></tr>
+<tr><td><code>game_charge_dollar_total_num</code></td><td>double</td><td>累积充值金额（美金）</td><td>chargedollartotalnum</td></tr>
+<tr><td><code>payment_set</code></td><td>array</td><td>时间倒序每日充值总金额列表</td><td>时间倒序每日充值总金额列表</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">广告相关</td></tr>
+<tr><td><code>advalue_sum</code></td><td>double</td><td>历史累计广告收入</td><td>来自dw_dmdb.advalue_role_date</td></tr>
+<tr><td><code>advalue_sum_1d</code></td><td>double</td><td>当日累计广告收入</td><td>当日revenue</td></tr>
+<tr><td><code>advalue_reward_sum</code></td><td>double</td><td>历史累计激励视频广告收入</td><td>adtype='rewardvideo'</td></tr>
+<tr><td><code>advalue_reward_sum_1d</code></td><td>double</td><td>当日累计激励视频广告收入</td><td>adtype='rewardvideo'</td></tr>
+<tr><td><code>advalue_interstitial_sum</code></td><td>double</td><td>历史累计插屏广告收入</td><td>adtype='interstitial'</td></tr>
+<tr><td><code>advalue_interstitial_sum_1d</code></td><td>double</td><td>当日累计插屏广告收入</td><td>adtype='interstitial'</td></tr>
+<tr><td><code>ad_reward_cnt</code></td><td>bigint</td><td>玩家观看激励视频总次数</td><td>game_client_log, adtype='rewardvideo'</td></tr>
+<tr><td><code>ad_reward_cnt_1d</code></td><td>bigint</td><td>当日观看激励视频次数</td><td>game_client_log, adtype='rewardvideo'</td></tr>
+<tr><td><code>ad_interstitial_cnt</code></td><td>bigint</td><td>玩家观看插屏广告总次数</td><td>game_client_log, adtype='interstitial'</td></tr>
+<tr><td><code>ad_interstitial_cnt_1d</code></td><td>bigint</td><td>当日观看插屏广告次数</td><td>game_client_log, adtype='interstitial'</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">金币相关</td></tr>
+<tr><td><code>gold_num</code></td><td>bigint</td><td>当前金币存量</td><td>当天最后一条日志的金币存量</td></tr>
+<tr><td><code>gold_consume_sum</code></td><td>bigint</td><td>历史累计金币消耗总数</td><td>gain_count &lt; 0 时 sum(gain_count)</td></tr>
+<tr><td><code>gold_consume_sum_1d</code></td><td>bigint</td><td>当日金币消耗总数</td><td>gain_count &lt; 0 时 sum(gain_count)</td></tr>
+<tr><td><code>gold_acquire_sum</code></td><td>bigint</td><td>历史累计金币获取总数</td><td>gain_count &gt; 0 时 sum(gain_count)</td></tr>
+<tr><td><code>gold_acquire_sum_1d</code></td><td>bigint</td><td>当日金币获取总数</td><td>gain_count &gt; 0 时 sum(gain_count)</td></tr>
+<tr><td><code>gold_battle_change</code></td><td>bigint</td><td>对局金币变化总量</td><td>reason in (1013,1014,1015,1016) sum(gaincoins)</td></tr>
+<tr><td><code>gold_battle_change_1d</code></td><td>bigint</td><td>当日对局金币变化量</td><td>同上当日</td></tr>
+<tr><td><code>gold_battle_use</code></td><td>bigint</td><td>对局金币流转量（正值）</td><td>负数的累计sum(abs(gaincoins))</td></tr>
+<tr><td><code>gold_battle_use_1d</code></td><td>bigint</td><td>当日对局金币流转量</td><td>同上当日</td></tr>
+<tr><td><code>gold_battle_consume</code></td><td>bigint</td><td>对局消耗金币量</td><td>1015、1016结算gain_count&lt;0</td></tr>
+<tr><td><code>gold_battle_consume_1d</code></td><td>bigint</td><td>当日对局消耗金币量</td><td>同上当日</td></tr>
+<tr><td><code>gold_battle_acquire</code></td><td>bigint</td><td>对局获取金币量</td><td>1015、1016结算gain_count&gt;0</td></tr>
+<tr><td><code>gold_battle_acquire_1d</code></td><td>bigint</td><td>当日对局获取金币量</td><td>同上当日</td></tr>
+<tr><td><code>gold_match_use</code></td><td>bigint</td><td>匹配消耗金币总量</td><td>1013、1014匹配sum(gaincoins)</td></tr>
+<tr><td><code>gold_match_use_1d</code></td><td>bigint</td><td>当日匹配消耗金币量</td><td>同上当日</td></tr>
+<tr><td><code>trade_battle_num</code></td><td>bigint</td><td>结算总局数</td><td>1015、1016记录数</td></tr>
+<tr><td><code>trade_battle_num_1d</code></td><td>bigint</td><td>当日结算局数</td><td>同上当日</td></tr>
+<tr><td><code>trade_match_num</code></td><td>bigint</td><td>匹配总局数</td><td>1013、1014记录数</td></tr>
+<tr><td><code>trade_match_num_1d</code></td><td>bigint</td><td>当日匹配局数</td><td>同上当日</td></tr>
+<tr><td><code>gold_max_battle_win</code></td><td>bigint</td><td>历史单局最高赢金币量</td><td>1015、1016最大的gaincoins</td></tr>
+<tr><td><code>gold_max_battle_win_1d</code></td><td>bigint</td><td>当日单局最高赢金币量</td><td>同上当日</td></tr>
+<tr><td><code>gold_max_battle_loss</code></td><td>bigint</td><td>历史单局最高输金币量</td><td>1015、1016最小的gaincoins</td></tr>
+<tr><td><code>gold_max_battle_loss_1d</code></td><td>bigint</td><td>当日单局最高输金币量</td><td>同上当日</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">钻石相关</td></tr>
+<tr><td><code>diamond_num</code></td><td>bigint</td><td>当前钻石存量</td><td>当天最后一条日志的钻石存量</td></tr>
+<tr><td><code>free_diamond_consume_sum</code></td><td>bigint</td><td>历史累计免费钻石消耗</td><td>yuanbaouse中sum(-free_yuanbao)</td></tr>
+<tr><td><code>paid_diamond_consume_sum</code></td><td>bigint</td><td>历史累计付费钻石消耗</td><td>yuanbaouse中sum(free_yuanbao-yuanbao)</td></tr>
+<tr><td><code>free_diamond_consume_sum_1d</code></td><td>bigint</td><td>当日免费钻石消耗</td><td>同上当日</td></tr>
+<tr><td><code>paid_diamond_consume_sum_1d</code></td><td>bigint</td><td>当日付费钻石消耗</td><td>同上当日</td></tr>
+<tr><td><code>free_diamond_acquire_sum</code></td><td>bigint</td><td>历史累计免费钻石获取</td><td>sum(free_yuanbao)</td></tr>
+<tr><td><code>paid_diamond_acquire_sum</code></td><td>bigint</td><td>历史累计付费钻石获得</td><td>sum(yuanbao-free_yuanbao)</td></tr>
+<tr><td><code>free_diamond_acquire_sum_1d</code></td><td>bigint</td><td>当日免费钻石获取</td><td>同上当日</td></tr>
+<tr><td><code>paid_diamond_acquire_sum_1d</code></td><td>bigint</td><td>当日付费钻石获得</td><td>同上当日</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">刮刮卡</td></tr>
+<tr><td><code>silver_scratch_consume_sum</code></td><td>bigint</td><td>历史累计银刮刮卡消耗</td><td>itemid=12000025</td></tr>
+<tr><td><code>silver_scratch_consume_sum_1d</code></td><td>bigint</td><td>当日银刮刮卡消耗</td><td>同上当日</td></tr>
+<tr><td><code>silver_scratch_acquire_sum</code></td><td>bigint</td><td>历史累计银刮刮卡获取</td><td>itemid=12000025</td></tr>
+<tr><td><code>silver_scratch_acquire_sum_1d</code></td><td>bigint</td><td>当日银刮刮卡获取</td><td>同上当日</td></tr>
+<tr><td><code>golden_cratch_consume_sum</code></td><td>bigint</td><td>历史累计金刮刮卡消耗</td><td>itemid=12000026</td></tr>
+<tr><td><code>golden_cratch_consume_sum_1d</code></td><td>bigint</td><td>当日金刮刮卡消耗</td><td>同上当日</td></tr>
+<tr><td><code>golden_cratch_acquire_sum</code></td><td>bigint</td><td>历史累计金刮刮卡获取</td><td>itemid=12000026</td></tr>
+<tr><td><code>golden_cratch_acquire_sum_1d</code></td><td>bigint</td><td>当日金刮刮卡获取</td><td>同上当日</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">玩法行为</td></tr>
+<tr><td><code>game_match_cnt</code></td><td>bigint</td><td>历史总匹配场数</td><td>累计匹配总次数</td></tr>
+<tr><td><code>game_match_cnt_1d</code></td><td>bigint</td><td>当日总匹配场数</td><td>统计日匹配总次数</td></tr>
+<tr><td><code>match_num_1d</code></td><td>bigint</td><td>当天对局次数</td><td>matchinfo</td></tr>
+<tr><td><code>avg_entrance_fee_1d</code></td><td>double</td><td>平均对局倍率（门票）</td><td>matchinfo</td></tr>
+<tr><td><code>trophy_max_num</code></td><td>bigint</td><td>玩家最大奖杯数</td><td>unotrophymaxnum</td></tr>
+<tr><td><code>exp_num</code></td><td>bigint</td><td>累计获得经验</td><td>totalexpnum</td></tr>
+<tr><td><code>bepraise_num</code></td><td>bigint</td><td>累计被点赞数</td><td>totalbepraisenum</td></tr>
+<tr><td><code>match_acquire_gold_num</code></td><td>bigint</td><td>比赛获得金币总数</td><td>totalgoldnum</td></tr>
+<tr><td><code>coin_expand_ratio</code></td><td>double</td><td>金币膨胀系数</td><td>coinexpandratio</td></tr>
+<tr><td><code>monthly_card_expiration_time</code></td><td>bigint</td><td>月卡到期时间</td><td>monthlycarddaynum</td></tr>
+<tr><td><code>monthly_card_day_num</code></td><td>bigint</td><td>月卡剩余天数</td><td>monthlycarddaynum与统计时间差值</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">破产相关</td></tr>
+<tr><td><code>bankruptcy_cnt</code></td><td>bigint</td><td>玩家总破产次数</td><td>reason=1002</td></tr>
+<tr><td><code>bankruptcy_cnt_1d</code></td><td>bigint</td><td>当日破产次数</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_scratch_acquire_cnt</code></td><td>bigint</td><td>破产后获取刮刮卡总次数</td><td>破产后itemid in (12000025,12000026)</td></tr>
+<tr><td><code>bankruptcy_scratch_acquire_cnt_1d</code></td><td>bigint</td><td>当日破产后获取刮刮卡次数</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_scratch_consume_cnt</code></td><td>bigint</td><td>破产后消耗刮刮卡总次数</td><td>同上</td></tr>
+<tr><td><code>bankruptcy_scratch_consume_cnt_1d</code></td><td>bigint</td><td>当日破产后消耗刮刮卡次数</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_paid_cnt</code></td><td>bigint</td><td>破产后充值总次数</td><td>破产补偿后充值次数</td></tr>
+<tr><td><code>bankruptcy_paid_cnt_1d</code></td><td>bigint</td><td>当日破产后充值次数</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_paid_sum</code></td><td>bigint</td><td>破产后充值总额</td><td>破产补偿后充值总额</td></tr>
+<tr><td><code>bankruptcy_paid_sum_1d</code></td><td>bigint</td><td>当日破产后充值总额</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_task_cnt</code></td><td>bigint</td><td>破产后完成日常任务总次数</td><td>破产后日常任务完成次数</td></tr>
+<tr><td><code>bankruptcy_task_cnt_1d</code></td><td>bigint</td><td>当日破产后完成日常任务次数</td><td>同上当日</td></tr>
+<tr><td><code>bankruptcy_no_play_cnt</code></td><td>bigint</td><td>破产后当天不再玩总次数</td><td>破产后matchinfo无记录</td></tr>
+<tr><td><code>is_play_bankruptcy</code></td><td>bigint</td><td>破产后当天是否继续玩(1继续/0不玩/空未破产)</td><td>同上</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">集卡赛季</td></tr>
+<tr><td><code>sticker_csum</code></td><td>int</td><td>赛季sticker累计收集进度</td><td>—</td></tr>
+<tr><td><code>getcard_num_1d</code></td><td>bigint</td><td>当日获取卡包数</td><td>getcardpack</td></tr>
+<tr><td><code>collectcard_num_1d</code></td><td>bigint</td><td>当日集卡数</td><td>OpenCardPack/UseExchangeCard</td></tr>
+<tr><td><code>is_fb_bind</code></td><td>int</td><td>是否绑定fb账号</td><td>loginrole</td></tr>
+<tr><td><code>collection_season_round</code></td><td>bigint</td><td>当前赛季收集轮次</td><td>roundnum</td></tr>
+<tr><td><code>collection_season_round_cardnum</code></td><td>bigint</td><td>赛季当前轮次收集卡片张数(去重)</td><td>collecitioncardnum normal+gold</td></tr>
+<tr><td><code>collection_season_round_cardnum_total</code></td><td>bigint</td><td>赛季当前轮次收集卡片总张数(不去重)</td><td>getsticker</td></tr>
+<tr><td><code>collection_season_round_goldencard</code></td><td>bigint</td><td>赛季当前轮次金卡张数(去重)</td><td>collecitioncardnum gold</td></tr>
+<tr><td><code>collection_season_round_goldencard_total</code></td><td>bigint</td><td>赛季当前轮次金卡总张数(不去重)</td><td>getsticker type=2,3</td></tr>
+<tr><td><code>collection_season_goldenpack</code></td><td>bigint</td><td>当前赛季已获得金卡包数量</td><td>opencardpack cardpack_id=91980013</td></tr>
+<tr><td><code>collection_season_onegoldenpack</code></td><td>bigint</td><td>当前赛季已获得单张金卡包数量</td><td>cardpack_id=91980020/21/22</td></tr>
+<tr><td><code>collection_season_goldenmagic</code></td><td>bigint</td><td>当前赛季已获得金魔法卡数量</td><td>getexchangecard magiccard_id=91999002</td></tr>
+<tr><td><code>collection_season_goldencard_total</code></td><td>bigint</td><td>当前赛季收集金卡总张数(不去重)</td><td>getsticker type=2,3</td></tr>
+<tr><td><code>collection_season_starnum</code></td><td>bigint</td><td>当前赛季已获得星星数量</td><td>getstar gain_num正数</td></tr>
+<tr><td><code>collection_season_starused</code></td><td>bigint</td><td>当前赛季已使用的星星数量</td><td>getstar gain_num负数</td></tr>
+<tr><td colspan="4" style="background:#f0f0f0;font-weight:600;">其他</td></tr>
+<tr><td><code>vip_level_before</code></td><td>int</td><td>当天首次登录的vip_level</td><td>取当天首次登录时的vip_level</td></tr>
+<tr><td><code>users_type</code></td><td>string</td><td>玩家类型</td><td>取最后一次登录时的users_type</td></tr>
+<tr><td><code>users_type_before</code></td><td>string</td><td>当天首次登录的玩家类型</td><td>取当天首次登录时的users_type</td></tr>
+<tr><td><code>collection_user_type</code></td><td>int</td><td>当天首次登录的玩家类型</td><td>取当天首次登录时的collection_user_type</td></tr>
 </table>
 </div>
 
