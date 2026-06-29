@@ -432,76 +432,65 @@ function buildPrompt(d) {
     L.push(filterText);
     L.push('');
   }
-  // 看板口径 DAU
+  // 看板口径（DAU + 广告收入）
   if (d.dashboard_mode) {
-    L.push('# ⚠️ 看板口径【必须遵循】');
-    L.push('> **重要：用户已启用看板口径模式。计算 DAU 时必须严格使用以下 SQL 口径，注意表名和过滤条件！**');
+    L.push('# ⚠️ 看板口径【必须参考】');
+    L.push('> **重要：用户已启用看板口径模式。以下 DAU 和广告收入的计算口径为强制要求，必须严格遵循，不得自行修改表名或过滤条件。**');
+    L.push('');
+    L.push('## 各产品看板口径汇总');
+    L.push('');
+    L.push('| 产品 | 活跃表 | DAU过滤条件 | 总广告收入 | RV收入 | INT收入 |');
+    L.push('|------|--------|------------|-----------|--------|---------|');
+    L.push('| UNO | dw_ods_mn01.dm_mn01_player_active_info | is_adult=1 AND client=APP AND 剔除机器人 | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| P10 | dw_ods_common_mn02.dm_mn02_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| SKB | dw_ods_common_mn04.dm_mn04_sdk_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| UNO2 | dw_ods_mn08.dm_mn08_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | 明细表计算 | 明细表计算 |');
+    L.push('');
+    L.push('## 看板 DAU SQL 参考');
     L.push('');
     if (d.product === 'UNO' || d.product === 'ALL') {
-      L.push('## UNO 看板 DAU 口径');
+      L.push('**UNO:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
       L.push("FROM dw_ods_mn01.dm_mn01_player_active_info");
       L.push("WHERE date = '日期'");
-      L.push("  AND NOT regexp_like(LOWER(account_id), '(ai|fb).163.com') -- 剔除机器人");
-      L.push("  AND is_adult = 1");
-      L.push("  AND UPPER(client) = 'APP'");
+      L.push("  AND NOT regexp_like(LOWER(account_id), '(ai|fb).163.com')");
+      L.push("  AND is_adult = 1 AND UPPER(client) = 'APP'");
       L.push("GROUP BY 1");
       L.push('```');
-      L.push('');
     }
     if (d.product === 'P10' || d.product === 'ALL') {
-      L.push('## P10 看板 DAU 口径');
+      L.push('**P10:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
       L.push("FROM dw_ods_common_mn02.dm_mn02_player_active_info");
-      L.push("WHERE date = '日期'");
-      L.push("  AND is_adult = 1");
-      L.push("  AND UPPER(client) = 'APP'");
+      L.push("WHERE date = '日期' AND is_adult = 1 AND UPPER(client) = 'APP'");
       L.push("GROUP BY 1");
       L.push('```');
-      L.push('');
     }
     if (d.product === 'SKB' || d.product === 'ALL') {
-      L.push('## SKB 看板 DAU 口径');
+      L.push('**SKB:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
       L.push("FROM dw_ods_common_mn04.dm_mn04_sdk_player_active_info");
-      L.push("WHERE date = '日期'");
-      L.push("  AND is_adult = 1");
-      L.push("  AND UPPER(client) = 'APP'");
+      L.push("WHERE date = '日期' AND is_adult = 1 AND UPPER(client) = 'APP'");
       L.push("GROUP BY 1");
       L.push('```');
-      L.push('');
     }
     if (d.product === 'UNO2' || d.product === 'ALL') {
-      L.push('## UNO2 看板 DAU 口径');
+      L.push('**UNO2:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
       L.push("FROM dw_ods_mn08.dm_mn08_player_active_info");
-      L.push("WHERE date = '日期'");
-      L.push("  AND is_adult = 1");
-      L.push("  AND UPPER(client) = 'APP'");
+      L.push("WHERE date = '日期' AND is_adult = 1 AND UPPER(client) = 'APP'");
       L.push("GROUP BY 1");
       L.push('```');
-      L.push('');
     }
-    // 看板口径：广告收入计算规则
-    L.push('## 看板口径：广告收入计算规则');
-    L.push('> **启用看板口径时，广告收入必须从各产品活跃用户表中直接取字段，不要用原始日志表计算。**');
     L.push('');
-    L.push('| 产品 | 活跃表 | 总广告收入 | RV收入 | INT收入 | 说明 |');
-    L.push('|------|--------|-----------|--------|---------|------|');
-    L.push('| UNO | dm_mn01_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
-    L.push('| P10 | dm_mn02_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
-    L.push('| SKB | dm_mn04_sdk_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
-    L.push('| UNO2 | dm_mn08_player_active_info | advalue_sum_1d | 明细表计算 | 明细表计算 | 总收入用advalue_sum_1d；分类型需从 dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue) 计算；安卓需/1000000 |');
-    L.push('');
-    L.push('**注意事项：**');
-    L.push('- 总广告收入统一用 `advalue_sum_1d` 字段（含 RV + INT + Banner）');
-    L.push('- 如需分广告类型：RV 用 `advalue_reward_sum_1d`，INT 用 `advalue_interstitial_sum_1d`');
-    L.push('- UNO2 总收入用 `advalue_sum_1d`；分广告类型需从明细表 `dw_ods_mn08.c_client_app_ad_log` (log_subtype=advalue) 按 adtype 分组计算，安卓需 /1000000');
-
+    L.push('## 广告收入取法');
+    L.push('- 总广告收入统一用活跃表 `advalue_sum_1d` 字段');
+    L.push('- 分广告类型：RV 用 `advalue_reward_sum_1d`，INT 用 `advalue_interstitial_sum_1d`');
+    L.push('- UNO2 总收入用 `advalue_sum_1d`；分类型需从 `dw_ods_mn08.c_client_app_ad_log` (log_subtype=advalue) 按 adtype 分组计算，安卓需 /1000000');
     L.push('');
   }
   // 数据口径字典引用
