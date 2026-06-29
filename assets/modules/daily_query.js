@@ -275,6 +275,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 看板口径开关
+  const dashboardToggle = document.getElementById('dq_dashboard_toggle');
+  const dashboardDesc = document.getElementById('dq-dashboard-desc');
+  const dashboardStatus = document.getElementById('dq-dashboard-status');
+  if (dashboardToggle) {
+    dashboardToggle.addEventListener('change', () => {
+      if (dashboardToggle.checked) {
+        dashboardDesc.style.display = 'block';
+        dashboardStatus.textContent = '已启用';
+        dashboardStatus.style.color = 'var(--brand-1)';
+        dashboardStatus.style.fontWeight = '600';
+      } else {
+        dashboardDesc.style.display = 'none';
+        dashboardStatus.textContent = '未启用';
+        dashboardStatus.style.color = 'var(--text-3)';
+        dashboardStatus.style.fontWeight = '500';
+      }
+    });
+  }
+
   // 提交
   document.getElementById('dq-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -294,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function collect() {
   const searchEnabled = document.getElementById('dq_global_search_toggle') && document.getElementById('dq_global_search_toggle').checked;
+  const dashboardEnabled = document.getElementById('dq_dashboard_toggle') && document.getElementById('dq_dashboard_toggle').checked;
   return {
     module: 'daily_query',
     product: FF.val('product'),
@@ -308,6 +329,7 @@ function collect() {
     log_refs: FF.collectRows('dq-log-ref-rows', ['log_name', 'doc_url', 'fields']),
     sql_refs: FF.collectRows('dq-sql-ref-rows', ['sql_label', 'sql_code']),
     global_search: searchEnabled ? (FF.val('dq_search_keywords') || '').trim() : '',
+    dashboard_mode: dashboardEnabled,
   };
 }
 
@@ -409,6 +431,61 @@ function buildPrompt(d) {
     });
     L.push(filterText);
     L.push('');
+  }
+  // 看板口径 DAU
+  if (d.dashboard_mode) {
+    L.push('# ⚠️ 看板口径【必须遵循】');
+    L.push('> **重要：用户已启用看板口径模式。计算 DAU 时必须严格使用以下 SQL 口径，注意表名和过滤条件！**');
+    L.push('');
+    if (d.product === 'UNO' || d.product === 'ALL') {
+      L.push('## UNO 看板 DAU 口径');
+      L.push('```sql');
+      L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
+      L.push("FROM dw_ods_mn01.dm_mn01_player_active_info");
+      L.push("WHERE date = '日期'");
+      L.push("  AND NOT regexp_like(LOWER(account_id), '(ai|fb).163.com') -- 剔除机器人");
+      L.push("  AND is_adult = 1");
+      L.push("  AND UPPER(client) = 'APP'");
+      L.push("GROUP BY 1");
+      L.push('```');
+      L.push('');
+    }
+    if (d.product === 'P10' || d.product === 'ALL') {
+      L.push('## P10 看板 DAU 口径');
+      L.push('```sql');
+      L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
+      L.push("FROM dw_ods_common_mn02.dm_mn02_player_active_info");
+      L.push("WHERE date = '日期'");
+      L.push("  AND is_adult = 1");
+      L.push("  AND UPPER(client) = 'APP'");
+      L.push("GROUP BY 1");
+      L.push('```');
+      L.push('');
+    }
+    if (d.product === 'SKB' || d.product === 'ALL') {
+      L.push('## SKB 看板 DAU 口径');
+      L.push('```sql');
+      L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
+      L.push("FROM dw_ods_common_mn04.dm_mn04_sdk_player_active_info");
+      L.push("WHERE date = '日期'");
+      L.push("  AND is_adult = 1");
+      L.push("  AND UPPER(client) = 'APP'");
+      L.push("GROUP BY 1");
+      L.push('```');
+      L.push('');
+    }
+    if (d.product === 'UNO2' || d.product === 'ALL') {
+      L.push('## UNO2 看板 DAU 口径');
+      L.push('```sql');
+      L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
+      L.push("FROM dw_ods_mn08.dm_mn08_player_active_info");
+      L.push("WHERE date = '日期'");
+      L.push("  AND is_adult = 1");
+      L.push("  AND UPPER(client) = 'APP'");
+      L.push("GROUP BY 1");
+      L.push('```');
+      L.push('');
+    }
   }
   // 数据口径字典引用
   L.push('# ⚠️ 数据口径字典【必须参考】');
