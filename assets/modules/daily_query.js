@@ -486,6 +486,24 @@ function buildPrompt(d) {
       L.push('```');
       L.push('');
     }
+    // 看板口径：广告收入计算规则
+    L.push('## 看板口径：广告收入计算规则');
+    L.push('> **启用看板口径时，广告收入必须从各产品活跃用户表中直接取字段，不要用原始日志表计算。**');
+    L.push('');
+    L.push('| 产品 | 活跃表 | 总广告收入 | RV收入 | INT收入 | 说明 |');
+    L.push('|------|--------|-----------|--------|---------|------|');
+    L.push('| UNO | dm_mn01_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
+    L.push('| P10 | dm_mn02_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
+    L.push('| SKB | dm_mn04_sdk_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT；⚠️安卓需/1000000 |');
+    L.push('| UNO2 | dm_mn08_player_active_info | advalue_sum_1d | — | — | ⚠️仅有总广告收入，无分广告类型字段 |');
+    L.push('');
+    L.push('**注意事项：**');
+    L.push('- 总广告收入统一用 `advalue_sum_1d` 字段（含 RV + INT + Banner）');
+    L.push('- 如需分广告类型：RV 用 `advalue_reward_sum_1d`，INT 用 `advalue_interstitial_sum_1d`');
+    L.push('- UNO2 没有分广告类型字段，只能用 `advalue_sum_1d` 作为总广告收入');
+    L.push('- SKB 安卓端 advalue 单位为微元，需要 `IF(platform=\'IOS\', advalue_sum_1d, advalue_sum_1d/1000000)`');
+    L.push('- 不要用 `iaa_sum`（P10 已于 2025-06-17 删除该字段）');
+    L.push('');
   }
   // 数据口径字典引用
   L.push('# ⚠️ 数据口径字典【必须参考】');

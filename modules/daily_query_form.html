@@ -107,7 +107,7 @@
           <span style="font-size:13px;font-weight:500;" id="dq-dashboard-status">未启用</span>
         </div>
         <div id="dq-dashboard-desc" style="display:none;">
-          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，DAU 统计将严格遵循看板口径：is_adult=1 + UPPER(client)='APP'，UNO 额外剔除机器人账号。</p>
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，DAU 和广告收入将严格遵循看板口径：DAU 需 is_adult=1 + UPPER(client)='APP'（UNO 额外剔除机器人）；广告收入统一用活跃表 advalue_sum_1d 字段（UNO2 无分类型）。</p>
         </div>
       </div>
     </div>
