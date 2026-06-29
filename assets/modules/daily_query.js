@@ -501,8 +501,7 @@ function buildPrompt(d) {
     L.push('- 总广告收入统一用 `advalue_sum_1d` 字段（含 RV + INT + Banner）');
     L.push('- 如需分广告类型：RV 用 `advalue_reward_sum_1d`，INT 用 `advalue_interstitial_sum_1d`');
     L.push('- UNO2 总收入用 `advalue_sum_1d`；分广告类型需从明细表 `dw_ods_mn08.c_client_app_ad_log` (log_subtype=advalue) 按 adtype 分组计算，安卓需 /1000000');
-    L.push('- SKB 安卓端 advalue 单位为微元，需要 `IF(platform=\'IOS\', advalue_sum_1d, advalue_sum_1d/1000000)`');
-    L.push('- 不要用 `iaa_sum`（P10 已于 2025-06-17 删除该字段）');
+
     L.push('');
   }
   // 数据口径字典引用
