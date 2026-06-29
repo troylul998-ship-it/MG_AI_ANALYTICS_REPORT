@@ -494,7 +494,7 @@ function buildPrompt(d) {
     L.push('|------|--------|-----------|--------|---------|------|');
     L.push('| UNO | dm_mn01_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
     L.push('| P10 | dm_mn02_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
-    L.push('| SKB | dm_mn04_sdk_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT；⚠️安卓需/1000000 |');
+    L.push('| SKB | dm_mn04_sdk_player_active_info | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d | 分RV/INT |');
     L.push('| UNO2 | dm_mn08_player_active_info | advalue_sum_1d | 明细表计算 | 明细表计算 | 总收入用advalue_sum_1d；分类型需从 dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue) 计算；安卓需/1000000 |');
     L.push('');
     L.push('**注意事项：**');
