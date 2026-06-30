@@ -23,25 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { title: '分析输出', question: '分析和输出配置', explain: '选模板、设分析要求、配推送渠道。填业务背景让分析更准。', example: '<b>例：</b>标准模板 + 归因分析 + 推送 Mobile Growth 群' },
   ]);
 
-  // 日期快捷按钮
-  document.querySelectorAll('.date-quick').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const range = btn.dataset.range;
-      const today = new Date();
-      const fmt = d => d.toISOString().slice(0, 10);
-      let target;
-      if (range === 'yesterday') {
-        target = new Date(today);
-        target.setDate(today.getDate() - 1);
-      } else {
-        target = today;
-      }
-      document.getElementById('report_date').value = fmt(target);
-      document.querySelectorAll('.date-quick').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
-
   // 报告类型切换
   document.querySelectorAll('input[name="report_type"]').forEach(r => {
     r.addEventListener('change', () => {
@@ -152,6 +133,10 @@ function buildFullPrompt(d) {
   L.push(`> 请为 ${productList} 生成 ${d.report_date} 的变现${typeLabel}，完整执行以下 5 个步骤。`);
   L.push('');
   L.push('**⚠️ 日报命名规则**：日报标题使用"生成日期"（今天），而非数据日期。数据总结里"日期"填数据日期，"环比"为数据日期 vs 前一天。');
+  L.push('');
+  L.push('**📐 格式参考（必须严格遵循）**：');
+  L.push('- 日报分析模板：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html （左侧导航"日报分析模板"章节）');
+  L.push('- 飞书卡片推送模板：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html （左侧导航"日报卡片推送"章节）');
   L.push('');
   L.push('---');
   L.push('');
