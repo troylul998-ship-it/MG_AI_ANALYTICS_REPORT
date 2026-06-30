@@ -895,21 +895,8 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 <div class="tmpl">&lt;at user_id="ou_xxx"&gt;姓名&lt;/at&gt;</div>
 <p>⚠️ 使用 <code>id</code> 而非 <code>user_id</code> 会导致飞书无法解析，显示为原始文本。</p>
 
-<h4>已知成员 ID</h4>
-<table>
-<tr><th>姓名</th><th>open_id</th></tr>
-<tr><td>徐丹（Winniexu）</td><td>ou_a007e6683d73240f2b45117b1a4265bd</td></tr>
-<tr><td>李超（Aric）</td><td>ou_42dc86ba9e33cd81a2c81fa0a68d4e00</td></tr>
-<tr><td>陆嘉欣</td><td>ou_34119b0418e16d76e5f0f620a59a2399</td></tr>
-</table>
-
-<h4>已知群组 ID</h4>
-<table>
-<tr><th>群组名</th><th>chat_id</th></tr>
-<tr><td>Mobile Growth</td><td>oc_efab06bc2b4f283575440499e8f802e2</td></tr>
-<tr><td>MG 变现小群</td><td>oc_9b0689b9a37e1eebf014fb39d8c78638</td></tr>
-<tr><td>赛博牛马🐂</td><td>oc_44ce402d9ee9d0f901b61e6885cc33b1</td></tr>
-</table>
+<h4>成员 ID 与群组 ID</h4>
+<p>推送时需要的成员 open_id 和群组 chat_id <strong>不在此处硬编码</strong>，请通过询问用户获取目标群组和 @ 通知的成员信息。</p>
 
 <h3>关键规则</h3>
 <ul>
