@@ -127,7 +127,7 @@ function collect() {
     dims: FF.getCheckedChips('dr_dims'),
     compare: FF.getCheckedChips('dr_compare'),
     template: document.querySelector('input[name="analysis_template"]:checked')?.value || 'standard',
-    template_refs: FF.collectDynamic(templateRefDyn),
+    template_refs: FF.collectRows('dr-template-ref-rows', ['doc_name', 'doc_url']),
     reqs: FF.getCheckedChips('dr_reqs'),
     context: FF.val('dr_context'),
     outputs: FF.getCheckedChips('dr_output'),
