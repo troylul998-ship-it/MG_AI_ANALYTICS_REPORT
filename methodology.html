@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>分析方法论 · AI 数据分析平台</title>
 <meta name="description" content="分析方法论 — 付费根因定位、广告漏斗分析、AB实验设计、数据质量评估、KPI设计、可视化与报告。">
-<link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="assets/style.css">
@@ -99,6 +98,7 @@
 <div class="sidebar-item" data-panel="m-kpi"><span class="icon">🎯</span>KPI 设计 & 市场估算</div>
 <div class="sidebar-item" data-panel="m-viz"><span class="icon">📊</span>数据可视化</div>
 <div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
+<div class="sidebar-item" data-panel="m-daily"><span class="icon">📰</span>日报分析模板</div>
 </div>
 </aside>
 
@@ -701,8 +701,120 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 </table>
 </div>
 
-</div>
+<!-- 日报分析模板 -->
+<div class="m-panel" id="m-daily">
+<div class="m-lead">Mobile Growth 变现日报标准化生成模板。基于 OmniEye 数据，生成固定格式的飞书日报文档和卡片推送。</div>
 
+<h2>核心原则</h2>
+<blockquote>数据真实准确 · 口径固定 · 结构固定 · 业务语言输出<br>不得估算 · 不得补数 · 不得改口径</blockquote>
+
+<h2>日报文档结构（飞书文档）</h2>
+<p>文档标题格式：<code>Mobile Growth_变现日报速览_YYYY.MM.DD</code></p>
+
+<h3>1. 数据总结（元信息）</h3>
+<table>
+<tr><th>字段</th><th>格式</th><th>说明</th></tr>
+<tr><td>日期</td><td>YYYY-MM-DD（星期X）</td><td>数据日期，即当日数据</td></tr>
+<tr><td>环比</td><td>YYYY-MM-DD / YYYY-MM-DD</td><td>前一天 vs 大前天</td></tr>
+<tr><td>历史日报</td><td>链接</td><td>AI_日报数据汇总</td></tr>
+</table>
+
+<h3>2. 收入概况表（核心表格）</h3>
+<p>固定 9 列 × 4 行，产品顺序：<strong>UNO → UNO2 → P10 → SKB</strong></p>
+<table>
+<tr><th>列名</th><th>格式</th><th>口径说明</th></tr>
+<tr><td>产品</td><td>UNO / UNO2 / P10 / SKB</td><td>固定排序</td></tr>
+<tr><td>IAA 收入</td><td>$XX,XXX.XX</td><td>Log 口径 Advalue 总和</td></tr>
+<tr><td>IAA 环比</td><td>+X.XX% / -X.XX%</td><td>vs 前一天</td></tr>
+<tr><td>IAA 同比</td><td>+X.XX% / -X.XX%</td><td>vs 上周同期（7天前）</td></tr>
+<tr><td>DAU</td><td>XXX.XX万（+X.XX%）</td><td>万为单位 + 环比变化</td></tr>
+<tr><td>频次</td><td>X.XX（+X.XX%）</td><td>Freq/DAU + 环比变化</td></tr>
+<tr><td>eCPM(log)</td><td>$X.XX（+X.XX%）</td><td>Log 口径 eCPM + 环比。⚠️ 不是 IAA eCPM</td></tr>
+<tr><td>AdARPU</td><td>$X.XXXX（+X.XX%）</td><td>接口返回的 AdARPU Total + 环比。⚠️ 不得自行用收入/DAU替代</td></tr>
+<tr><td>归因</td><td>一句话</td><td>综合归因：指出主要驱动因素和方向</td></tr>
+</table>
+
+<p><strong>表格下方</strong>：总收入行</p>
+<p>格式：<code>总收入： 约 $XXX,XXX.XX（环比 +X.XX%）。</code></p>
+
+<h3>3. 分产品详细分析</h3>
+<p>每个产品包含 <strong>4 个维度</strong>，每个维度一行：</p>
+<table>
+<tr><th>维度</th><th>分析内容</th><th>写法示例</th></tr>
+<tr><td><strong>整体</strong></td><td>收入变化、DAU、频次、eCPM、AdARPU 综合归因</td><td>"收入 -1.04%，DAU 与 eCPM(log) 小幅回升，但频次与 AdARPU 下滑"</td></tr>
+<tr><td><strong>平台</strong></td><td>AND/IOS 分端 ARPU 变化和主要原因</td><td>"双端 ARPU 均下滑，AND 端下滑 iOS 端小幅回升"</td></tr>
+<tr><td><strong>渠道</strong></td><td>头部渠道（AL/moloco/unity 等）eCPM 变化</td><td>"IOS eCPM 回升，主要受 AL 以外其他渠道增长影响"</td></tr>
+<tr><td><strong>点位</strong></td><td>在线时长变化% + 核心点位频次变化</td><td>"在线时长 -1.22%；核心结算点位频次小幅回落"</td></tr>
+</table>
+
+<h3>4. 关键结论</h3>
+<p>标题：<code>🔍 关键结论</code>，子标题：<code>⭐ 日报重点</code></p>
+<p>固定 4 条结论：</p>
+<table>
+<tr><th>序号</th><th>内容</th><th>写法要求</th></tr>
+<tr><td>1</td><td><strong>整体情况</strong></td><td>总收入环比 + 主要拖累/驱动产品</td></tr>
+<tr><td>2</td><td><strong>效率分化</strong></td><td>各产品 AdARPU/eCPM 变化方向对比</td></tr>
+<tr><td>3</td><td><strong>点位活动</strong></td><td>各产品核心点位变化总结</td></tr>
+<tr><td>4</td><td><strong>关注点</strong></td><td>未来需重点关注的 2-3 个问题</td></tr>
+</table>
+
+<h3>5. 近期趋势</h3>
+<p>标题：<code>📈 近期趋势</code></p>
+<p>每产品一条，格式：<code>产品名：收入约 XX.XK，一句话趋势总结。</code></p>
+
+<h2>指标口径规范</h2>
+<table>
+<tr><th>指标</th><th>口径</th><th>⚠️ 易错点</th></tr>
+<tr><td>IAA 收入</td><td>Log Advalue 总和</td><td>不要和 API Revenue 混用</td></tr>
+<tr><td>eCPM(log)</td><td>Log 口径：Advalue / Impression(log) × 1000</td><td>⚠️ 不是 IAA eCPM（API 口径）</td></tr>
+<tr><td>AdARPU</td><td>接口返回的 AdARPU Total 字段</td><td>⚠️ 不得自行用 收入/DAU 替代</td></tr>
+<tr><td>频次</td><td>Freq/DAU = Impression(log) / DAU</td><td>是 DAU 频次，不是 DEU 频次</td></tr>
+<tr><td>参与率</td><td>AdPlayUser(log) / DAU</td><td>分母是 DAU，不是 DEU</td></tr>
+<tr><td>环比</td><td>(当日值 - 前一日值) / 前一日值</td><td>—</td></tr>
+<tr><td>周同比</td><td>(当日值 - 7天前值) / 7天前值</td><td>—</td></tr>
+</table>
+
+<h2>归因分析框架</h2>
+<p>日报归因遵循以下优先级顺序：</p>
+<ol>
+<li><strong>量端（DAU）</strong>：DAU 变化是否是主因？（周末效应/版本更新/UA 波动）</li>
+<li><strong>效率端（AdARPU）</strong>：AdARPU = eCPM × Freq / 1000，拆解 eCPM 和 Freq 哪个主导</li>
+<li><strong>频次拆解</strong>：频次变化来自 RV/INT/Banner 哪个广告类型？来自哪些核心点位？</li>
+<li><strong>eCPM 拆解</strong>：eCPM 变化来自哪些渠道？头部渠道（AL）还是中小渠道？AND 还是 iOS？</li>
+<li><strong>外部因素</strong>：活动上下线、版本更新、赛季切换、Banner 放量等</li>
+</ol>
+
+<h2>禁止行为</h2>
+<ul>
+<li>❌ 不得用历史记忆补数</li>
+<li>❌ 不得估算缺失值</li>
+<li>❌ 不得用其他日期数据替代当前日报</li>
+<li>❌ 不得把 IAA eCPM 当成 eCPM(log)</li>
+<li>❌ 不得用 收入/DAU 自行替代接口中的 AdARPU Total</li>
+<li>❌ 不得改变产品排序（固定 UNO → UNO2 → P10 → SKB）</li>
+<li>❌ 缺少数据时不得猜测，应写"暂无数据支持，暂不下结论"</li>
+</ul>
+
+<h2>数据提取接口清单</h2>
+<table>
+<tr><th>数据模块</th><th>接口 Endpoint</th><th>返回内容</th></tr>
+<tr><td>汇总报表</td><td>adverAnakeytrendTable</td><td>DAU/收入/eCPM/Impression/参与率/频次，含 RV/INT/Banner 分项</td></tr>
+<tr><td>整体数据</td><td>adverAnakeytrendRevenue</td><td>分平台收入、AdARPU、DAU、在线时长</td></tr>
+<tr><td>平台数据</td><td>adverAnakeytrendeCPM</td><td>分 RV/INT 的 Freq/DAU、eCPM、参与率</td></tr>
+<tr><td>渠道数据</td><td>adverAnakeytrendTableAdchannel</td><td>按渠道的收入、展示量、收入占比、eCPM</td></tr>
+<tr><td>点位数据</td><td>adverAnakeytrendTablePointLog</td><td>各广告点位的 DAU 频次、DEU 频次、参与率</td></tr>
+</table>
+
+<h2>完整流程（5 步）</h2>
+<ol>
+<li><strong>OmniEye 提取数据</strong>：从关键数据趋势看板拉取 4 个产品 × 5 个接口的数据</li>
+<li><strong>整理 CSV</strong>：生成 7 个 CSV 文件（汇总/概况/收入/平台/在线时长/渠道/点位）</li>
+<li><strong>AI 分析生成</strong>：按本模板结构生成分析文本</li>
+<li><strong>创建飞书文档</strong>：lark-cli 创建文档 + 授权管理权限</li>
+<li><strong>推送飞书卡片</strong>：JSON 2.0 卡片格式推送到指定群组</li>
+</ol>
+
+</div>
 
 </main><!-- end m-content -->
 </div><!-- end m-layout -->
