@@ -742,11 +742,47 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 <p>每个产品包含 <strong>4 个维度</strong>，每个维度一行：</p>
 <table>
 <tr><th>维度</th><th>分析内容</th><th>写法示例</th></tr>
-<tr><td><strong>整体</strong></td><td>收入变化、DAU、频次、eCPM、AdARPU 综合归因</td><td>"收入 -1.04%，DAU 与 eCPM(log) 小幅回升，但频次与 AdARPU 下滑"</td></tr>
-<tr><td><strong>平台</strong></td><td>AND/IOS 分端 ARPU 变化和主要原因</td><td>"双端 ARPU 均下滑，AND 端下滑 iOS 端小幅回升"</td></tr>
-<tr><td><strong>渠道</strong></td><td>头部渠道（AL/moloco/unity 等）eCPM 变化</td><td>"IOS eCPM 回升，主要受 AL 以外其他渠道增长影响"</td></tr>
-<tr><td><strong>点位</strong></td><td>在线时长变化% + 核心点位频次变化</td><td>"在线时长 -1.22%；核心结算点位频次小幅回落"</td></tr>
+<tr><td><strong>整体</strong></td><td>收入变化方向 + 各指标（DAU/频次/eCPM/AdARPU）联动归因</td><td>"收入 -4.13%，DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。"</td></tr>
+<tr><td><strong>平台</strong></td><td>AND/IOS 双端 ARPU 变化方向 + 主要原因简述</td><td>"ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。"</td></tr>
+<tr><td><strong>渠道</strong></td><td>渠道 eCPM 整体方向 + 影响最大的渠道</td><td>"双端 eCPM 均有所下滑，主要受以 AL 为主大部分渠道的影响。"</td></tr>
+<tr><td><strong>点位</strong></td><td>在线时长方向 + 核心点位频次变化 + 支撑/拖累因素</td><td>"在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动 token 形成一定支撑，使得大盘频次有所增长。"</td></tr>
 </table>
+
+<h4>⚠️ 分产品分析风格规范（核心）</h4>
+<div class="m-lead" style="border-left-color:#e74c3c;">以下规则为强制性要求，违反将导致日报不合格。</div>
+<table>
+<tr><th>规则</th><th>说明</th><th>❌ 错误示例</th><th>✅ 正确示例</th></tr>
+<tr><td><b>不列具体数值</b></td><td>分产品分析中不出现 $xx、xx%、xxmin 等具体数字。数值只在"收入概况表"中展示。</td><td>"IOS 收入 $27,077（环比 -5.01%），AND ARPU $0.0216（+4.51%）"</td><td>"ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。"</td></tr>
+<tr><td><b>不加 emoji 标记</b></td><td>分析正文和收入概况表中不使用 ⚠️⬆️ 等 emoji 标注数值。</td><td>"DAU 11.63万（-10.10%⚠️）"<br>"AdARPU $0.1595（+6.28%⬆️）"</td><td>"DAU 11.63万（-10.10%）"<br>"AdARPU $0.1595（+6.28%）"</td></tr>
+<tr><td><b>因果链条完整</b></td><td>归因不止说"xx是主因"，要完整描述"什么变了 → 导致什么 → 有什么对冲/加剧"。</td><td>"DAU 下降是收入下滑主因。"</td><td>"DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。"</td></tr>
+<tr><td><b>融入业务背景</b></td><td>结合实际业务事件（活动上下线、功能开放等）做归因，不纯粹堆砌数据方向。</td><td>"收入增长主要来自价格端。"</td><td>"主要是挖蘑菇新开，RV 频次明显增长，eCPM 也有小幅增长共同带来。"</td></tr>
+<tr><td><b>用词中性前瞻</b></td><td>近期趋势和关键结论用中性专业语言，避免"亮眼""创新高"等煽动性用词。</td><td>"表现亮眼""创近期新高""最亮眼产品"</td><td>"效率端修复""高位盘继续承压""需观察量端恢复"</td></tr>
+</table>
+
+<h4>标准化写法参考</h4>
+<div class="tmpl">UNO
+整体：收入 -4.13%，DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。
+平台：ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。
+渠道：双端eCPM均有所下滑，且主要受以AL为主大部分渠道的影响。
+点位：在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动token、rv_commonevent_SORT 形成一定支撑，使得大盘频次有所增长。
+
+UNO2
+整体：收入 -4.45%，DAU 大幅下滑；但频次、eCPM(log) 与 AdARPU 均回升，效率端修复明显，对收入下滑形成部分对冲。
+平台：双端arpu有所回升，AND端提升更明显受DAU下滑影响较多，IOS主要是eCPM和DAU频次回升影响。
+渠道：IOS端受AL等渠道影响eCPM有小幅回升，AND端则较为稳定。
+点位：在线时长小幅回升，受DAU下滑影响，gamefinish 频次明显提升，多个 RV 点位均有提升，共同影响大盘。
+
+P10
+整体：收入 -2.29%，DAU 与频次均有提升；但 eCPM(log) 与 AdARPU 明显下滑。
+平台：双端收入与 ARPU 均下滑，主要是eCPM下滑导致。
+渠道：双端基本全渠道有下滑趋势，其中AL的负面影响较为明显。
+点位：在线时长小幅回升；Gameplay 插页频次有所提升，Drawcard 活动游戏内道具、主动弹出有提升，拉高整体频次，集中在int广告。
+
+SKB
+整体：收入 +8.95%，DAU 基本稳定，频次、eCPM(log) 与 AdARPU 同步提升，效率端修复是收入增长核心。
+平台：双端收入与 ARPU 均提升，主要是挖蘑菇新开，RV频次明显增长，eCPM也有小幅增长共同带来。
+渠道：双端头部 applovin eCPM 均回升，iOS 端 unity 也有回升，其次RV频次明显增长也有结构性利好。
+点位：在线时长小幅回升；pvp_offline_banner_entrance 频次小幅提升，int_round_over 回升，rv_dig_hunter重启，是收入和效率改善的重要来源。</div>
 
 <h3>4. 关键结论</h3>
 <p>标题：<code>🔍 关键结论</code>，子标题：<code>⭐ 日报重点</code></p>
@@ -762,6 +798,11 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 <h3>5. 近期趋势</h3>
 <p>标题：<code>📈 近期趋势</code></p>
 <p>每产品一条，格式：<code>产品名：收入约 XX.XK，一句话趋势总结。</code></p>
+<p><strong>⚠️ 近期趋势写法要求：</strong>用中性前瞻性语言，不做价值判断。</p>
+<ul>
+<li>❌ 避免："表现亮眼""创近期新高""最亮眼的产品"</li>
+<li>✅ 应该："效率端修复""高位盘继续承压""需观察量端恢复""短期仍受量端压力影响"</li>
+</ul>
 
 <h2>指标口径规范</h2>
 <table>
