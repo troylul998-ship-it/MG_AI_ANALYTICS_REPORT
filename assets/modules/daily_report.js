@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 动态行：标准化文档参考
+  const templateRefDyn = FF.initDynamic('dr-template-ref-rows', 'dr-add-template-ref', (data) => {
+    const d = data || {};
+    return `<input type="text" data-f="doc_name" placeholder="文档名" value="${FF.esc(d.doc_name||'')}" style="flex:0 0 160px;">` +
+    `<input type="text" data-f="doc_url" placeholder="文档链接（选填）" value="${FF.esc(d.doc_url||'')}" style="flex:1;">`;
+  }, { rowClass: 'dyn-row' }) || { addRow: () => {}, container: null };
+
   // 数据源切换：OmniEye ↔ CSV 上传
   document.querySelectorAll('input[name="data_source"]').forEach(r => {
     r.addEventListener('change', () => {
@@ -120,6 +127,7 @@ function collect() {
     dims: FF.getCheckedChips('dr_dims'),
     compare: FF.getCheckedChips('dr_compare'),
     template: document.querySelector('input[name="analysis_template"]:checked')?.value || 'standard',
+    template_refs: FF.collectDynamic(templateRefDyn),
     reqs: FF.getCheckedChips('dr_reqs'),
     context: FF.val('dr_context'),
     outputs: FF.getCheckedChips('dr_output'),
@@ -142,6 +150,8 @@ function buildFullPrompt(d) {
   L.push(`# Mobile Growth 变现${typeLabel}生成任务`);
   L.push('');
   L.push(`> 请为 ${productList} 生成 ${d.report_date} 的变现${typeLabel}，完整执行以下 5 个步骤。`);
+  L.push('');
+  L.push('**⚠️ 日报命名规则**：日报标题使用"生成日期"（今天），而非数据日期。数据总结里"日期"填数据日期，"环比"为数据日期 vs 前一天。');
   L.push('');
   L.push('---');
   L.push('');
@@ -268,20 +278,50 @@ function buildDataPrompt(d) {
 /* ---------- 分析模板 Prompt ---------- */
 function buildAnalysisPrompt(d) {
   const L = [];
+  L.push('### 日报命名与日期规则');
+  L.push('');
+  L.push('- **日报文件/文档标题**：`Mobile Growth_变现日报速览_<生成日期>`，生成日期 = 今天（执行日报任务的日期），而非数据日期');
+  L.push('- **数据总结区的"日期"字段**：填数据日期（即被分析的那一天，通常是昨天）');
+  L.push('- **数据总结区的"环比"字段**：`数据日期 / 数据日期前一天`（即昨天 vs 大前天）');
+  L.push('- **示例**：今天是 2026-06-30，分析 06-29 的数据 → 标题为 `_2026.06.30`，日期为 `2026-06-29`，环比为 `2026-06-29 / 2026-06-28`');
+  L.push('');
   L.push('### 分析模板结构');
   L.push('');
   L.push('**1. 收入概况表**');
   L.push('| 产品 | IAA 收入 | IAA 环比 | IAA 同比 | DAU | 频次 | eCPM(log) | AdARPU | 归因 |');
   L.push('');
   L.push('**2. 分产品分析**（每产品 4 个维度）：');
-  L.push('- **整体**：收入变化、DAU、频次、eCPM、AdARPU 综合归因');
-  L.push('- **平台**：AND/IOS 分端 ARPU 和收入变化');
-  L.push('- **渠道**：头部渠道 eCPM 变化、结构性变化');
-  L.push('- **点位**：在线时长变化、核心点位频次变化');
+  L.push('- **整体**：收入变化方向 + 主要拖累/驱动项（如"DAU 明显下滑是主要拖累项，ARPU 小幅回升"）');
+  L.push('- **平台**：双端 ARPU 的变化方向和分化表现（如"AND 端小幅回升，iOS 端小幅下滑"）');
+  L.push('- **渠道**：eCPM 变化方向 + 主要影响渠道（如"双端 eCPM 均有所下滑，主要受 AL 为主大部分渠道影响"）');
+  L.push('- **点位**：在线时长方向 + 核心点位频次变化 + 哪些点位形成支撑/拖累（如"在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包和活动 token 形成支撑"）');
   L.push('');
   L.push('**3. 关键结论**：整体情况、效率分化、点位活动、关注点');
   L.push('');
   L.push('**4. 近期趋势**：每产品一条趋势总结');
+  L.push('');
+  L.push('### 分析输出风格规则（重要）');
+  L.push('');
+  L.push('**分产品分析部分（整体/平台/渠道/点位）必须遵循以下风格：**');
+  L.push('- ❌ **不要**列出大量具体数值（如"IOS 收入 $27,077（环比 -5.01%），AND ARPU $0.0216（+4.51%）"）');
+  L.push('- ✅ **要**用简洁的业务语言描述趋势方向和归因逻辑');
+  L.push('- 只在"收入概况表"中保留完整数值，分产品分析部分用描述性语言');
+  L.push('- 重点说明"什么在变化"+"为什么变化"+"哪些因素在驱动/拖累"');
+  L.push('');
+  L.push('**正确示例：**');
+  L.push('```');
+  L.push('UNO');
+  L.push('整体：收入小幅下降，DAU 明显下滑是主要拖累项，ARPU 小幅回升部分对冲');
+  L.push('平台：ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑');
+  L.push('渠道：双端 eCPM 均有所下滑，主要受以 AL 为主大部分渠道的影响');
+  L.push('点位：在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动 token、rv_commonevent_SORT 形成一定支撑，使得大盘频次有所增长');
+  L.push('');
+  L.push('UNO2');
+  L.push('整体：收入小幅下降，DAU 大幅下滑；但频次、eCPM(log) 与 AdARPU 均回升，效率端修复明显，对收入下滑形成部分对冲');
+  L.push('平台：双端 ARPU 有所回升，AND 端提升更明显受 DAU 下滑影响较多，IOS 主要是 eCPM 和频次回升影响');
+  L.push('渠道：IOS 端受 AL 等渠道影响 eCPM 有小幅回升，AND 端则较为稳定');
+  L.push('点位：在线时长小幅回升，受 DAU 下滑影响，gamefinish 频次明显提升，多个 RV 点位均有提升，共同影响大盘');
+  L.push('```');
   L.push('');
   L.push('### 分析规则（SKILL）');
   L.push('- 数据真实准确、口径固定、结构固定、业务语言输出');
@@ -289,6 +329,20 @@ function buildAnalysisPrompt(d) {
   L.push('- 产品排序固定：**UNO → UNO2 → P10 → SKB**');
   L.push('- eCPM(log) 是 Log 口径的 eCPM，不是 IAA eCPM');
   L.push('- AdARPU 使用接口返回的 AdARPU Total 字段');
+  L.push('- 分产品分析中，点位名称需保留（如 int_gamefinish、rv_commonevent_SORT 等），但不需要列出频次/参与率的具体数值');
+  if (d.template_refs && d.template_refs.length > 0) {
+    const refs = d.template_refs.filter(r => r.doc_name || r.doc_url);
+    if (refs.length > 0) {
+      L.push('- ✅ **严格参考以下标准化文档的格式**，输出的结构、措辞风格、详略程度必须与参考文档保持一致：');
+      refs.forEach(r => {
+        if (r.doc_url) {
+          L.push(`  - [${r.doc_name || '参考文档'}](${r.doc_url})`);
+        } else {
+          L.push(`  - ${r.doc_name}`);
+        }
+      });
+    }
+  }
   if (d.reqs.includes('attribution')) L.push('- ✅ 需要归因分析（识别收入变化的主要驱动因素）');
   if (d.reqs.includes('anomaly')) L.push('- ✅ 需要异常识别（环比/同比超过 ±10% 重点标注）');
   if (d.reqs.includes('weekend')) L.push('- ✅ 需要标注周末效应（周末 DAU 通常回升）');

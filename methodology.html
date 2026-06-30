@@ -814,6 +814,108 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 <li><strong>推送飞书卡片</strong>：JSON 2.0 卡片格式推送到指定群组</li>
 </ol>
 
+<h2>飞书推送日报卡片模板</h2>
+<div class="m-lead">日报生成后，按以下标准格式推送飞书原生卡片（Interactive Card）到群组通知。</div>
+
+<h3>⚠️ 日期规则（重要）</h3>
+<table>
+<tr><th>字段</th><th>含义</th><th>示例（假设今天是 6 月 30 日）</th></tr>
+<tr><td>卡片标题 / 文档标题</td><td>报告发送日期（即今天）</td><td>Mobile Growth_变现日报速览_2026.06.30</td></tr>
+<tr><td>📅 日期</td><td>今天日期</td><td>2026-06-30，星期二</td></tr>
+<tr><td>📊 环比</td><td>昨天 vs 大前天</td><td>2026-06-29 / 2026-06-28</td></tr>
+</table>
+<p><strong>解释</strong>：我们在 6/30 推送报告，内容日期显示 6/30（今天），环比比较的是 6/29 vs 6/28（昨天 vs 大前天的数据）。</p>
+
+<h3>卡片结构（4 个模块）</h3>
+<table>
+<tr><th>模块</th><th>内容</th><th>说明</th></tr>
+<tr><td>1. 报告信息</td><td>📅 日期 / 📊 环比 / 💰 总收入 / 📄 日报文档链接</td><td>4 行基础信息 + @ 通知</td></tr>
+<tr><td>2. 收入概况表</td><td>飞书原生 <code>table</code> 组件，9 列 × 4 行</td><td>产品顺序：UNO → UNO2 → P10 → SKB</td></tr>
+<tr><td>3. 日报重点</td><td>3~4 条编号列表</td><td>整体情况 / 效率分化 / 点位活动 / 关注点</td></tr>
+<tr><td>4. 近期趋势</td><td>4 条编号列表，每产品 1 条</td><td>简要趋势总结</td></tr>
+</table>
+
+<h3>卡片 JSON 模板（schema 2.0）</h3>
+<div class="tmpl">{
+  "schema": "2.0",
+  "header": {
+    "template": "blue",
+    "title": {"content": "Mobile Growth_变现日报速览_YYYY.MM.DD", "tag": "plain_text"}
+  },
+  "body": {
+    "elements": [
+      {
+        "tag": "markdown",
+        "content": "**📅 日期**：YYYY.MM.DD，星期X\n**📊 环比**：YYYY-MM-DD / YYYY-MM-DD\n**💰 总收入**：约 **$XXX,XXX**（环比 X.X%，总 DAU 约 XXX 万）\n**📄 日报文档**：[文档标题](文档链接)\n\n&lt;at user_id=\"ou_xxx\"&gt;姓名&lt;/at&gt;"
+      },
+      {"tag": "hr"},
+      {"tag": "markdown", "content": "**📊 收入概况**"},
+      {
+        "tag": "table",
+        "columns": [
+          {"name": "col0", "display_name": "产品", "width": "80px"},
+          {"name": "col1", "display_name": "IAA 收入", "width": "100px"},
+          {"name": "col2", "display_name": "IAA 环比", "width": "100px"},
+          {"name": "col3", "display_name": "IAA 同比", "width": "100px"},
+          {"name": "col4", "display_name": "DAU", "width": "150px"},
+          {"name": "col5", "display_name": "频次 (IPU)", "width": "120px"},
+          {"name": "col6", "display_name": "eCPM", "width": "120px"},
+          {"name": "col7", "display_name": "AdARPU", "width": "120px"},
+          {"name": "col8", "display_name": "归因", "width": "150px"}
+        ],
+        "rows": [4行产品数据，key 与 columns[].name 对应]
+      },
+      {"tag": "hr"},
+      {"tag": "markdown", "content": "**⭐ 日报重点**\n1. **整体情况**：...\n2. **效率分化**：...\n3. **点位活动**：...\n4. **关注点**：..."},
+      {"tag": "markdown", "content": "**📈 近期趋势**\n1. **UNO**：...\n2. **UNO2**：...\n3. **P10**：...\n4. **SKB**：..."}
+    ]
+  }
+}</div>
+
+<h3>表格列配置详情</h3>
+<table>
+<tr><th>列标识</th><th>display_name</th><th>data_type</th><th>width</th><th>数据格式</th></tr>
+<tr><td>col0</td><td>产品</td><td>text</td><td>80px</td><td>UNO / UNO2 / P10 / SKB</td></tr>
+<tr><td>col1</td><td>IAA 收入</td><td>text</td><td>100px</td><td>$42,566</td></tr>
+<tr><td>col2</td><td>IAA 环比</td><td>text</td><td>100px</td><td>-4.13% / +8.95%⬆️</td></tr>
+<tr><td>col3</td><td>IAA 同比</td><td>text</td><td>100px</td><td>+1.52% / -3.20%</td></tr>
+<tr><td>col4</td><td>DAU</td><td>text</td><td>150px</td><td>117.00万(-5.91%)</td></tr>
+<tr><td>col5</td><td>频次 (IPU)</td><td>text</td><td>120px</td><td>5.93(+5.07%)</td></tr>
+<tr><td>col6</td><td>eCPM</td><td>text</td><td>120px</td><td>$6.13(-3.02%)</td></tr>
+<tr><td>col7</td><td>AdARPU</td><td>text</td><td>120px</td><td>$0.0364(+1.90%)</td></tr>
+<tr><td>col8</td><td>归因</td><td>text</td><td>150px</td><td>DAU回落，频次补偿</td></tr>
+</table>
+
+<h3>@ 提及格式（重要）</h3>
+<p>推送时 @ 通知成员，<strong>必须使用 <code>user_id</code> 属性</strong>：</p>
+<div class="tmpl">&lt;at user_id="ou_xxx"&gt;姓名&lt;/at&gt;</div>
+<p>⚠️ 使用 <code>id</code> 而非 <code>user_id</code> 会导致飞书无法解析，显示为原始文本。</p>
+
+<h4>已知成员 ID</h4>
+<table>
+<tr><th>姓名</th><th>open_id</th></tr>
+<tr><td>徐丹（Winniexu）</td><td>ou_a007e6683d73240f2b45117b1a4265bd</td></tr>
+<tr><td>李超（Aric）</td><td>ou_42dc86ba9e33cd81a2c81fa0a68d4e00</td></tr>
+<tr><td>陆嘉欣</td><td>ou_34119b0418e16d76e5f0f620a59a2399</td></tr>
+</table>
+
+<h4>已知群组 ID</h4>
+<table>
+<tr><th>群组名</th><th>chat_id</th></tr>
+<tr><td>Mobile Growth</td><td>oc_efab06bc2b4f283575440499e8f802e2</td></tr>
+<tr><td>MG 变现小群</td><td>oc_9b0689b9a37e1eebf014fb39d8c78638</td></tr>
+<tr><td>赛博牛马🐂</td><td>oc_44ce402d9ee9d0f901b61e6885cc33b1</td></tr>
+</table>
+
+<h3>关键规则</h3>
+<ul>
+<li><strong>JSON 2.0 结构</strong>：根级 <code>"schema": "2.0"</code>，正文放 <code>body.elements</code> 数组中</li>
+<li><strong>表格组件</strong>：<code>columns[].name</code> 为列标识（col0~col8），<code>display_name</code> 为表头文字，<code>rows</code> 的 key 与 name 对应</li>
+<li><strong>markdown 组件</strong>：使用 <code>tag: "markdown"</code>，内容用 markdown 语法加粗、链接</li>
+<li><strong>卡片标题</strong>：<code>header.template: "blue"</code> 蓝色背景</li>
+<li><strong>发送方式</strong>：使用 MCP <code>im_v1_message_create</code>，<code>receive_id_type: "chat_id"</code>，<code>msg_type: "interactive"</code></li>
+</ul>
+
 </div>
 
 </main><!-- end m-content -->
