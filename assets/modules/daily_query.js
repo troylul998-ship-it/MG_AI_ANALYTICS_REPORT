@@ -295,6 +295,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // SQL 自检开关
+  const sqlVerifyToggle = document.getElementById('dq_sql_verify_toggle');
+  const sqlVerifyDesc = document.getElementById('dq-sql-verify-desc');
+  const sqlVerifyStatus = document.getElementById('dq-sql-verify-status');
+  if (sqlVerifyToggle) {
+    sqlVerifyToggle.addEventListener('change', () => {
+      if (sqlVerifyToggle.checked) {
+        sqlVerifyDesc.style.display = 'block';
+        sqlVerifyStatus.textContent = '已启用';
+        sqlVerifyStatus.style.color = 'var(--brand-1)';
+        sqlVerifyStatus.style.fontWeight = '600';
+      } else {
+        sqlVerifyDesc.style.display = 'none';
+        sqlVerifyStatus.textContent = '未启用';
+        sqlVerifyStatus.style.color = 'var(--text-3)';
+        sqlVerifyStatus.style.fontWeight = '500';
+      }
+    });
+  }
+
   // 提交
   document.getElementById('dq-form').addEventListener('submit', e => {
     e.preventDefault();
@@ -315,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function collect() {
   const searchEnabled = document.getElementById('dq_global_search_toggle') && document.getElementById('dq_global_search_toggle').checked;
   const dashboardEnabled = document.getElementById('dq_dashboard_toggle') && document.getElementById('dq_dashboard_toggle').checked;
+  const sqlVerifyEnabled = document.getElementById('dq_sql_verify_toggle') && document.getElementById('dq_sql_verify_toggle').checked;
   return {
     module: 'daily_query',
     product: FF.val('product'),
@@ -330,6 +351,7 @@ function collect() {
     sql_refs: FF.collectRows('dq-sql-ref-rows', ['sql_label', 'sql_code']),
     global_search: searchEnabled ? (FF.val('dq_search_keywords') || '').trim() : '',
     dashboard_mode: dashboardEnabled,
+    sql_verify_mode: sqlVerifyEnabled,
   };
 }
 
@@ -544,7 +566,61 @@ function buildPrompt(d) {
   L.push('2. **必须优先参考上方提供的埋点文档和历史 SQL**，保持口径一致');
   L.push('3. **统计三方相关指标时，能用三方中间表的尽量用三方中间表**（如 `dm_mnXX_player_3pp_payment_info`），避免直接查 `omni_server_payment` 原始表。中间表每天刷新，字段包含 `third_payment_sum_1d`、`third_ingame_payment_sum_1d`、`third_web_payment_sum_1d` 等，可直接获取三方总收入/内嵌收入/主站收入');
   L.push('4. **UNO 产品的 account_id 需要做 split 处理**：`split(account_id, \'@\')[1] AS account_id`。UNO 原始 account_id 格式为 `xxx@yyy`，取 `@` 后面部分才是真实 account_id，用于与三方中间表等外部表 JOIN 时必须先 split');
-  L.push('5. 输出可直接执行的完整 SQL');
+  // SQL 自检要求
+  if (d.sql_verify_mode) {
+    const verifyProject = PRODUCT_PROJECT_MAP[d.product] || d.product.toLowerCase();
+    L.push('5. **⚠️ SQL 自检（已启用）**：在输出最终 SQL **之前**，你必须严格按照以下步骤，使用 Omnieye 的 MCP 工具 `sql_query` 逐一执行自检 SQL 查询，确认无误后再输出最终 SQL。');
+    L.push('');
+    L.push('   **自检执行方式：**');
+    L.push(`   使用 MCP 工具 \`sql_query\` 执行自检 SQL，执行参数：`);
+    L.push(`   - project：\`${verifyProject}\``);
+    L.push('   - sql：下方各 Step 中的自检 SQL 语句');
+    L.push('');
+    L.push('   **Step 1：字段存在性验证（严格 — 最关键步骤）**');
+    L.push('   对所有涉及的表，执行 `SELECT * FROM 表名 WHERE date=\'最近一天\' LIMIT 5`（禁止使用 SHOW COLUMNS FROM），从返回结果的 columns 列名列表中**逐一核对**你 SQL 中用到的每个字段是否真实存在。');
+    L.push('   - 如果某个字段在返回结果的列名中不存在，**严禁在最终 SQL 中使用该字段**');
+    L.push('   - **字段不存在时的处理流程（必须执行）**：');
+    L.push('     1. 先确认需求中确实需要该字段（如 os_ver、device_model 用于过滤）');
+    L.push('     2. 尝试在同产品的其他表中查找该字段：依次对登录表（omni_server_login）、广告明细表（c_client_app_ad_log）、全量用户表（dm_mnXX_player_info）等执行 `SELECT * FROM 其他表 WHERE date=\'最近一天\' LIMIT 5`');
+    L.push('     3. 找到包含目标字段的表后，确认该表与主表之间的 JOIN 字段（如 account_id、role_id）');
+    L.push('     4. 在最终 SQL 中通过 JOIN 补充缺失字段，而不是凭印象假设字段存在');
+    L.push('   - **特别注意**：不同产品的活跃表字段差异很大（如 SKB 有 os_ver 但 UNO2 没有，UNO 有 device_model 但 UNO2 活跃表没有），绝对不要假设所有表结构一致');
+    L.push('   - **典型案例**：UNO2 活跃表 dm_mn08_player_active_info 不含 os_ver/device_model 字段，需从 omni_server_login（字段名为 os）或 c_client_app_ad_log（字段名为 os）中获取');
+    L.push('');
+    L.push('   **Step 2：字段枚举值/格式检查**');
+    L.push('   对 WHERE 条件或 CASE WHEN 中涉及比较判断的字段，执行 `SELECT DISTINCT 字段名 FROM 表名 WHERE date=\'某天\' LIMIT 30`，检查返回的实际枚举值是否符合你 SQL 中的过滤写法。例如：');
+    L.push('   - os/os_ver 字段格式是纯数字 `"13"` 还是带前缀 `"android 13"`？');
+    L.push('   - platform 是大写 `"IOS"` 还是混合 `"iOS"`？');
+    L.push('   - adtype 是 `"banner"` 还是 `"Banner"`？');
+    L.push('   - client 是 `"APP"` 还是 `"app"`？');
+    L.push('   根据实际枚举值调整 SQL 中的过滤条件写法。');
+    L.push('');
+    L.push('   **Step 3：JOIN 字段一致性验证**');
+    L.push('   当需要多表 JOIN 时（特别是 Step 1 中因字段不存在而需要补表的情况），分别对两张表执行 `SELECT DISTINCT 用户字段 FROM 表名 WHERE date=\'某天\' LIMIT 5`，确认：');
+    L.push('   - 两侧 JOIN 字段名是否相同（如一边叫 `account_id`，另一边可能叫 `sdk_account_id`）');
+    L.push('   - 字段值格式是否一致（如一边有前缀/后缀，另一边是纯 ID）');
+    L.push('   - 两侧数据粒度是否匹配（如登录表一天可能有多条记录，需要先做 DISTINCT 或聚合）');
+    L.push('   如果字段名不同，需要用正确的字段名做关联（如 `a.account_id = b.sdk_account_id`）。');
+    L.push('   **常见 JOIN 映射参考**：');
+    L.push('   - 活跃表 role_id ↔ 广告表 role_id（UNO2 可直接关联）');
+    L.push('   - 活跃表 account_id ↔ 登录表 account_id');
+    L.push('   - 活跃表 role_id ↔ 广告表 sdk_account_id（需确认具体产品）');
+    L.push('');
+    L.push('   **Step 4：输出自检结论**');
+    L.push('   所有自检完成后，在最终 SQL 之前列出简要结论，格式如：');
+    L.push('   ```');
+    L.push('   自检结论：');
+    L.push('   ❌ dm_mn08_player_active_info 不存在 os_ver/device_model 字段');
+    L.push('   ✅ 已改用 omni_server_login 表获取 os + device_model 字段，通过 account_id + date JOIN 活跃表');
+    L.push('   ✅ omni_server_login.os 格式为纯数字/版本号（安卓 "10"/"15"，iOS "26.5"/"18.6.2"）');
+    L.push('   ✅ c_client_app_ad_log 存在 role_id 字段，可直接与活跃表 role_id JOIN');
+    L.push('   ✅ platform 字段值为大写（"IOS", "ANDROID"）');
+    L.push('   ✅ device_model 格式：三星为 "samsung SM-xxx"，iPhone 为 "iPhone17,2"');
+    L.push('   ```');
+    L.push('   如果自检发现字段不存在等问题，必须说明：发现了什么 → 从哪张表找到替代 → 如何 JOIN 补充。');
+  } else {
+    L.push('5. 输出可直接执行的完整 SQL');
+  }
   L.push('6. 列名用英文蛇形命名');
   L.push('7. 加简短注释说明每个 CTE 的作用');
   return L.join('\n');

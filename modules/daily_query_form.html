@@ -110,6 +110,19 @@
           <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，DAU 和广告收入将严格遵循看板口径：DAU 需 is_adult=1 + UPPER(client)='APP'（UNO 额外剔除机器人）；广告收入统一用活跃表 advalue_sum_1d 字段（UNO2 无分类型）。</p>
         </div>
       </div>
+      <div class="field" style="margin-top:16px;">
+        <label>🔬 SQL 自检 <span class="help">选填，启用后 AI 会在生成 SQL 前先通过 omnieye 实际运行验证查询</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="dq_sql_verify_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="dq-sql-verify-status">未启用</span>
+        </div>
+        <div id="dq-sql-verify-desc" style="display:none;">
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，AI 会通过 omnieye 平台实际执行自检 SQL 查询：① 验证字段是否存在及枚举格式 ② 检查跨表 JOIN 字段名是否一致 ③ 确认过滤字段写法。所有自检结果确认无误后才输出最终 SQL。</p>
+        </div>
+      </div>
     </div>
 
     <!-- 2 需求描述 + 维度 -->
