@@ -365,7 +365,7 @@ function buildPrompt(d) {
   // ═══════════════════════════════════════════════════════════
   L.push('# 1. 角色与目标');
   L.push('');
-  L.push('你是资深数据分析师，精通 Presto/Trino。请基于以下需求编写一段可直接执行的取数 SQL。');
+  L.push('你是资深数据分析师，精通 Presto/Trino。请基于以下需求编写一段可直接执行的取数 SQL。所有输出内容使用中文。');
   L.push('');
 
   // ═══════════════════════════════════════════════════════════
@@ -853,8 +853,6 @@ function buildFullPrompt(d, sqlPrompt, analysisPrompt) {
 
   // Step 1: SQL Prompt
   L.push('## 📝 Step 1：生成取数 SQL');
-  L.push('');
-  L.push('请根据以下需求生成可直接执行的 Presto/Trino SQL：');
   L.push('');
   L.push(sqlPrompt);
   L.push('');
