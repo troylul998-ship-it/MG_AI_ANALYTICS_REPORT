@@ -46,13 +46,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 产品 radio → 同步 select
+  // 产品 checkbox → 同步 select（支持多选）
   document.querySelectorAll('#chips-product-dq .chip').forEach(chip => {
     const inp = chip.querySelector('input');
     inp.addEventListener('change', () => {
-      chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked'));
-      chip.classList.add('checked');
-      document.getElementById('product').value = inp.value;
+      // 选"全部"时取消其他，选其他时取消"全部"
+      if (inp.value === 'ALL' && inp.checked) {
+        chip.closest('.chips').querySelectorAll('input').forEach(i => { if (i !== inp) { i.checked = false; i.closest('.chip').classList.remove('checked'); } });
+      } else if (inp.checked) {
+        const allInp = chip.closest('.chips').querySelector('input[value="ALL"]');
+        if (allInp) { allInp.checked = false; allInp.closest('.chip').classList.remove('checked'); }
+      }
+      chip.classList.toggle('checked', inp.checked);
+      // 收集所有选中的产品
+      const selected = [...chip.closest('.chips').querySelectorAll('input:checked')].map(i => i.value);
+      document.getElementById('product').value = selected.join(',') || '';
     });
   });
 
@@ -83,12 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function autoGenerateColumns() {
     FF.clearContainer('dq-map-rows');
     const product = FF.val('product');
+    const primaryProduct = product ? product.split(',')[0] : '';
     const dims = FF.getCheckedChips('dq_dims');
     const desc = FF.val('query_desc') || '';
 
     // 默认加主键
-    if (product && PRODUCT_META[product]) {
-      mapDyn.addRow({ col_name: PRODUCT_META[product].uid, col_desc: '用户主键', col_type: 'id' });
+    if (primaryProduct && PRODUCT_META[primaryProduct]) {
+      mapDyn.addRow({ col_name: PRODUCT_META[primaryProduct].uid, col_desc: '用户主键', col_type: 'id' });
     }
     // 日期列
     if (dims.includes('date')) mapDyn.addRow({ col_name: 'date', col_desc: '日期', col_type: 'date' });
@@ -356,8 +365,11 @@ function collect() {
 }
 
 function buildPrompt(d) {
-  const meta = PRODUCT_META[d.product] || {};
-  const verifyProject = PRODUCT_PROJECT_MAP[d.product] || d.product.toLowerCase();
+  const products = d.product.split(',').filter(Boolean);
+  const primaryProduct = products[0] || '';
+  const meta = PRODUCT_META[primaryProduct] || {};
+  const verifyProject = PRODUCT_PROJECT_MAP[primaryProduct] || primaryProduct.toLowerCase();
+  const hasProduct = (p) => products.includes(p) || products.includes('ALL');
   const L = [];
 
   // ═══════════════════════════════════════════════════════════
@@ -450,9 +462,17 @@ function buildPrompt(d) {
   // 3.1 主表
   L.push('## 3.1 主表');
   L.push('');
-  L.push(`- 产品：${d.product}`);
-  L.push(`- 活跃/主表：${meta.active_table || '（请确认）'}`);
-  L.push(`- 用户主键：${meta.uid || '（请确认）'}`);
+  L.push(`- 产品：${products.join(', ')}`);
+  if (products.length > 1) {
+    L.push('- 涉及多产品，各产品数据表如下：');
+    products.forEach(p => {
+      const m = PRODUCT_META[p];
+      if (m) L.push(`  - ${p}：\`${m.active_table}\`（主键：${m.uid}）`);
+    });
+  } else {
+    L.push(`- 活跃/主表：${meta.active_table || '（请确认）'}`);
+    L.push(`- 用户主键：${meta.uid || '（请确认）'}`);
+  }
   L.push('- 引擎：Presto/Trino；客户端 UPPER(client)=\'APP\'；平台 UPPER(platform) IN (\'IOS\',\'ANDROID\')');
   if (meta.note) L.push(`- ⚠️ ${meta.note}`);
   if (d.date_range[0] || d.date_range[1]) L.push(`- 时间范围：${d.date_range[0] || '不限'} ~ ${d.date_range[1] || '不限'}`);
@@ -475,7 +495,7 @@ function buildPrompt(d) {
     L.push('');
     L.push('### 看板 DAU SQL 参考');
     L.push('');
-    if (d.product === 'UNO' || d.product === 'ALL') {
+    if (hasProduct('UNO')) {
       L.push('**UNO:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
@@ -486,7 +506,7 @@ function buildPrompt(d) {
       L.push("GROUP BY 1");
       L.push('```');
     }
-    if (d.product === 'P10' || d.product === 'ALL') {
+    if (hasProduct('P10')) {
       L.push('**P10:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
@@ -495,7 +515,7 @@ function buildPrompt(d) {
       L.push("GROUP BY 1");
       L.push('```');
     }
-    if (d.product === 'SKB' || d.product === 'ALL') {
+    if (hasProduct('SKB')) {
       L.push('**SKB:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
@@ -504,7 +524,7 @@ function buildPrompt(d) {
       L.push("GROUP BY 1");
       L.push('```');
     }
-    if (d.product === 'UNO2' || d.product === 'ALL') {
+    if (hasProduct('UNO2')) {
       L.push('**UNO2:**');
       L.push('```sql');
       L.push("SELECT date, COUNT(DISTINCT account_id) AS dau");
@@ -840,7 +860,8 @@ const PRODUCT_PROJECT_MAP = {
 };
 
 function buildFullPrompt(d, sqlPrompt, analysisPrompt) {
-  const project = PRODUCT_PROJECT_MAP[d.product] || d.product.toLowerCase();
+  const primaryProduct = d.product.split(',')[0] || '';
+  const project = PRODUCT_PROJECT_MAP[primaryProduct] || primaryProduct.toLowerCase();
   const L = [];
 
   L.push('# 全能数分 Prompt');
