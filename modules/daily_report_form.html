@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日报/周报分析 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/daily_report_form.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="../assets/style.css" as="style">
+  <link rel="preload" href="../assets/form.css" as="style">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
+</head>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">日报/周报分析工作台</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>📊 日报/周报分析工作台</h2>
+    <p>OmniEye 提数 → CSV 整理 → AI 分析 → 飞书文档 → 卡片推送，全流程自动化。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">逐步引导你配置日报参数，AI 自动完成全流程。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填所有参数，一键生成完整 Prompt。</span></button>
+  </div>
+  <div class="mode-hint" id="hint-guide" style="display:none;"></div>
+  <div class="mode-hint" id="hint-fast" style="display:none;"></div>
+
+  <form id="dr-form">
+    <div class="form-error-summary">⚠️ 以下必填项未填写</div>
+
+    <!-- 1 报告基本信息 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 报告基本信息</h3>
+      <div class="field">
+        <label>报告类型 <span class="req">*</span></label>
+        <div class="chips" id="chips-report-type">
+          <label class="chip"><input type="radio" name="report_type" value="daily" checked>📅 日报</label>
+          <label class="chip"><input type="radio" name="report_type" value="weekly">📆 周报</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>数据日期 <span class="req">*</span> <span class="help">日报填数据日期，周报填结束日期</span></label>
+        <input type="date" id="report_date" data-required>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>覆盖产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-products">
+          <label class="chip"><input type="checkbox" name="dr_products" value="UNO" checked>UNO</label>
+          <label class="chip"><input type="checkbox" name="dr_products" value="UNO2" checked>UNO2</label>
+          <label class="chip"><input type="checkbox" name="dr_products" value="P10" checked>Phase10</label>
+          <label class="chip"><input type="checkbox" name="dr_products" value="SKB" checked>Skip-Bo</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 数据源与维度 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 数据源与维度配置</h3>
+      <div class="field">
+        <label>数据来源 <span class="req">*</span></label>
+        <div class="chips" id="chips-data-source">
+          <label class="chip"><input type="radio" name="data_source" value="omnieye" checked>🌐 OmniEye 自动拉取</label>
+          <label class="chip"><input type="radio" name="data_source" value="csv">📄 上传 CSV</label>
+        </div>
+        <p id="source-hint-omnieye" style="font-size:11px;color:var(--text-3);margin-top:4px;">默认从 OmniEye "关键数据趋势" 看板自动拉取数据</p>
+        <div id="csv-upload-area" style="display:none;margin-top:12px;">
+          <div class="csv-drop" id="dr-csv-drop" style="border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;">
+            📎 <b>点击选择 CSV 文件</b>，或把文件拖到这里<br>
+            <span style="font-size:11px;color:var(--text-3);">支持 .csv / .tsv 格式，文件内容需包含日期、产品、指标列</span>
+          </div>
+          <div id="csv-file-info" style="display:none;margin-top:8px;padding:10px 14px;background:#e8f5e9;border-radius:8px;font-size:12px;color:#2e7d32;">
+            ✅ <span id="csv-file-name"></span>（<span id="csv-file-size"></span>）
+          </div>
+        </div>
+      </div>
+      <div class="field" id="field-data-type">
+        <label>数据类型</label>
+        <div class="chips" id="chips-data-type">
+          <label class="chip"><input type="radio" name="data_type" value="log" checked>Log（客户端打点）</label>
+          <label class="chip"><input type="radio" name="data_type" value="api">API（渠道回传）</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>拉取维度 <span class="help">勾选需要的数据维度</span></label>
+        <div class="chips" id="chips-dimensions" data-custom="dr_dims">
+          <label class="chip"><input type="checkbox" name="dr_dims" value="summary" checked>汇总报表（环比/同比）</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="overview" checked>数据概况（RV/INT/Banner）</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="revenue" checked>整体数据（分平台收入）</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="platform" checked>平台数据（eCPM/频次）</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="online" checked>在线时长</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="channel" checked>渠道数据（分平台×渠道）</label>
+          <label class="chip"><input type="checkbox" name="dr_dims" value="placement" checked>点位数据（广告点位）</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>📊 对比维度</label>
+        <div class="chips" id="chips-compare">
+          <label class="chip"><input type="checkbox" name="dr_compare" value="dod" checked>日环比（vs 前一天）</label>
+          <label class="chip"><input type="checkbox" name="dr_compare" value="wow" checked>周同比（vs 上周同期）</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 分析配置 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 分析与输出配置</h3>
+      <div class="field">
+        <label>分析模板 <span class="req">*</span></label>
+        <div class="chips" id="chips-template">
+          <label class="chip"><input type="radio" name="analysis_template" value="standard" checked>📋 标准日报模板</label>
+          <label class="chip"><input type="radio" name="analysis_template" value="brief">📝 简报模板</label>
+        </div>
+        <p style="font-size:11px;color:var(--text-3);margin-top:6px;">标准模板：收入概况表 → 分产品（整体/平台/渠道/点位）→ 关键结论 → 近期趋势</p>
+      </div>
+      <div class="field" id="field-template-link">
+        <label>标准化分析 <span class="help">选填，填入后生成的 Prompt 会要求严格参考该文档的格式</span></label>
+        <div id="dr-template-ref-rows"></div>
+        <button type="button" class="btn-add" id="dr-add-template-ref">+ 添加参考文档</button>
+      </div>
+      <div class="field">
+        <label>分析要求</label>
+        <div class="chips" id="chips-analysis-reqs">
+          <label class="chip"><input type="checkbox" name="dr_reqs" value="attribution" checked>归因分析</label>
+          <label class="chip"><input type="checkbox" name="dr_reqs" value="anomaly" checked>异常识别（±10%）</label>
+          <label class="chip"><input type="checkbox" name="dr_reqs" value="trend">趋势判断</label>
+          <label class="chip"><input type="checkbox" name="dr_reqs" value="weekend">周末效应标注</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>补充背景 <span class="help">选填，如活动上下线、版本更新等</span></label>
+        <textarea id="dr_context" rows="3" placeholder="如：&#10;• UNO2 本周上线了 Banner 广告&#10;• SKB 挖蘑菇活动已关闭&#10;• P10 新赛季开始"></textarea>
+      </div>
+
+      <hr style="border:none;border-top:1px dashed var(--border);margin:20px 0;">
+
+      <div class="field">
+        <label>输出格式</label>
+        <div class="chips" id="chips-output">
+          <label class="chip"><input type="checkbox" name="dr_output" value="csv" checked>📊 CSV 数据文件</label>
+          <label class="chip"><input type="checkbox" name="dr_output" value="feishu_doc" checked>📄 飞书文档</label>
+          <label class="chip"><input type="checkbox" name="dr_output" value="feishu_card" checked>💬 飞书卡片推送</label>
+          <label class="chip"><input type="checkbox" name="dr_output" value="markdown">📝 本地 Markdown</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">🚀 生成日报 Prompt</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+
+</div>
+
+<script src="../assets/form-framework.js" defer></script>
+<script src="../assets/modules/daily_report.js" defer></script>
+</body>
+</html>

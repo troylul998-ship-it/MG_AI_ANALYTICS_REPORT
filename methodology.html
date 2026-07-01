@@ -1,0 +1,1057 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>分析方法论 · AI 数据分析平台</title>
+<meta name="description" content="分析方法论 — 付费根因定位、广告漏斗分析、AB实验设计、数据质量评估、KPI设计、可视化与报告。">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+<link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* 左侧边栏布局 */
+.m-layout{display:flex;max-width:1400px;margin:0 auto;padding:0 24px 80px;gap:0;}
+
+/* 左侧导航 */
+.m-sidebar{position:sticky;top:70px;width:240px;min-width:240px;height:calc(100vh - 70px);overflow-y:auto;padding:20px 0 40px 0;border-right:1px solid var(--border);}
+.m-sidebar::-webkit-scrollbar{width:4px;}
+.m-sidebar::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px;}
+.sidebar-group{margin-bottom:16px;}
+.sidebar-group-title{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 16px;margin-bottom:2px;}
+.sidebar-item{display:block;font-size:13px;padding:7px 16px 7px 20px;color:var(--text-2);cursor:pointer;border-radius:0 6px 6px 0;border-left:3px solid transparent;transition:all .15s;}
+.sidebar-item:hover{background:#f4f3f0;color:var(--text-1);}
+.sidebar-item.active{background:#fff5f0;color:var(--brand-1);border-left-color:var(--brand-1);font-weight:600;}
+.sidebar-item .icon{margin-right:6px;font-size:14px;}
+
+/* 右侧内容 */
+.m-content{flex:1;min-width:0;padding:24px 0 0 36px;}
+.m-panel{display:none;animation:fadeIn .2s;}
+.m-panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* 内容面板样式 */
+.m-panel h2{font-size:20px;margin:0 0 6px;color:var(--text-1);letter-spacing:-0.02em;}
+.m-panel .panel-desc{font-size:13px;color:var(--text-3);margin-bottom:20px;}
+.m-panel h3{font-size:15px;margin:24px 0 8px;color:var(--text-1);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.m-panel h3:first-of-type{margin-top:8px;}
+.m-panel h4{font-size:13px;margin:16px 0 6px;color:var(--brand-1);font-weight:600;}
+.m-panel p{font-size:13.5px;color:var(--text-2);margin-bottom:10px;line-height:1.7;}
+.m-panel ul{padding-left:20px;margin-bottom:12px;}
+.m-panel li{font-size:13px;color:var(--text-2);margin:5px 0;line-height:1.6;}
+.m-panel table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;}
+.m-panel th,.m-panel td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top;}
+.m-panel th{background:#f7f8fa;font-weight:600;white-space:nowrap;font-size:11px;position:sticky;top:0;z-index:1;}
+.m-panel tr:nth-child(even){background:#fafaf8;}
+.m-panel tr:hover{background:#fff4ec;}
+.m-panel code{background:#f1f0ec;padding:1px 5px;border-radius:4px;font-size:12px;}
+.m-lead{font-size:13px;color:var(--text-3);background:#faf9f6;border-left:3px solid var(--brand-1);padding:10px 14px;border-radius:6px;margin-bottom:18px;}
+.step-box{background:#faf9f6;border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.step-box .num{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--text-1);color:#fff;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:8px;}
+.step-box b{font-size:13px;}
+.tmpl{background:#1c1c1a;color:#e8e6dc;border-radius:8px;padding:16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;margin-bottom:14px;}
+
+/* 响应式 */
+@media(max-width:768px){
+  .m-layout{flex-direction:column;}
+  .m-sidebar{position:relative;top:0;width:100%;min-width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:12px 0;display:flex;flex-wrap:wrap;gap:4px;}
+  .sidebar-group{margin-bottom:4px;display:flex;flex-wrap:wrap;gap:2px;}
+  .sidebar-group-title{display:none;}
+  .sidebar-item{padding:6px 12px;border-radius:6px;border-left:none;font-size:12px;}
+  .m-content{padding:20px 0 0 0;}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+<div class="topbar-inner">
+<div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
+<h1>AI 数据分析平台</h1>
+<span class="sub">分析方法论</span>
+<div style="flex:1;"></div>
+<nav><a href="index.html">← 返回工作台</a></nav>
+<div style="display:flex;align-items:center;gap:8px;">
+  <input type="text" id="page-search" placeholder="🔍 页内搜索..." style="width:180px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;" onfocus="this.style.width='240px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="this.style.width='180px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'">
+  <span id="page-search-count" style="font-size:11px;color:var(--text-3);white-space:nowrap;min-width:28px;text-align:center;"></span>
+</div>
+</div>
+</header>
+
+<div class="m-layout">
+<!-- 左侧导航 -->
+<aside class="m-sidebar">
+<div class="sidebar-group">
+<div class="sidebar-group-title">根因分析</div>
+<div class="sidebar-item active" data-panel="m-pay"><span class="icon">💰</span>付费根因定位</div>
+<div class="sidebar-item" data-panel="m-ad"><span class="icon">📺</span>广告漏斗分析</div>
+<div class="sidebar-item" data-panel="m-diag"><span class="icon">🔬</span>指标诊断 & KPI</div>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">分析方法</div>
+<div class="sidebar-item" data-panel="m-simpson"><span class="icon">🧪</span>辛普森悖论 & AB实验</div>
+<div class="sidebar-item" data-panel="m-quality"><span class="icon">✅</span>数据质量评估</div>
+<div class="sidebar-item" data-panel="m-flow"><span class="icon">🔄</span>分析工作流</div>
+</div>
+<div class="sidebar-group">
+<div class="sidebar-group-title">工具与输出</div>
+<div class="sidebar-item" data-panel="m-assist"><span class="icon">🤖</span>AI 探索助手</div>
+<div class="sidebar-item" data-panel="m-kpi"><span class="icon">🎯</span>KPI 设计 & 市场估算</div>
+<div class="sidebar-item" data-panel="m-viz"><span class="icon">📊</span>数据可视化</div>
+<div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
+<div class="sidebar-item" data-panel="m-daily"><span class="icon">📰</span>日报分析模板</div>
+<div class="sidebar-item" data-panel="m-card"><span class="icon">💬</span>日报卡片推送</div>
+</div>
+</aside>
+
+<!-- 右侧内容 -->
+<main class="m-content">
+<div class="m-panel active" id="m-pay">
+<div class="m-lead">付费收入波动的系统化根因定位方法。核心思路：先看整体趋势，再层层拆解，定位到具体维度和用户行为，最后排除外部因素得出可行动结论。</div>
+
+<h3>核心公式</h3>
+<div class="tmpl">收入 = DAU × 付费率 × ARPPU
+
+付费率   = 付费用户数 / 活跃用户数
+ARPPU   = 付费金额 / 付费用户数
+ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
+<p>任何收入变化，最终都能归因到 <b>DAU、付费率、ARPPU</b> 三个乘数之一（或组合）。先判断是哪个乘数在变，再往下拆。</p>
+
+<h3>6 步根因定位法</h3>
+<div class="step-box"><span class="num">1</span><b>整体趋势判断</b><p style="margin:6px 0 0;">先看收入大盘的时间趋势，确认是真实波动还是正常周期。对比环比/同比、节假日、版本节点。明确"变了多少、从什么时候开始变"。</p></div>
+<div class="step-box"><span class="num">2</span><b>多维拆解贡献度</b><p style="margin:6px 0 0;">把收入变化拆到 DAU / 付费率 / ARPPU 三因子，算出各因子对总变化的贡献度，锁定主因子。</p></div>
+<div class="step-box"><span class="num">3</span><b>交叉分析</b><p style="margin:6px 0 0;">沿主因子继续按维度下钻（国家、渠道、版本、新老用户、付费档位…），找出贡献最大的细分人群/场景。警惕辛普森悖论。</p></div>
+<div class="step-box"><span class="num">4</span><b>行为归因</b><p style="margin:6px 0 0;">进入用户行为层：付费路径、商品结构、触发场景、漏斗转化是否变化。把指标波动和具体行为变化对应起来。</p></div>
+<div class="step-box"><span class="num">5</span><b>外部因素排除</b><p style="margin:6px 0 0;">排除版本发布、活动、价格调整、买量结构、市场大盘、数据口径变更/埋点改动等外部干扰，确认根因。</p></div>
+<div class="step-box"><span class="num">6</span><b>结论输出</b><p style="margin:6px 0 0;">答案优先：一句话说清主因 + 证据 + 业务影响 + 建议动作 + 信心程度。</p></div>
+
+<h3>贡献度公式</h3>
+<div class="m-lead" style="border-left-color:var(--brand-1);">当 收入 = A × B 时，A、B 各自对收入变化的贡献可拆解为：</div>
+<div class="tmpl">ΔRevenue = (A₁ - A₀) × B₀        ← A 的贡献（量的变化）
+         + A₀ × (B₁ - B₀)        ← B 的贡献（率的变化）
+         + (A₁ - A₀) × (B₁ - B₀)  ← 交互项
+
+贡献度% = 单因子贡献 / ΔRevenue 总额</div>
+<p>三因子（DAU × 付费率 × ARPPU）可逐层套用：先拆 DAU vs (付费率×ARPPU)，再把后者拆成付费率 vs ARPPU。</p>
+
+<h3>12 个常用拆解维度</h3>
+<table>
+<tr><th>维度类别</th><th>具体维度</th></tr>
+<tr><td>用户属性</td><td>新老用户、注册天数/生命周期阶段、付费历史档位</td></tr>
+<tr><td>获取来源</td><td>国家/地区、买量渠道、媒体来源、自然量 vs 买量</td></tr>
+<tr><td>产品环境</td><td>App 版本、平台（iOS/Android）、机型/系统</td></tr>
+<tr><td>付费结构</td><td>商品/SKU、价格档位、支付方式（官方 vs 三方）、首充 vs 复购</td></tr>
+</table>
+
+<h3>数据需求清单（拆解前先备齐）</h3>
+<ul>
+<li>收入大盘日粒度时间序列（含 DAU、付费用户数、付费金额）</li>
+<li>各拆解维度的明细（国家 / 渠道 / 版本 / 新老 / 商品）</li>
+<li>版本发布、活动、价格调整的时间节点表（用于第 5 步排除）</li>
+<li>埋点/口径变更记录（避免把数据问题当业务问题）</li>
+</ul>
+</div>
+
+<!-- 广告漏斗分析 -->
+<div class="m-panel" id="m-ad">
+<div class="m-lead">广告变现（IAA）全链路漏斗分析方法。核心：用 adsessionid 串联一次广告会话的完整链路，逐环节定位加载、播放、转化的损耗点。</div>
+
+<h3>广告全链路漏斗</h3>
+<div class="step-box"><span class="num">1</span><b>广告请求</b><p style="margin:6px 0 0;">触发广告位、向 mediation 发起请求。</p></div>
+<div class="step-box"><span class="num">2</span><b>加载成功</b><p style="margin:6px 0 0;">广告素材成功返回并加载。<b>加载成功率 = 加载成功 / 广告请求</b>。</p></div>
+<div class="step-box"><span class="num">3</span><b>展示/播放</b><p style="margin:6px 0 0;">广告成功展示给用户。<b>播放成功率 = 播放成功 / 加载成功</b>。</p></div>
+<div class="step-box"><span class="num">4</span><b>完整观看 / 转化</b><p style="margin:6px 0 0;">用户看完或产生奖励发放。<b>转化率 = 完成 / 播放成功</b>。</p></div>
+<div class="step-box"><span class="num">5</span><b>收益</b><p style="margin:6px 0 0;">产生 eCPM 收益。<b>eCPM = 收益 / 展示次数 × 1000</b>。</p></div>
+
+<h3>关键指标定义</h3>
+<table>
+<tr><th>指标</th><th>定义</th></tr>
+<tr><td>加载成功率</td><td>加载成功次数 / 广告请求次数</td></tr>
+<tr><td>播放成功率</td><td>播放成功次数 / 加载成功次数</td></tr>
+<tr><td>转化率</td><td>完成观看次数 / 播放成功次数</td></tr>
+<tr><td>eCPM</td><td>广告收益 / 展示次数 × 1000，衡量单位展示价值</td></tr>
+<tr><td>人均广告次数</td><td>展示次数 / 活跃用户数，衡量广告频次</td></tr>
+<tr><td>广告 LTV</td><td>用户生命周期内累计广告收益</td></tr>
+</table>
+
+<h3>核心分析维度</h3>
+<table>
+<tr><th>维度</th><th>说明</th></tr>
+<tr><td>mediation</td><td>聚合平台（如 MAX、AdMob），对比不同聚合层表现</td></tr>
+<tr><td>adchannel</td><td>广告渠道/网络（Meta、Google、Unity…）</td></tr>
+<tr><td>arm（广告位）</td><td>激励视频、插屏、Banner、开屏等广告形式</td></tr>
+<tr><td>material（素材）</td><td>具体广告素材，定位素材级别的转化差异</td></tr>
+<tr><td>国家 / 版本 / 平台</td><td>常规人群与环境维度</td></tr>
+</table>
+
+<h3>adsessionid：会话串联</h3>
+<p>用 <code>adsessionid</code> 把一次广告会话的"请求 → 加载 → 播放 → 完成 → 收益"所有事件串联起来，才能算准每一环的真实转化率，定位损耗发生在哪一步。这是广告漏斗分析的核心技术前提。</p>
+
+<h3>6 个常用分析视图</h3>
+<ul>
+<li><b>大盘趋势</b>：广告收益、eCPM、人均次数、填充率的时间趋势</li>
+<li><b>漏斗损耗</b>：请求→加载→播放→完成各环节转化率，定位瓶颈</li>
+<li><b>渠道对比</b>：不同 adchannel / mediation 的 eCPM 与填充率</li>
+<li><b>广告位分析</b>：各 arm 形式的收益贡献与用户体验平衡</li>
+<li><b>素材分析</b>：material 级别的转化与收益，指导素材优化</li>
+<li><b>人群分析</b>：国家/版本/新老用户的广告价值差异</li>
+</ul>
+
+<div class="m-lead" style="border-left-color:var(--brand-1);">⚠️ 口径提醒：UNO2（MN08）广告明细在 <code>dw_ods_mn08.c_client_app_ad_log</code>，安卓收益需 <code>/1000000</code>；详见数据口径字典。</div>
+</div>
+
+<!-- 分析工作流 -->
+<div class="m-panel" id="m-flow">
+<div class="m-lead">把分析需求拆成标准化流程。区分"活动类"与"复杂探索类"两种工作流，配合埋点准则，保证分析可复用、可追溯。</div>
+
+<h3>埋点准则</h3>
+<ul>
+<li><b>先确认埋点再写 SQL</b>：分析前必须确认相关行为是否有埋点、字段含义、上报时机</li>
+<li><b>口径以文档为准</b>：指标定义、过滤条件参考 Confluence 真实文档，不凭经验猜</li>
+<li><b>关注埋点变更</b>：埋点改动/删除会造成数据断层，分析前查变更记录</li>
+<li><b>明确分析单元</b>：事件级 / 用户级 / 会话级，避免粒度混用导致重复计算</li>
+</ul>
+
+<h3>活动类分析工作流</h3>
+<p>针对运营活动、版本功能上线等有明确时间节点的分析。</p>
+<div class="step-box"><span class="num">1</span><b>明确活动信息</b><p style="margin:6px 0 0;">活动时间、参与门槛、目标人群、预期目标指标。</p></div>
+<div class="step-box"><span class="num">2</span><b>选择对比基准</b><p style="margin:6px 0 0;">活动前 vs 活动中 vs 活动后；或参与组 vs 未参与组。注意完整周期对比，避免部分期间比较。</p></div>
+<div class="step-box"><span class="num">3</span><b>核心指标评估</b><p style="margin:6px 0 0;">参与率、目标指标提升、收入/留存影响，量化活动效果。</p></div>
+<div class="step-box"><span class="num">4</span><b>排除干扰</b><p style="margin:6px 0 0;">剔除自然增长、其他并行活动、买量波动等因素。</p></div>
+<div class="step-box"><span class="num">5</span><b>结论与建议</b><p style="margin:6px 0 0;">活动是否达标、ROI、是否值得复用/放量。</p></div>
+
+<h3>复杂探索类分析工作流</h3>
+<p>针对开放式问题（"为什么 X 下降了？""哪类用户更值钱？"），没有现成答案需要探索。</p>
+<div class="step-box"><span class="num">1</span><b>拆解问题</b><p style="margin:6px 0 0;">把模糊问题拆成可量化的子问题，明确要回答什么、用什么证据证明。</p></div>
+<div class="step-box"><span class="num">2</span><b>建立假设</b><p style="margin:6px 0 0;">基于业务理解列出可能原因（假设），按可能性和可验证性排序。</p></div>
+<div class="step-box"><span class="num">3</span><b>逐一验证</b><p style="margin:6px 0 0;">用数据验证/推翻每个假设，从最可能、最易验证的开始。</p></div>
+<div class="step-box"><span class="num">4</span><b>交叉下钻</b><p style="margin:6px 0 0;">对成立的假设继续多维拆解，定位到具体人群/场景/行为。</p></div>
+<div class="step-box"><span class="num">5</span><b>综合结论</b><p style="margin:6px 0 0;">整合多条证据形成完整因果链，输出结论与行动建议。</p></div>
+
+<h3>UNO 用户研究方法论沉淀</h3>
+<p class="m-lead" style="border-left-color:var(--brand-1);">来源: <a href="https://confluence.mattel163.cn/pages/viewpage.action?pageId=217201757" target="_blank">UNO 移动版本 - 用户研究与数据分析汇总</a> 及其子页面。</p>
+
+<h4>研究体系三条主线</h4>
+<table>
+<tr><th>主线</th><th>方法偏向</th><th>代表产出</th></tr>
+<tr><td>用户研究（UX）</td><td>定性、画像、品牌印象</td><td>问卷调研、品牌访谈、体验反馈</td></tr>
+<tr><td>DEV 研究分析</td><td>定量、用户分类、AB实验</td><td>付费画像1.0~3.0、活跃玩家聚类、情绪体验留存</td></tr>
+<tr><td>数据分析（运营/玩法）</td><td>版本与活动级复盘</td><td>版本数据报告、活动效果评估、广告变现分析</td></tr>
+</table>
+
+<h4>付费用户画像方法</h4>
+<ul>
+<li><b>分层维度演进</b>：首版分层 → 引入持续付费维度 → 重构画像加入首充、生命水池维度</li>
+<li><b>核心拆解</b>：持续付费 vs 一次性付费、生命水池视角的付费持续性分析</li>
+<li><b>价值分类</b>：基于活跃行为做聚类，区分活跃玩家价值层级</li>
+<li><b>社交链路</b>：量化社交行为（好友对局、互动频次）对活跃和付费的影响</li>
+</ul>
+
+<h4>留存与情绪体验分析方法</h4>
+<div class="step-box"><span class="num">1</span><b>定义样本与留存指标</b><p style="margin:6px 0 0;">明确用户群体（如注册24-30天活跃的轻用户）、统计口径（D30留存=D24-D29活跃且D30登录/D24-D29活跃）、排除条件。</p></div>
+<div class="step-box"><span class="num">2</span><b>情绪点归类</b><p style="margin:6px 0 0;">将对局事件按情绪正负分类。UNO案例：对手被罚牌(正)、初始牌中+4数量(正)、手牌变化(正/负)、绝处逢生感(正)。</p></div>
+<div class="step-box"><span class="num">3</span><b>对比验证</b><p style="margin:6px 0 0;">流失用户 vs 留存用户在不同体验类型局数的占比分布，验证"体验越正向，留存越好"假设。</p></div>
+<div class="step-box"><span class="num">4</span><b>拆分因果</b><p style="margin:6px 0 0;">控制输赢变量，发现"即使赢了但体验负向→留存依旧低"，证明情绪体验独立于胜负影响留存。</p></div>
+
+<p><b>核心发现</b>：输赢不能完全决定留存。对留存正向影响最大的情绪点：对手被罚牌、初始好牌、绝处逢生感、手牌数变化。</p>
+
+<h4>新老手差异分析方法</h4>
+<table>
+<tr><th>维度</th><th>分析思路</th><th>UNO 发现</th></tr>
+<tr><td>D2 留存</td><td>对照组/测试组分别验证新老手显著性</td><td>对照组新手>老手(26.97% vs 25.74%)，测试组无差异</td></tr>
+<tr><td>在线时长到达率</td><td>按时长分段(5min/10min/15min...)画到达率曲线</td><td>老手整体优于新手，但前5分钟不如新手</td></tr>
+<tr><td>对局到达率</td><td>按对局数画完成率曲线</td><td>老手整体优但前期略差</td></tr>
+<tr><td>破产率</td><td>对比新老手金币归零比例</td><td>老手明显更高→体验更差</td></tr>
+</table>
+<p><b>综合结论</b>：老手潜力大（开局意愿、完成率、在线时长更优），但前期适应性差。需为老手设计更平缓的回归体验。</p>
+
+<h4>胜率与留存因果分析方法</h4>
+<ul>
+<li><b>分号段追踪</b>：按用户分组号段追踪每周期的预制对局前N局胜率变化，排除外部干扰</li>
+<li><b>胜率 × 再开局率 × 次留</b>：验证三者趋势一致性</li>
+<li><b>水池设计影响</b>：不同必输/必赢水池对新手初期体验差异巨大——"小输小赢"优于"大输大赢"</li>
+<li><b>金币收益波动</b>：前期金币收益波动过大→提前流失，需纳入水池设计考量</li>
+</ul>
+
+<h4>版本级数据复盘框架</h4>
+<table>
+<tr><th>步骤</th><th>内容</th></tr>
+<tr><td>1. 样本界定</td><td>国家(T1/T2/T3)、平台、成年人、分组号段</td></tr>
+<tr><td>2. 核心指标对比</td><td>D2留存、对局到达率(0→1局)、对局完成率、在线时长</td></tr>
+<tr><td>3. 分层下钻</td><td>新老手标签、10局前后行为差异、真人对局vs预制对局</td></tr>
+<tr><td>4. 异常归因</td><td>控制对局占比偏低？破产率过高？水池/匹配逻辑缺陷？</td></tr>
+<tr><td>5. 后续建议</td><td>下版本调整方向 + 分流测试设计</td></tr>
+</table>
+
+<h4>数据问法迭代方法（2026新方向）</h4>
+<ul>
+<li><b>问题</b>：现有问题仅能精准筛出25%用户，剩余75%冗杂度高</li>
+<li><b>方法</b>：主观问题筛喜好性 + 客观行为判定是否会玩 → 双维度联合判定</li>
+<li><b>实验</b>：一组改回新老手问法、一组保留意愿问法，对比区分度</li>
+<li><b>AI辅助</b>：将到达匹配界面但未开始的玩家全量客户端日志交给AI做行为聚类，再由数分维度校验</li>
+</ul>
+</div>
+
+<!-- AI 探索助手技能 -->
+<div class="m-panel" id="m-assist">
+<div class="m-lead">面向非数分职能（运营/产品）的 AI 数据分析探索助手设计规范。核心：用对话式引导降低门槛，让小白也能产出可靠的分析需求和 SQL。</div>
+
+<h3>6 步对话工作流</h3>
+<div class="step-box"><span class="num">1</span><b>需求澄清</b><p style="margin:6px 0 0;">用提问把模糊诉求变清晰：想看什么指标、什么时间范围、哪个产品、对比什么。给选项让用户勾选，不问开放题。</p></div>
+<div class="step-box"><span class="num">2</span><b>方案确认</b><p style="margin:6px 0 0;">把理解到的分析方案复述给用户确认：分析目标、口径、维度、产出形式。确认后再往下。</p></div>
+<div class="step-box"><span class="num">3</span><b>确认字段</b><p style="margin:6px 0 0;">明确用到的表、字段、埋点。引用数据口径字典，确保字段真实存在、口径正确。</p></div>
+<div class="step-box"><span class="num">4</span><b>SQL 生成</b><p style="margin:6px 0 0;">基于确认的字段和口径生成 SQL，遵守各产品表名/主键差异。</p></div>
+<div class="step-box"><span class="num">5</span><b>SQL 自评</b><p style="margin:6px 0 0;">生成后自查：粒度对不对、join 会不会爆炸、过滤条件全不全、口径有没有踩坑。</p></div>
+<div class="step-box"><span class="num">6</span><b>解读指引</b><p style="margin:6px 0 0;">告诉用户跑出来的数据怎么看、关注哪些异常、下一步可以怎么深挖。</p></div>
+
+<h3>5 条数据管理规范</h3>
+<table>
+<tr><th>规范</th><th>说明</th></tr>
+<tr><td>先写后查</td><td>先把 SQL 写进文件存档，再执行查询，保证可追溯、可复用</td></tr>
+<tr><td>SQL 变更策略</td><td>SQL 有改动时保留版本，记录改了什么、为什么改</td></tr>
+<tr><td>CSV 命名规范</td><td>结果 CSV 用统一命名（主题_产品_日期），方便归档检索</td></tr>
+<tr><td>SQL 与 CSV 关联</td><td>每份 CSV 对应记录其来源 SQL，数据与查询一一对应</td></tr>
+<tr><td>UTF-8 BOM 头</td><td>导出 CSV 带 UTF-8 BOM 头，避免 Excel 打开中文乱码</td></tr>
+</table>
+
+<h3>对话式引导原则</h3>
+<ul>
+<li><b>给选项，不问开放题</b>：用编号 + 字母（如 <code>1A / 2B</code>）让用户快速回复，降低输入成本</li>
+<li><b>一次只问一件事</b>：分步引导，不要一次抛一堆问题</li>
+<li><b>能勾选不填写</b>：尽量用选择代替手动输入</li>
+<li><b>语言精炼直白</b>：10 岁小孩也能看懂，不用术语黑话</li>
+<li><b>每步可确认可回退</b>：复述理解让用户确认，错了能改</li>
+</ul>
+
+<h3>SQL 高手指南（自评要点）</h3>
+<ul>
+<li><b>粒度优先</b>：写之前先想清楚结果是一行代表什么（用户/天/事件）</li>
+<li><b>防 join 爆炸</b>：多对多 join 会静默倍增行数，join 后核对行数</li>
+<li><b>过滤完整</b>：日期、产品、平台、测试用户排除等过滤条件不能漏</li>
+<li><b>口径对齐</b>：指标定义、分子分母、去重逻辑严格对齐文档</li>
+<li><b>大表先限流</b>：探索阶段先加日期/LIMIT 限制扫描量，避免全表扫描</li>
+</ul>
+</div>
+
+<!-- 辛普森悖论 & AB实验设计 -->
+<div class="m-panel" id="m-simpson">
+<div class="m-lead">数据分析避坑指南：辛普森悖论、AB 实验设计与常用分析常识。不需要统计学基础，帮你在日常看数、提需求、做实验时少踩坑。</div>
+
+<h3>第一部分：辛普森悖论（Simpson's Paradox）</h3>
+<p>辛普森悖论是统计学中一个反直觉的现象：<b>在数据聚合分析中，整体趋势与子组趋势相反</b>。在游戏数据分析中非常普遍，可能导致误判功能效果、玩家行为或平衡性问题。</p>
+
+<h4>案例：经典场 vs 欢乐场胜率</h4>
+<table>
+<tr><th></th><th>经典场</th><th>欢乐场</th></tr>
+<tr><td>整体胜率</td><td>48.5%</td><td>47.5%</td></tr>
+</table>
+<p>看似经典场胜率更高，但按等级分组后：</p>
+<table>
+<tr><th></th><th>10级以内</th><th>10级以上</th></tr>
+<tr><td>经典场</td><td>32.7%</td><td>49.7%</td></tr>
+<tr><td>欢乐场</td><td>34.4%</td><td>50.4%</td></tr>
+</table>
+<p>分组后欢乐场<b>每个分组都更高</b>！原因：10级以内玩家胜率低，而欢乐场中低级玩家占比更高，拉低了整体胜率。如果只看整体就盲目控胜率，可能导致玩家体验下降、优化方向完全做反。</p>
+
+<h4>因何而成？</h4>
+<ul>
+<li><b>混杂变量</b>：玩家等级同时影响模式选择和胜率。游戏中常见混杂变量包括：玩家等级、游戏时长、设备类型、活动参与度、付费档位</li>
+<li><b>数据权重失衡</b>：各子组数据量不均匀，权重高的子组主导整体趋势</li>
+</ul>
+<p>⚠️ 辛普森悖论最高发的场景是 <b>AB 实验</b>：如果实验时的用户结构与推全后的结构不一致，实验里「显著更好」的策略推全后反而可能让整体数据变差！</p>
+
+<h4>如何避免？</h4>
+<div class="step-box"><span class="num">1</span><b>分层分析优先</b><p style="margin:6px 0 0;">比较两组数据时，必须按潜在混杂变量（玩家等级、VIP 等级、新老用户等）做分层分析，不能只看大整体。</p></div>
+<div class="step-box"><span class="num">2</span><b>随机化控制混杂变量</b><p style="margin:6px 0 0;">实验组与对照组必须同时放量、等比例放量；分析起始时间必须是上策略的时间；一次实验只上一个策略。</p></div>
+<div class="step-box"><span class="num">3</span><b>多变量建模辅助</b><p style="margin:6px 0 0;">复杂场景用逻辑回归、决策树、倾向性得分匹配（PSM）等隔离目标效应。注意参数选错或过拟合反而引入新错误。</p></div>
+<div class="step-box"><span class="num">4</span><b>数据可视化检查</b><p style="margin:6px 0 0;">用堆叠柱状图、散点图等展现子组贡献，直观识别权重失衡。</p></div>
+
+<h4>如何应对？—— 贡献度拆解法</h4>
+<div class="tmpl">分项指标波动贡献：A = 分项指标同比变化值 × 环期权重占比
+分项结构变化贡献：B = 分项权重变化值 ×（分项本期指标 − 整体环期指标）
+各分项贡献度：  C =（A + B）/ 整体环期指标</div>
+<p>核心原则：养成<b>「先拆分，后聚合」</b>的习惯，对任何整体异常数据保持警惕和怀疑，参考不同用户群的事实全貌。</p>
+
+<h3>第二部分：AB 实验的设计与分析</h3>
+
+<h4>为什么要做 AB，而不是「上线前后对比」？</h4>
+<p>前后对比非常不可靠——除了你的改动，还有买量结构、节假日、版本活动、季节因素等无数变量。AB 实验的精髓：<b>同一时间段，随机分配的两群人，同样的环境，唯一的差别就是你的改动</b>。</p>
+
+<h4>设计 AB 实验的 6 个关键要点</h4>
+<table>
+<tr><th>要点</th><th>说明</th><th>踩坑后果</th></tr>
+<tr><td>随机分组</td><td>按用户 ID 哈希随机分配，不能人为挑选</td><td>两组本身不可比，结论无效</td></tr>
+<tr><td>同时放量</td><td>实验组和对照组必须在同一时间段一起跑</td><td>时间差引入季节/活动混杂</td></tr>
+<tr><td>等比例放量</td><td>两组内部用户结构要可比，常见 5:5</td><td>结构失衡 → 辛普森悖论</td></tr>
+<tr><td>一次只改一个变量</td><td>一个实验里只改一个策略</td><td>多改动叠加分不清功劳</td></tr>
+<tr><td>起始时间对齐</td><td>从「真正开始分流」那一刻算起</td><td>掺入上线前的脏数据</td></tr>
+<tr><td>先定指标再开实验</td><td>预先明确主指标（1个）和护栏指标</td><td>「P值钓鱼」，自欺欺人</td></tr>
+</table>
+
+<h4>主指标 vs 护栏指标</h4>
+<ul>
+<li><b>主指标（Primary Metric）</b>：实验最想推动的核心指标，<b>只设一个</b>。如「新手7日留存」或「付费率」</li>
+<li><b>护栏指标（Guardrail Metric）</b>：不希望被牺牲的底线指标。如做付费实验时，留存和时长就是护栏</li>
+</ul>
+<p>经验：几乎所有「只盯一个指标」的实验最后都会出问题。付费实验一定要看留存，留存实验一定要看付费和时长。</p>
+
+<h4>看到「实验组更高」前，先问 4 个问题</h4>
+<div class="step-box"><span class="num">1</span><b>样本够不够大？</b><p style="margin:6px 0 0;">几十上百人的差异基本是噪声，别急着下结论。</p></div>
+<div class="step-box"><span class="num">2</span><b>差异显著吗？</b><p style="margin:6px 0 0;">两组差 0.3% 可能只是随机波动，参考 AB 看板显著性或找数分跑检验。</p></div>
+<div class="step-box"><span class="num">3</span><b>两组用户结构一样吗？</b><p style="margin:6px 0 0;">对比新老比、国家分布、付费档位分布。分流不均先解决分流问题。</p></div>
+<div class="step-box"><span class="num">4</span><b>跑够时间了吗？</b><p style="margin:6px 0 0;">很多改动第1天有「新鲜感跳升」。至少跑满一个完整周，重要功能建议看2周以上。</p></div>
+
+<h4>AB 实验常见误区</h4>
+<table>
+<tr><th>误区</th><th>正确做法</th></tr>
+<tr><td>偷看数据，一看到正向就停止</td><td>预先定好实验时长和样本量，到点再下结论（提前停止会系统性高估效果）</td></tr>
+<tr><td>一个实验塞多个改动</td><td>一次只改一个变量；要测多个用多组或正交设计</td></tr>
+<tr><td>只报喜不报忧</td><td>主指标 + 护栏指标一起看</td></tr>
+<tr><td>两组结构不一致还硬比</td><td>先做分层（AA 检验），确认两组可比再看结果</td></tr>
+<tr><td>用上线前后对比代替 AB</td><td>能 AB 尽量 AB；不能时用准实验方法</td></tr>
+</table>
+
+<h4>没法做 AB 时：准实验方法</h4>
+<table>
+<tr><th>方法</th><th>适用场景</th><th>关键前提</th></tr>
+<tr><td>双重差分（DID）</td><td>改动已全量上线，找「不受改动影响」的人群做对照</td><td>改动前两组趋势必须平行</td></tr>
+<tr><td>平行趋势检验</td><td>验证 DID 前提</td><td>先画图确认上线前两条线走势一致</td></tr>
+<tr><td>中断时间序列</td><td>指标按时间画曲线，在改动时点打断点</td><td>看是否出现与改动对齐的跳变</td></tr>
+</table>
+<p>牢记：准实验始终不如真 AB 干净。能做 AB 就别偷懒用前后对比。</p>
+
+<h3>第三部分：分析常识与实战案例</h3>
+
+<h4>① 平均数会骗人，要看分布</h4>
+<p>「人均付费 5 元」可能是 100 人各付 5 元，也可能是 99 人不付、1 人付 500 元。</p>
+<ul>
+<li>看付费、时长等指标时，要看<b>中位数和分位数（P25/P50/P75/P90）</b></li>
+<li>平均数远大于中位数 → 少数头部用户拉高，典型长尾分布</li>
+<li><b>案例</b>：分析道具库存、单次付费金额时都看分位数，游戏数据几乎都是重度长尾，均值会被大R严重带偏</li>
+</ul>
+
+<h4>② 比率类指标，一定要看清分母</h4>
+<p>「付费率上升了」——分母是 DAU、新增、还是活跃付费用户？口径不同含义天差地别。</p>
+<ul>
+<li>看到任何「率」，先问清楚<b>分子是谁、分母是谁、是否去重、时间窗口多长</b></li>
+<li><b>案例</b>：分析美国 IAP ARPU 下滑，关键一步是确认「下降是付费率导致还是 ARPPU 导致」——最后定位到是付费率（转化）问题</li>
+</ul>
+
+<h4>③ 结构变化 vs 指标变化，要拆开看</h4>
+<p>整体指标变差，可能不是每个子群都变差，而是「差的那群用户占比变大了」。</p>
+<ul>
+<li><b>案例</b>：ARPU 下滑最大原因是用户结构变化——高 ARPU 的美国用户 DAU 占比从 ~30% 降到 ~22%，低 ARPU 地区占比上升拉低整体，而各地区内部并未变差</li>
+<li>用<b>贡献度拆解</b>把「结构的锅」和「指标的锅」分清楚</li>
+</ul>
+
+<h4>④ 相关 ≠ 因果</h4>
+<p>「买了战令的用户留存更高」≠「战令提升了留存」。可能是本来就爱玩的用户更愿意买战令（选择偏差）。</p>
+<ul>
+<li>看到两个指标一起动，先想清：A 导致 B？B 导致 A？还是第三因素 C 同时导致了 A 和 B？</li>
+<li>验证因果最干净的方式是 AB 实验；不能做就用准实验，并诚实标注「无法排除混淆」</li>
+</ul>
+
+<h4>⑤ 幸存者偏差</h4>
+<p>「分析活跃用户的行为」时要记得——流失的用户已经不在样本里了。只看留存下来的用户会系统性高估满意度、低估问题严重性。</p>
+<ul>
+<li><b>案例</b>：看「老用户复购」时，流失的付费用户不在活跃样本里。「活跃老用户复购率稳定」不代表「付费盘子健康」，还要看付费用户池是否在收缩</li>
+</ul>
+
+<h4>⑥ 异常值和脏数据要先清洗</h4>
+<ul>
+<li>埋点常有脏数据：作弊、超大异常值、口径错误、ID 不一致、时区错位</li>
+<li>算钱/算道具前，先做合理性过滤（剔除作弊、设单笔上限、剔除不可能值）</li>
+<li><b>案例</b>：算道具产销和付费时，剔除 subreason 为作弊的记录、给单笔设上限、修正错误定价——不清洗直接算，一个异常大单就能把当天均值彻底带偏</li>
+</ul>
+
+<h4>⑦ 对结论做一次「同行评审」</h4>
+<p>下结论前花两分钟反问自己：</p>
+<ul>
+<li>这个结论我有多确定？最薄弱的一环是哪里？</li>
+<li>有没有别的解释也能说通这个数据？</li>
+<li>我是不是只挑了支持我观点的数据（确认偏误）？</li>
+<li>如果让一个唱反调的人来看，他会怎么质疑？</li>
+</ul>
+
+<div class="m-lead" style="border-left-color:var(--brand-1);margin-top:20px;"><b>一句话总结：</b>数据分析最重要的不是复杂的模型，而是几个朴素的习惯——<b>先拆分后聚合、看分布而非均值、看清分母、区分相关与因果、能 AB 就 AB、对反直觉的结论保持怀疑</b>。把这几条养成肌肉记忆，就能避开 90% 的坑。</div>
+</div>
+
+<!-- 1. 数据质量评估 -->
+<div class="m-panel" id="m-quality">
+<div class="m-lead">评估数据集是否可信以用于分析/建模/仪表盘；并验证已完成的分析在分享前是否可靠。</div>
+
+<h3>Part A：数据质量评估</h3>
+<h4>工作流</h4>
+<div class="step-box"><span class="num">1</span><b>明确质量问题和操作上下文</b><p style="margin:6px 0 0;">建立数据集代表什么、预期分析单元、下游用途。确定主键、日期列、时区假设、领域规则、业务阈值。</p></div>
+<div class="step-box"><span class="num">2</span><b>选择可检查的分析路径</b><p style="margin:6px 0 0;">默认使用配套 notebook 或脚本，以便检查发现背后的确切代码。先确认 schema、粒度、样本行。</p></div>
+<div class="step-box"><span class="num">3</span><b>构建紧凑的数据画像</b><p style="margin:6px 0 0;">行数、列数、类型、候选键重复率、空值率、时间戳范围。先确认粒度——许多表面问题实际是混合粒度/部分回填/重复 join。</p></div>
+<div class="step-box"><span class="num">4</span><b>运行核心质量检查</b><p style="margin:6px 0 0;">完整性、唯一性、有效性、一致性、引用完整性、时效性、容量与形态。比较比率而非仅计数，按维度切分。</p></div>
+<div class="step-box"><span class="num">5</span><b>形态特定检查 + 时间分布检查</b><p style="margin:6px 0 0;">事件/维度/事实/特征/实验数据各有专属检查。有历史数据时关注变化点（发布、迁移、事故）。</p></div>
+<div class="step-box"><span class="num">6</span><b>调查风险 + 推荐修复</b><p style="margin:6px 0 0;">将每个问题与下游风险联系，推荐最小一组修复/监控/自动化测试。</p></div>
+
+<h4>核心检查类别</h4>
+<table>
+<tr><th>类别</th><th>检查内容</th></tr>
+<tr><td>完整性</td><td>按列/分区/分段统计空值率；意外空字符串或哨兵值；必需列填充率</td></tr>
+<tr><td>唯一性</td><td>完全重复行、重复主键、重复复合键</td></tr>
+<tr><td>有效性</td><td>类型符合性；ID/邮箱/URL/枚举/时间戳格式；度量和日期范围检查</td></tr>
+<tr><td>一致性</td><td>跨字段规则、单位/货币一致性、状态-时间戳对齐</td></tr>
+<tr><td>引用完整性</td><td>父子键覆盖、孤儿记录、意外多对多 join、断裂 SCD join</td></tr>
+<tr><td>时效性</td><td>新鲜度延迟、缺失最近分区、无法解释的历史重写/回填</td></tr>
+<tr><td>容量和形态</td><td>行数漂移、不同值计数漂移、分布漂移、新增/消失类别</td></tr>
+</table>
+
+<h4>严重程度分类</h4>
+<table>
+<tr><th>级别</th><th>定义</th></tr>
+<tr><td>Critical</td><td>中断可信分析、核心 join、生产仪表盘或关键决策</td></tr>
+<tr><td>High</td><td>实质性偏向下游决策（大范围空值激增、类别漂移、泄漏）</td></tr>
+<tr><td>Medium</td><td>局部或可解释问题，需文档记录或监控</td></tr>
+<tr><td>Low</td><td>表面不一致、预期稀疏性或已知边缘情况</td></tr>
+</table>
+
+<h3>Part B：分析验证（QA）</h3>
+<h4>常见陷阱</h4>
+<ul>
+<li><b>Join 爆炸</b>：多对多 join 静默地倍增行</li>
+<li><b>幸存者偏差</b>：仅包括今天存在的实体</li>
+<li><b>不完整期间比较</b>：部分期间 vs 完整期间</li>
+<li><b>分母偏移</b>：比较组之间合格人群变化</li>
+<li><b>平均值的平均值</b>：未加权平均预计算的均值</li>
+<li><b>时区不匹配</b>：不同时间戳约定或截止点</li>
+<li><b>辛普森悖论</b>：聚合和分段级别趋势冲突</li>
+</ul>
+<h4>置信度评级</h4>
+<table>
+<tr><th>评级</th><th>含义</th></tr>
+<tr><td>Ready to share</td><td>方法论健全，关键计算已验证，注意事项清晰</td></tr>
+<tr><td>Share with caveats</td><td>方向性可用，但必须传达特定限制</td></tr>
+<tr><td>Needs revision</td><td>实质性错误、不受支持的声明或方法论问题</td></tr>
+</table>
+</div>
+
+<!-- 2. 指标诊断 & KPI报告 -->
+<div class="m-panel" id="m-diag">
+<div class="m-lead">诊断指标为何变更或与预期不同，并生成面向领导层的 KPI 更新。</div>
+
+<h3>Part A：指标诊断</h3>
+<div class="step-box"><span class="num">1</span><b>定义诊断问题</b><p style="margin:6px 0 0;">框定什么变了、什么比较能证明它。明确时间窗口、人群、粒度、诊断类型（变动/集中度/对账）。</p></div>
+<div class="step-box"><span class="num">2</span><b>验证指标定义和来源</b><p style="margin:6px 0 0;">确认定义、粒度、聚合逻辑、过滤、join、排除、新鲜度、血缘。至少检查一个业务面 + 一个低层来源。</p></div>
+<div class="step-box"><span class="num">3</span><b>建立指标模式</b><p style="margin:6px 0 0;">量化相关期间和范围内的指标，重现比较。模式的大小、时间、范围验证前不要找原因。</p></div>
+<div class="step-box"><span class="num">4</span><b>选择诊断计划</b><p style="margin:6px 0 0;">从指标操作逻辑、业务上下文、源形态中选驱动因素维度。优先业务可监控/可行动的因素。</p></div>
+<div class="step-box"><span class="num">5</span><b>分解并验证驱动因素</b><p style="margin:6px 0 0;">用最强证据衡量每个驱动因素。比率指标看分子/分母/两者；区分混合效应 vs 段内绩效效应。</p></div>
+<div class="step-box"><span class="num">6</span><b>陈述含义和后续行动</b><p style="margin:6px 0 0;">以诊断问题的答案开头，陈述最强驱动因素 + 证据 + 业务影响 + 信心程度 + 下一步。</p></div>
+
+<h4>解释模式</h4>
+<table>
+<tr><th>场景</th><th>方法</th></tr>
+<tr><td>指标变更</td><td>焦点窗口 vs 基线，对分段贡献排名，检查混合偏移 vs 段内变动</td></tr>
+<tr><td>尖峰/回归/事故</td><td>确定开始/峰值/恢复、分布形态、受影响切片、广泛 vs 局部退化</td></tr>
+<tr><td>最大贡献者</td><td>定义"最大"，对实体排名，比较总量份额和变化，找主要变动者/进入者/退出者</td></tr>
+<tr><td>对账</td><td>对齐定义/过滤/粒度/分子/分母，量化解释差距的组成部分</td></tr>
+</table>
+
+<h3>Part B：KPI 报告</h3>
+<h4>报告结构</h4>
+<div class="tmpl">**Status**: [On track / At risk / Ahead of plan]
+**Current**: [Value] vs. Target: [Value] ([+/-X%, pacing])
+**Driver**: [What's driving performance]
+**Implication**: [What the team should do]</div>
+<h4>呈现标准</h4>
+<ul>
+<li>为略读的高管写作：以答案开头，然后是证据</li>
+<li>使用业务可读的数字：<code>123k (+8% w/w, +19% m/m)</code></li>
+<li>用指标证据替代通用形容词（"强劲"、"健康"）</li>
+<li>将注意事项放在它们影响的声明附近</li>
+<li>仅在有助于优先行动时使用交通信号灯状态</li>
+</ul>
+</div>
+
+<!-- 3. KPI 设计 & 市场估算 -->
+<div class="m-panel" id="m-kpi">
+<div class="m-lead">设计 KPI 框架、设定目标、制定测量计划，并估算市场/机会规模（TAM/SAM/SOM）。</div>
+
+<h3>Part A：KPI 框架设计</h3>
+<div class="step-box"><span class="num">1</span><b>明确决策和操作上下文</b><p style="margin:6px 0 0;">理解指标支持的决策、审查上下文、谁对结果采取行动。</p></div>
+<div class="step-box"><span class="num">2</span><b>收集证据再推荐指标</b><p style="margin:6px 0 0;">了解目标、当前状态、受众、约束、风险、现有定义、基线/目标上下文。</p></div>
+<div class="step-box"><span class="num">3</span><b>生成更广泛的候选集</b><p style="margin:6px 0 0;">创建候选结果、驱动因素、护栏指标，每个有明确定义和与决策的合理联系。</p></div>
+<div class="step-box"><span class="num">4</span><b>比较和选择指标</b><p style="margin:6px 0 0;">按 6 标准筛选，推荐 1-3 个主要 KPI + 每个 1-2 个驱动因素 + 1-2 个护栏。</p></div>
+<div class="step-box"><span class="num">5</span><b>设定目标</b><p style="margin:6px 0 0;">自上而下（基准/历史/竞品）vs 自下而上（团队能做什么）。比较雄心与现实影响力。</p></div>
+
+<h4>指标选择 6 标准</h4>
+<table>
+<tr><th>标准</th><th>说明</th></tr>
+<tr><td>反映目标</td><td>指标代表预期结果，用代理时解释原因</td></tr>
+<tr><td>为决策提供信息</td><td>变动应该改变团队的做法</td></tr>
+<tr><td>显示有用信号</td><td>在决策节奏下不太慢或太嘈杂</td></tr>
+<tr><td>可被团队影响</td><td>存在合理杠杆，或与驱动因素配对</td></tr>
+<tr><td>可操作测量</td><td>持续地仪表化、计算、跟踪</td></tr>
+<tr><td>难以博弈</td><td>改进指标不应隐藏对质量/信任/留存的损害</td></tr>
+</table>
+
+<h3>Part B：市场估算</h3>
+<h4>方法选择</h4>
+<table>
+<tr><th>方法</th><th>何时</th></tr>
+<tr><td>自上而下</td><td>存在可靠的聚合市场数据</td></tr>
+<tr><td>自下而上</td><td>市场可从可观察单位和假设构建</td></tr>
+<tr><td>基于价值</td><td>从创造的价值而非公布的市场总量估算</td></tr>
+</table>
+<h4>关键原则</h4>
+<ul>
+<li>区分来源事实、推断估算、判断调用</li>
+<li>派生值可追溯到公式，不硬编码输出</li>
+<li>识别最能移动估算的假设，做灵敏度分析</li>
+<li>不确定性显著时用范围，不要藏在单点估算后</li>
+</ul>
+</div>
+
+<!-- 4. 数据可视化 -->
+<div class="m-panel" id="m-viz">
+<div class="m-lead">设计、指定、实现、修订和 QA 定量可视化及图表选择。将图表视为结论的证据。</div>
+
+<h3>图表选择指南</h3>
+<table>
+<tr><th>数据关系</th><th>最佳图表</th><th>要点</th></tr>
+<tr><td>随时间趋势</td><td><code>line</code></td><td>展示足够多点揭示形态；目标 8-12 个时间点</td></tr>
+<tr><td>随时间构成</td><td><code>stackedArea</code></td><td>各部分作为整体读取；比较轨迹更重要时切 line</td></tr>
+<tr><td>跨类别比较</td><td><code>bar</code></td><td>顺序非语义时排序；长标签用水平条</td></tr>
+<tr><td>排名/Top-N</td><td><code>leaderboard</code></td><td>紧凑单度量；要上下文切排序 bar</td></tr>
+<tr><td>整体-部分</td><td>stacked <code>bar</code></td><td>分母明确；少数切片才用 pie</td></tr>
+<tr><td>分布/扩散</td><td><code>histogram</code></td><td>揭示形态的数值 bin；比较组用 boxPlot</td></tr>
+<tr><td>变量间关系</td><td><code>scatter</code></td><td>数值 x/y；目标 12-20 个有意义的点</td></tr>
+<tr><td>密集 2D 模式</td><td><code>heatmap</code></td><td>矩阵形状或强度；点级变化切 scatter</td></tr>
+<tr><td>加性桥接</td><td><code>waterfall</code></td><td>驱动因素干净加到最终值；否则排序 bar</td></tr>
+<tr><td>有序阶段</td><td><code>funnel</code></td><td>仅用于有序单系列阶段</td></tr>
+</table>
+
+<h3>视觉设计标准</h3>
+<h4>排版和颜色</h4>
+<ul>
+<li>跨图表单一字体系列；白色/近白背景、安静灰网格线、深炭文本</li>
+<li>不仅依赖颜色——用色调、填充、标记、线条样式、直接标签、排序</li>
+<li>调色板策略：单根色优先 / 硬性双根色上限 / 宽松多类别（≤5）</li>
+</ul>
+<h4>选择规则</h4>
+<ul>
+<li>从分析问题开始，不是最喜欢的图表类型</li>
+<li>图表用于形态和比较；表格用于精确查找</li>
+<li>不交付动力不足的趋势图（&lt;8点）或散点图（&lt;12点）</li>
+<li>pie / Pareto / waterfall / Likert 保留为变体而非默认</li>
+</ul>
+<h4>质量门槛</h4>
+<ul>
+<li>图表选择遵循分析问题，而非视觉偏好</li>
+<li>形式匹配比较；比例诚实一致</li>
+<li>每个图表有可见标题 + 带必要上下文的副标题</li>
+<li>正/负状态用色调 + 符号标签，不仅是颜色</li>
+</ul>
+</div>
+
+<!-- 5. 分析报告 & 仪表盘 -->
+<div class="m-panel" id="m-report">
+<div class="m-lead">构建精美的分析报告、仪表盘和产品/业务分析。</div>
+
+<h3>Part A：报告构建</h3>
+<div class="step-box"><span class="num">1</span><b>定义报告任务</b><p style="margin:6px 0 0;">陈述问题、决策、受众、范围、时间框架、比较基线。选一种受众：产品利益相关者 / 技术。</p></div>
+<div class="step-box"><span class="num">2</span><b>收集并界定证据</b><p style="margin:6px 0 0;">清点源数据、指标定义、分母、假设、注意事项、notebook/SQL。草拟声明前解决歧义。</p></div>
+<div class="step-box"><span class="num">3</span><b>提炼报告主干</b><p style="margin:6px 0 0;">答案优先：问题 → 答案 → 指标口径 → 发现+证据 → 验证 → 注意事项 → 下一步。</p></div>
+<div class="step-box"><span class="num">4</span><b>规划读者面向的结构</b><p style="margin:6px 0 0;">有序主段落 + 可见标题。定量发现默认可视化，表格用于精确查找。</p></div>
+<div class="step-box"><span class="num">5</span><b>设计可视化和表格</b><p style="margin:6px 0 0;">每个视觉支持特定声明，规划相邻解释段落。</p></div>
+
+<h4>报告标准</h4>
+<ul>
+<li>利益相关者报告以执行摘要开启（2-4 个带粗体主题句的要点）</li>
+<li>以结论开启主段落，而非设置性散文</li>
+<li>每个重要数字/可视化与通俗英语解释配对</li>
+<li>将原始数字放入上下文：基准百分比、基线比较、历史范围</li>
+<li>在叙述中用速记大数字（<code>899k</code>, <code>10.9k</code>, <code>1.2M</code>）</li>
+</ul>
+
+<h3>Part B：仪表盘构建</h3>
+<h4>指标模型分类</h4>
+<table>
+<tr><th>类型</th><th>测量对象</th></tr>
+<tr><td>Reach 触达</td><td>谁/什么在使用、渗透率、激活、覆盖</td></tr>
+<tr><td>Volume 量</td><td>事件、使用、交易、会话、吞吐量、频率</td></tr>
+<tr><td>Value 价值</td><td>收入、成本、利润、节省、转化、留存价值</td></tr>
+<tr><td>Quality 质量</td><td>成功/失败率、可靠性、延迟、满意度</td></tr>
+<tr><td>Depth 深度</td><td>重复使用、强度、功能组合、工作流完成</td></tr>
+<tr><td>Mix 混合</td><td>细分、地理、渠道、产品/版本、计划、队列</td></tr>
+<tr><td>Movement 变动</td><td>趋势、增长、季节性、前/后、基准、预测</td></tr>
+<tr><td>Risk 风险</td><td>数据覆盖、新鲜度、已知盲点、容量</td></tr>
+</table>
+<h4>布局原则</h4>
+<ul>
+<li>从摘要到详情：关键状态/KPI → 随时间变动 → 分解 → 详情表格</li>
+<li>默认视图在交互前回答主要受众问题</li>
+<li>过滤器少、有意义且正确工作</li>
+<li>卡片、图表、表对账一致</li>
+</ul>
+
+<h3>Part C：产品和业务分析</h3>
+<h4>决策透镜（选相关的解释证据）</h4>
+<table>
+<tr><th>透镜</th><th>问题</th></tr>
+<tr><td>当前规模</td><td>足够大以重要？</td></tr>
+<tr><td>势头</td><td>增长、收缩、加速？</td></tr>
+<tr><td>广度</td><td>广泛还是狭窄？</td></tr>
+<tr><td>集中度</td><td>依赖少数大实体？</td></tr>
+<tr><td>效率</td><td>相同输入下输出更好？</td></tr>
+<tr><td>可寻址性</td><td>团队能对此采取行动？</td></tr>
+<tr><td>风险/依赖</td><td>改变建议的约束？</td></tr>
+</table>
+</div>
+
+<!-- 日报分析模板 -->
+<div class="m-panel" id="m-daily">
+<div class="m-lead">Mobile Growth 变现日报标准化生成模板。基于 OmniEye 数据，生成固定格式的飞书日报文档和卡片推送。</div>
+
+<h2>核心原则</h2>
+<blockquote>数据真实准确 · 口径固定 · 结构固定 · 业务语言输出<br>不得估算 · 不得补数 · 不得改口径</blockquote>
+
+<h2>日报文档结构（飞书文档）</h2>
+<p>文档标题格式：<code>Mobile Growth_变现日报速览_YYYY.MM.DD</code></p>
+
+<h3>1. 数据总结（元信息）</h3>
+<table>
+<tr><th>字段</th><th>格式</th><th>说明</th></tr>
+<tr><td>日期</td><td>YYYY-MM-DD（星期X）</td><td>数据日期，即当日数据</td></tr>
+<tr><td>环比</td><td>YYYY-MM-DD / YYYY-MM-DD</td><td>前一天 vs 大前天</td></tr>
+<tr><td>历史日报</td><td>链接</td><td>AI_日报数据汇总</td></tr>
+</table>
+
+<h3>2. 收入概况表（核心表格）</h3>
+<p>固定 9 列 × 4 行，产品顺序：<strong>UNO → UNO2 → P10 → SKB</strong></p>
+<table>
+<tr><th>列名</th><th>格式</th><th>口径说明</th></tr>
+<tr><td>产品</td><td>UNO / UNO2 / P10 / SKB</td><td>固定排序</td></tr>
+<tr><td>IAA 收入</td><td>$XX,XXX.XX</td><td>Log 口径 Advalue 总和</td></tr>
+<tr><td>IAA 环比</td><td>+X.XX% / -X.XX%</td><td>vs 前一天</td></tr>
+<tr><td>IAA 同比</td><td>+X.XX% / -X.XX%</td><td>vs 上周同期（7天前）</td></tr>
+<tr><td>DAU</td><td>XXX.XX万（+X.XX%）</td><td>万为单位 + 环比变化</td></tr>
+<tr><td>频次</td><td>X.XX（+X.XX%）</td><td>Freq/DAU + 环比变化</td></tr>
+<tr><td>eCPM(log)</td><td>$X.XX（+X.XX%）</td><td>Log 口径 eCPM + 环比。⚠️ 不是 IAA eCPM</td></tr>
+<tr><td>AdARPU</td><td>$X.XXXX（+X.XX%）</td><td>接口返回的 AdARPU Total + 环比。⚠️ 不得自行用收入/DAU替代</td></tr>
+<tr><td>归因</td><td>一句话</td><td>综合归因：指出主要驱动因素和方向</td></tr>
+</table>
+
+<p><strong>表格下方</strong>：总收入行</p>
+<p>格式：<code>总收入： 约 $XXX,XXX.XX（环比 +X.XX%）。</code></p>
+
+<h3>3. 分产品详细分析</h3>
+<p>每个产品包含 <strong>4 个维度</strong>，每个维度一行：</p>
+<table>
+<tr><th>维度</th><th>分析内容</th><th>写法示例</th></tr>
+<tr><td><strong>整体</strong></td><td>收入变化方向 + 各指标（DAU/频次/eCPM/AdARPU）联动归因</td><td>"收入 -4.13%，DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。"</td></tr>
+<tr><td><strong>平台</strong></td><td>AND/IOS 双端 ARPU 变化方向 + 主要原因简述</td><td>"ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。"</td></tr>
+<tr><td><strong>渠道</strong></td><td>渠道 eCPM 整体方向 + 影响最大的渠道</td><td>"双端 eCPM 均有所下滑，主要受以 AL 为主大部分渠道的影响。"</td></tr>
+<tr><td><strong>点位</strong></td><td>在线时长方向 + 核心点位频次变化 + 支撑/拖累因素</td><td>"在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动 token 形成一定支撑，使得大盘频次有所增长。"</td></tr>
+</table>
+
+<h4>⚠️ 分产品分析风格规范（核心）</h4>
+<div class="m-lead" style="border-left-color:#e74c3c;">以下规则为强制性要求，违反将导致日报不合格。</div>
+<table>
+<tr><th>规则</th><th>说明</th><th>❌ 错误示例</th><th>✅ 正确示例</th></tr>
+<tr><td><b>不列具体数值</b></td><td>分产品分析中不出现 $xx、xx%、xxmin 等具体数字。数值只在"收入概况表"中展示。</td><td>"IOS 收入 $27,077（环比 -5.01%），AND ARPU $0.0216（+4.51%）"</td><td>"ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。"</td></tr>
+<tr><td><b>不加 emoji 标记</b></td><td>分析正文和收入概况表中不使用 ⚠️⬆️ 等 emoji 标注数值。</td><td>"DAU 11.63万（-10.10%⚠️）"<br>"AdARPU $0.1595（+6.28%⬆️）"</td><td>"DAU 11.63万（-10.10%）"<br>"AdARPU $0.1595（+6.28%）"</td></tr>
+<tr><td><b>因果链条完整</b></td><td>归因不止说"xx是主因"，要完整描述"什么变了 → 导致什么 → 有什么对冲/加剧"。</td><td>"DAU 下降是收入下滑主因。"</td><td>"DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。"</td></tr>
+<tr><td><b>融入业务背景</b></td><td>结合实际业务事件（活动上下线、功能开放等）做归因，不纯粹堆砌数据方向。</td><td>"收入增长主要来自价格端。"</td><td>"主要是挖蘑菇新开，RV 频次明显增长，eCPM 也有小幅增长共同带来。"</td></tr>
+<tr><td><b>用词中性前瞻</b></td><td>近期趋势和关键结论用中性专业语言，避免"亮眼""创新高"等煽动性用词。</td><td>"表现亮眼""创近期新高""最亮眼产品"</td><td>"效率端修复""高位盘继续承压""需观察量端恢复"</td></tr>
+</table>
+
+<h4>标准化写法参考</h4>
+<div class="tmpl">UNO
+整体：收入 -4.13%，DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。
+平台：ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。
+渠道：双端eCPM均有所下滑，且主要受以AL为主大部分渠道的影响。
+点位：在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动token、rv_commonevent_SORT 形成一定支撑，使得大盘频次有所增长。
+
+UNO2
+整体：收入 -4.45%，DAU 大幅下滑；但频次、eCPM(log) 与 AdARPU 均回升，效率端修复明显，对收入下滑形成部分对冲。
+平台：双端arpu有所回升，AND端提升更明显受DAU下滑影响较多，IOS主要是eCPM和DAU频次回升影响。
+渠道：IOS端受AL等渠道影响eCPM有小幅回升，AND端则较为稳定。
+点位：在线时长小幅回升，受DAU下滑影响，gamefinish 频次明显提升，多个 RV 点位均有提升，共同影响大盘。
+
+P10
+整体：收入 -2.29%，DAU 与频次均有提升；但 eCPM(log) 与 AdARPU 明显下滑。
+平台：双端收入与 ARPU 均下滑，主要是eCPM下滑导致。
+渠道：双端基本全渠道有下滑趋势，其中AL的负面影响较为明显。
+点位：在线时长小幅回升；Gameplay 插页频次有所提升，Drawcard 活动游戏内道具、主动弹出有提升，拉高整体频次，集中在int广告。
+
+SKB
+整体：收入 +8.95%，DAU 基本稳定，频次、eCPM(log) 与 AdARPU 同步提升，效率端修复是收入增长核心。
+平台：双端收入与 ARPU 均提升，主要是挖蘑菇新开，RV频次明显增长，eCPM也有小幅增长共同带来。
+渠道：双端头部 applovin eCPM 均回升，iOS 端 unity 也有回升，其次RV频次明显增长也有结构性利好。
+点位：在线时长小幅回升；pvp_offline_banner_entrance 频次小幅提升，int_round_over 回升，rv_dig_hunter重启，是收入和效率改善的重要来源。</div>
+
+<h3>4. 关键结论</h3>
+<p>标题：<code>🔍 关键结论</code>，子标题：<code>⭐ 日报重点</code></p>
+<p>固定 4 条结论：</p>
+<table>
+<tr><th>序号</th><th>内容</th><th>写法要求</th></tr>
+<tr><td>1</td><td><strong>整体情况</strong></td><td>总收入环比 + 主要拖累/驱动产品</td></tr>
+<tr><td>2</td><td><strong>效率分化</strong></td><td>各产品 AdARPU/eCPM 变化方向对比</td></tr>
+<tr><td>3</td><td><strong>点位活动</strong></td><td>各产品核心点位变化总结</td></tr>
+<tr><td>4</td><td><strong>关注点</strong></td><td>未来需重点关注的 2-3 个问题</td></tr>
+</table>
+
+<h3>5. 近期趋势</h3>
+<p>标题：<code>📈 近期趋势</code></p>
+<p>每产品一条，格式：<code>产品名：收入约 XX.XK，一句话趋势总结。</code></p>
+<p><strong>⚠️ 近期趋势写法要求：</strong>用中性前瞻性语言，不做价值判断。</p>
+<ul>
+<li>❌ 避免："表现亮眼""创近期新高""最亮眼的产品"</li>
+<li>✅ 应该："效率端修复""高位盘继续承压""需观察量端恢复""短期仍受量端压力影响"</li>
+</ul>
+
+<h2>指标口径规范</h2>
+<table>
+<tr><th>指标</th><th>口径</th><th>⚠️ 易错点</th></tr>
+<tr><td>IAA 收入</td><td>Log Advalue 总和</td><td>不要和 API Revenue 混用</td></tr>
+<tr><td>eCPM(log)</td><td>Log 口径：Advalue / Impression(log) × 1000</td><td>⚠️ 不是 IAA eCPM（API 口径）</td></tr>
+<tr><td>AdARPU</td><td>接口返回的 AdARPU Total 字段</td><td>⚠️ 不得自行用 收入/DAU 替代</td></tr>
+<tr><td>频次</td><td>Freq/DAU = Impression(log) / DAU</td><td>是 DAU 频次，不是 DEU 频次</td></tr>
+<tr><td>参与率</td><td>AdPlayUser(log) / DAU</td><td>分母是 DAU，不是 DEU</td></tr>
+<tr><td>环比</td><td>(当日值 - 前一日值) / 前一日值</td><td>—</td></tr>
+<tr><td>周同比</td><td>(当日值 - 7天前值) / 7天前值</td><td>—</td></tr>
+</table>
+
+<h2>归因分析框架</h2>
+<p>日报归因遵循以下优先级顺序：</p>
+<ol>
+<li><strong>量端（DAU）</strong>：DAU 变化是否是主因？（周末效应/版本更新/UA 波动）</li>
+<li><strong>效率端（AdARPU）</strong>：AdARPU = eCPM × Freq / 1000，拆解 eCPM 和 Freq 哪个主导</li>
+<li><strong>频次拆解</strong>：频次变化来自 RV/INT/Banner 哪个广告类型？来自哪些核心点位？</li>
+<li><strong>eCPM 拆解</strong>：eCPM 变化来自哪些渠道？头部渠道（AL）还是中小渠道？AND 还是 iOS？</li>
+<li><strong>外部因素</strong>：活动上下线、版本更新、赛季切换、Banner 放量等</li>
+</ol>
+
+<h2>禁止行为</h2>
+<ul>
+<li>❌ 不得用历史记忆补数</li>
+<li>❌ 不得估算缺失值</li>
+<li>❌ 不得用其他日期数据替代当前日报</li>
+<li>❌ 不得把 IAA eCPM 当成 eCPM(log)</li>
+<li>❌ 不得用 收入/DAU 自行替代接口中的 AdARPU Total</li>
+<li>❌ 不得改变产品排序（固定 UNO → UNO2 → P10 → SKB）</li>
+<li>❌ 缺少数据时不得猜测，应写"暂无数据支持，暂不下结论"</li>
+</ul>
+
+<h2>数据提取接口清单</h2>
+<table>
+<tr><th>数据模块</th><th>接口 Endpoint</th><th>返回内容</th></tr>
+<tr><td>汇总报表</td><td>adverAnakeytrendTable</td><td>DAU/收入/eCPM/Impression/参与率/频次，含 RV/INT/Banner 分项</td></tr>
+<tr><td>整体数据</td><td>adverAnakeytrendRevenue</td><td>分平台收入、AdARPU、DAU、在线时长</td></tr>
+<tr><td>平台数据</td><td>adverAnakeytrendeCPM</td><td>分 RV/INT 的 Freq/DAU、eCPM、参与率</td></tr>
+<tr><td>渠道数据</td><td>adverAnakeytrendTableAdchannel</td><td>按渠道的收入、展示量、收入占比、eCPM</td></tr>
+<tr><td>点位数据</td><td>adverAnakeytrendTablePointLog</td><td>各广告点位的 DAU 频次、DEU 频次、参与率</td></tr>
+</table>
+
+<h2>完整流程（5 步）</h2>
+<ol>
+<li><strong>OmniEye 提取数据</strong>：从关键数据趋势看板拉取 4 个产品 × 5 个接口的数据</li>
+<li><strong>整理 CSV</strong>：生成 7 个 CSV 文件（汇总/概况/收入/平台/在线时长/渠道/点位）</li>
+<li><strong>AI 分析生成</strong>：按本模板结构生成分析文本</li>
+<li><strong>创建飞书文档</strong>：lark-cli 创建文档 + 授权管理权限</li>
+<li><strong>推送飞书卡片</strong>：JSON 2.0 卡片格式推送到指定群组</li>
+</ol>
+
+</div>
+
+<!-- 日报卡片推送模板 -->
+<div class="m-panel" id="m-card">
+<div class="m-lead">日报生成后，按以下标准格式推送飞书原生卡片（Interactive Card）到群组通知。</div>
+
+<h3>⚠️ 日期规则（重要）</h3>
+<table>
+<tr><th>字段</th><th>含义</th><th>示例（假设今天是 6 月 30 日）</th></tr>
+<tr><td>卡片标题 / 文档标题</td><td>报告发送日期（即今天）</td><td>Mobile Growth_变现日报速览_2026.06.30</td></tr>
+<tr><td>📅 日期</td><td>今天日期</td><td>2026-06-30，星期二</td></tr>
+<tr><td>📊 环比</td><td>昨天 vs 大前天</td><td>2026-06-29 / 2026-06-28</td></tr>
+</table>
+<p><strong>解释</strong>：我们在 6/30 推送报告，内容日期显示 6/30（今天），环比比较的是 6/29 vs 6/28（昨天 vs 大前天的数据）。</p>
+
+<h3>卡片结构（4 个模块）</h3>
+<table>
+<tr><th>模块</th><th>内容</th><th>说明</th></tr>
+<tr><td>1. 报告信息</td><td>📅 日期 / 📊 环比 / 💰 总收入 / 📄 日报文档链接</td><td>4 行基础信息 + @ 通知</td></tr>
+<tr><td>2. 收入概况表</td><td>飞书原生 <code>table</code> 组件，9 列 × 4 行</td><td>产品顺序：UNO → UNO2 → P10 → SKB</td></tr>
+<tr><td>3. 日报重点</td><td>3~4 条编号列表</td><td>整体情况 / 效率分化 / 点位活动 / 关注点</td></tr>
+<tr><td>4. 近期趋势</td><td>4 条编号列表，每产品 1 条</td><td>简要趋势总结</td></tr>
+</table>
+
+<h3>卡片 JSON 模板（schema 2.0）</h3>
+<div class="tmpl">{
+  "schema": "2.0",
+  "header": {
+    "template": "blue",
+    "title": {"content": "Mobile Growth_变现日报速览_YYYY.MM.DD", "tag": "plain_text"}
+  },
+  "body": {
+    "elements": [
+      {
+        "tag": "markdown",
+        "content": "**📅 日期**：YYYY.MM.DD，星期X\n**📊 环比**：YYYY-MM-DD / YYYY-MM-DD\n**💰 总收入**：约 **$XXX,XXX**（环比 X.X%，总 DAU 约 XXX 万）\n**📄 日报文档**：[文档标题](文档链接)\n\n&lt;at user_id=\"ou_xxx\"&gt;姓名&lt;/at&gt;"
+      },
+      {"tag": "hr"},
+      {"tag": "markdown", "content": "**📊 收入概况**"},
+      {
+        "tag": "table",
+        "columns": [
+          {"name": "col0", "display_name": "产品", "width": "80px"},
+          {"name": "col1", "display_name": "IAA 收入", "width": "100px"},
+          {"name": "col2", "display_name": "IAA 环比", "width": "100px"},
+          {"name": "col3", "display_name": "IAA 同比", "width": "100px"},
+          {"name": "col4", "display_name": "DAU", "width": "150px"},
+          {"name": "col5", "display_name": "频次 (IPU)", "width": "120px"},
+          {"name": "col6", "display_name": "eCPM", "width": "120px"},
+          {"name": "col7", "display_name": "AdARPU", "width": "120px"},
+          {"name": "col8", "display_name": "归因", "width": "150px"}
+        ],
+        "rows": [4行产品数据，key 与 columns[].name 对应]
+      },
+      {"tag": "hr"},
+      {"tag": "markdown", "content": "**⭐ 日报重点**\n1. **整体情况**：...\n2. **效率分化**：...\n3. **点位活动**：...\n4. **关注点**：..."},
+      {"tag": "markdown", "content": "**📈 近期趋势**\n1. **UNO**：...\n2. **UNO2**：...\n3. **P10**：...\n4. **SKB**：..."}
+    ]
+  }
+}</div>
+
+<h3>表格列配置详情</h3>
+<table>
+<tr><th>列标识</th><th>display_name</th><th>data_type</th><th>width</th><th>数据格式</th></tr>
+<tr><td>col0</td><td>产品</td><td>text</td><td>80px</td><td>UNO / UNO2 / P10 / SKB</td></tr>
+<tr><td>col1</td><td>IAA 收入</td><td>text</td><td>100px</td><td>$42,566</td></tr>
+<tr><td>col2</td><td>IAA 环比</td><td>text</td><td>100px</td><td>-4.13% / +8.95%⬆️</td></tr>
+<tr><td>col3</td><td>IAA 同比</td><td>text</td><td>100px</td><td>+1.52% / -3.20%</td></tr>
+<tr><td>col4</td><td>DAU</td><td>text</td><td>150px</td><td>117.00万(-5.91%)</td></tr>
+<tr><td>col5</td><td>频次 (IPU)</td><td>text</td><td>120px</td><td>5.93(+5.07%)</td></tr>
+<tr><td>col6</td><td>eCPM</td><td>text</td><td>120px</td><td>$6.13(-3.02%)</td></tr>
+<tr><td>col7</td><td>AdARPU</td><td>text</td><td>120px</td><td>$0.0364(+1.90%)</td></tr>
+<tr><td>col8</td><td>归因</td><td>text</td><td>150px</td><td>DAU回落，频次补偿</td></tr>
+</table>
+
+<h3>@ 提及格式（重要）</h3>
+<p>推送时 @ 通知成员，<strong>必须使用 <code>user_id</code> 属性</strong>：</p>
+<div class="tmpl">&lt;at user_id="ou_xxx"&gt;姓名&lt;/at&gt;</div>
+<p>⚠️ 使用 <code>id</code> 而非 <code>user_id</code> 会导致飞书无法解析，显示为原始文本。</p>
+
+<h4>成员 ID 与群组 ID</h4>
+<p>推送时需要的成员 open_id 和群组 chat_id <strong>不在此处硬编码</strong>，请通过询问用户获取目标群组和 @ 通知的成员信息。</p>
+
+<h3>关键规则</h3>
+<ul>
+<li><strong>JSON 2.0 结构</strong>：根级 <code>"schema": "2.0"</code>，正文放 <code>body.elements</code> 数组中</li>
+<li><strong>表格组件</strong>：<code>columns[].name</code> 为列标识（col0~col8），<code>display_name</code> 为表头文字，<code>rows</code> 的 key 与 name 对应</li>
+<li><strong>markdown 组件</strong>：使用 <code>tag: "markdown"</code>，内容用 markdown 语法加粗、链接</li>
+<li><strong>卡片标题</strong>：<code>header.template: "blue"</code> 蓝色背景</li>
+<li><strong>发送方式</strong>：使用 MCP <code>im_v1_message_create</code>，<code>receive_id_type: "chat_id"</code>，<code>msg_type: "interactive"</code></li>
+</ul>
+
+</div>
+
+</main><!-- end m-content -->
+</div><!-- end m-layout -->
+
+<script>
+// 左侧导航切换
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById(item.dataset.panel).classList.add('active');
+    document.querySelector('.m-content').scrollTo(0, 0);
+  });
+});
+
+// 页内搜索 + 高亮定位 + 上下切换
+(function(){
+  const input = document.getElementById('page-search');
+  const countEl = document.getElementById('page-search-count');
+  if (!input) return;
+
+  const navWrap = document.createElement('span');
+  navWrap.id = 'search-nav';
+  navWrap.style.cssText = 'display:none;align-items:center;gap:4px;';
+  navWrap.innerHTML = '<button id="search-prev" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">\u2191</button><button id="search-next" style="border:1px solid var(--border);background:#fff;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;line-height:1;">\u2193</button>';
+  input.parentNode.appendChild(navWrap);
+
+  let currentIdx = -1;
+  let allMarks = [];
+
+  const initSearch = decodeURIComponent(window.location.hash.split('search=')[1] || '');
+  if (initSearch) { input.value = initSearch; setTimeout(() => doSearch(initSearch), 300); }
+  let debounceTimer;
+  input.addEventListener('input', function() { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => doSearch(this.value.trim()), 200); });
+  document.getElementById('search-prev').addEventListener('click', () => navigate(-1));
+  document.getElementById('search-next').addEventListener('click', () => navigate(1));
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); navigate(e.shiftKey ? -1 : 1); }
+  });
+
+  function navigate(dir) {
+    if (!allMarks.length) return;
+    if (allMarks[currentIdx]) { allMarks[currentIdx].style.background = '#ffcc02'; allMarks[currentIdx].style.color = ''; }
+    currentIdx = (currentIdx + dir + allMarks.length) % allMarks.length;
+    allMarks[currentIdx].style.background = '#ff6b00';
+    allMarks[currentIdx].style.color = '#fff';
+    const panel = allMarks[currentIdx].closest('.m-panel');
+    if (panel && !panel.classList.contains('active')) {
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
+      panel.classList.add('active');
+      const sideItem = document.querySelector('.sidebar-item[data-panel="' + panel.id + '"]');
+      if (sideItem) sideItem.classList.add('active');
+    }
+    allMarks[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    countEl.textContent = (currentIdx + 1) + '/' + allMarks.length;
+  }
+
+  function doSearch(q) {
+    document.querySelectorAll('mark.search-hl').forEach(m => { const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+    allMarks = []; currentIdx = -1;
+    if (!q) { countEl.textContent = ''; navWrap.style.display = 'none'; return; }
+    const content = document.querySelector('.m-content') || document.body;
+    const panels = content.querySelectorAll('.m-panel');
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    (panels.length ? panels : [content]).forEach(function(panel) {
+      const walker = document.createTreeWalker(panel, NodeFilter.SHOW_TEXT, null, false);
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        if (node.parentElement.closest('script,style,input,textarea')) continue;
+        if (re.test(node.textContent)) {
+          const span = document.createElement('span');
+          span.innerHTML = node.textContent.replace(re, '<mark class="search-hl" style="background:#ffcc02;padding:1px 2px;border-radius:2px;">$1</mark>');
+          node.parentNode.replaceChild(span, node);
+        }
+        re.lastIndex = 0;
+      }
+    });
+    allMarks = Array.from(document.querySelectorAll('mark.search-hl'));
+    if (allMarks.length) {
+      navWrap.style.display = 'inline-flex';
+      currentIdx = 0;
+      allMarks[0].style.background = '#ff6b00';
+      allMarks[0].style.color = '#fff';
+      const panel = allMarks[0].closest('.m-panel');
+      if (panel && !panel.classList.contains('active')) {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.m-panel').forEach(p => p.classList.remove('active'));
+        panel.classList.add('active');
+        const sideItem = document.querySelector('.sidebar-item[data-panel="' + panel.id + '"]');
+        if (sideItem) sideItem.classList.add('active');
+      }
+      allMarks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      countEl.textContent = '1/' + allMarks.length;
+    } else {
+      countEl.textContent = '0';
+      navWrap.style.display = 'none';
+    }
+  }
+})();
+</script>
+</body>
+</html>

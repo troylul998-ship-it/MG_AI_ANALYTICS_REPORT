@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>历史报告归档 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/archive.html">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="assets/style.css" as="style">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="assets/form.css">
   <style>
@@ -103,7 +108,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="logo">📊</div>
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
     <h1>AI 数据分析平台</h1>
     <span class="sub">历史报告归档</span>
     <nav><a href="index.html">← 返回工作台</a></nav>
@@ -113,6 +118,15 @@
 <div class="archive-wrap">
   <h2 style="margin-bottom:6px;">🗂️ 历史报告归档</h2>
   <p style="font-size:13px;color:var(--text-3);margin-bottom:16px;">保存的分析需求与产物，点击可查看完整信息。数据存储在浏览器本地。</p>
+
+  <!-- 统计 + 操作 -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+    <span id="archive-count" style="font-size:12px;color:var(--text-3);font-weight:600;"></span>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button onclick="exportAll()" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;color:var(--text-2);">📥 导出全部</button>
+      <button onclick="clearAll()" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;color:var(--red);">🗑️ 清空全部</button>
+    </div>
+  </div>
 
   <!-- 筛选器 -->
   <div class="filter-bar">
@@ -135,6 +149,9 @@
       <option value="UNO">UNO</option>
       <option value="UNO2">UNO2</option>
     </select>
+    <select id="filter-owner">
+      <option value="">全部需求人</option>
+    </select>
     <input type="text" id="filter-search" placeholder="搜索项目/主题...">
     <button class="filter-btn" onclick="renderList()">筛选</button>
   </div>
@@ -153,29 +170,48 @@ const MODULE_LABELS = { revenue_analysis:'付费/收入', ab_test:'AB实验', fu
 const MODULE_FORMS = { revenue_analysis:'modules/revenue_analysis_form.html', ab_test:'modules/ab_test_form.html', funnel:'modules/funnel_analysis_form.html', retention_ltv:'modules/retention_ltv_form.html', user_seg:'modules/user_segmentation_form.html', causal:'modules/causal_chain_form.html', daily_query:'modules/daily_query_form.html', metric_diag:'modules/metric_diagnostics_form.html' };
 
 document.addEventListener('DOMContentLoaded', () => {
+  populateOwnerFilter();
   renderList();
   document.getElementById('detail-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
   document.getElementById('filter-module').addEventListener('change', renderList);
   document.getElementById('filter-product').addEventListener('change', renderList);
+  document.getElementById('filter-owner').addEventListener('change', renderList);
   document.getElementById('filter-search').addEventListener('input', renderList);
 });
+
+function populateOwnerFilter() {
+  const list = FF.getArchives();
+  const owners = [...new Set(list.map(r => r.data?.owner).filter(Boolean))].sort();
+  const select = document.getElementById('filter-owner');
+  owners.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o; opt.textContent = o;
+    select.appendChild(opt);
+  });
+}
 
 function getFiltered() {
   let list = FF.getArchives();
   const module = document.getElementById('filter-module').value;
   const product = document.getElementById('filter-product').value;
+  const owner = document.getElementById('filter-owner').value;
   const search = document.getElementById('filter-search').value.toLowerCase().trim();
   if (module) list = list.filter(r => r.module === module);
   if (product) list = list.filter(r => r.product === product);
+  if (owner) list = list.filter(r => (r.data?.owner || '') === owner);
   if (search) list = list.filter(r => ((r.project||'')+(r.goal||'')+(r.data?.owner||'')).toLowerCase().includes(search));
   return list;
 }
 
 function renderList() {
   const list = getFiltered();
+  const total = FF.getArchives().length;
   const container = document.getElementById('archive-list');
+  document.getElementById('archive-count').textContent = list.length === total ? `共 ${total} 条记录` : `筛选出 ${list.length} / ${total} 条`;
   if (!list.length) {
-    container.innerHTML = `<div class="archive-empty"><div class="icon">📭</div><p>没有匹配的记录</p></div>`;
+    container.innerHTML = total === 0
+      ? `<div class="archive-empty"><div class="icon">📭</div><p style="font-size:15px;font-weight:600;margin-bottom:8px;">还没有历史报告</p><p>完成一次分析并保存后，记录会出现在这里。</p><a href="index.html" style="display:inline-block;margin-top:16px;padding:10px 24px;background:var(--brand-grad);color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">去创建第一个分析 →</a></div>`
+      : `<div class="archive-empty"><div class="icon">🔍</div><p>没有匹配的记录，试试调整筛选条件</p></div>`;
     container.className = '';
     return;
   }
@@ -253,6 +289,26 @@ function showDetail(record) {
 
 function closeDetail() {
   document.getElementById('detail-overlay').classList.remove('show');
+}
+
+function exportAll() {
+  const list = FF.getArchives();
+  if (!list.length) { alert('没有记录可导出'); return; }
+  const blob = new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ai_analytics_archive_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function clearAll() {
+  const total = FF.getArchives().length;
+  if (!total) { alert('已经没有记录了'); return; }
+  if (confirm(`确认清空全部 ${total} 条记录？此操作不可撤销。`)) {
+    localStorage.removeItem('ai_analytics_archive');
+    renderList();
+    populateOwnerFilter();
+  }
 }
 </script>
 </body>

@@ -60,7 +60,7 @@ const FF = (() => {
       const name = group.dataset.custom;
       const wrap = document.createElement('span');
       wrap.className = 'chip-add-wrap';
-      wrap.innerHTML = `<input type="text" class="chip-add-input" placeholder="+ 自定义后回车">`;
+      wrap.innerHTML = `<input type="text" class="chip-add-input" placeholder="自定义 ↑">`;
       const input = wrap.querySelector('input');
       const submit = () => {
         const v = input.value.trim();
@@ -119,9 +119,16 @@ const FF = (() => {
     const addRow = (data) => {
       const div = document.createElement('div');
       div.className = opts.rowClass || 'dyn-row';
+      div.draggable = true;
       div.innerHTML = rowHtmlFn(data) +
         '<button type="button" class="del" title="删除">×</button>';
       div.querySelector('.del').addEventListener('click', () => div.remove());
+      // Drag-and-drop
+      div.addEventListener('dragstart', e => { div.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      div.addEventListener('dragend', () => { div.classList.remove('dragging'); container.querySelectorAll('.dyn-row').forEach(r => r.classList.remove('drag-over')); });
+      div.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; div.classList.add('drag-over'); });
+      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+      div.addEventListener('drop', e => { e.preventDefault(); div.classList.remove('drag-over'); const dragging = container.querySelector('.dragging'); if (dragging && dragging !== div) container.insertBefore(dragging, div); });
       container.appendChild(div);
       return div;
     };
@@ -228,6 +235,7 @@ const FF = (() => {
           ).join('') +
           '<br><span style="font-size:11px;color:#999;">点击上方字段名可直接定位</span>';
         summary.classList.add('show');
+        showToast('请检查必填项', 'error', 4000);
 
         // 定位按钮点击
         summary.querySelectorAll('.err-locate').forEach((a, idx) => {
@@ -280,6 +288,7 @@ const FF = (() => {
       navigator.clipboard.writeText(pre.textContent).then(() => {
         const old = btn.textContent;
         btn.textContent = '✓ 已复制';
+        showToast('已复制到剪贴板', 'success', 2000);
         setTimeout(() => (btn.textContent = old), 1500);
       });
     });
@@ -298,6 +307,27 @@ const FF = (() => {
     });
   }
 
+  /* ---------- Toast 通知 ---------- */
+  function showToast(message, type = 'success', duration = 3000) {
+    // 确保容器存在
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    const icons = { success: '✓', error: '✗', info: 'ℹ' };
+    toast.className = `toast toast-${type}`;
+    toast.textContent = `${icons[type] || ''} ${message}`;
+    container.appendChild(toast);
+    // 自动消失
+    setTimeout(() => {
+      toast.classList.add('toast-out');
+      toast.addEventListener('animationend', () => toast.remove());
+    }, duration);
+  }
+
   /* ---------- 工具 ---------- */
   function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
   function esc(s) { return (s || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
@@ -312,13 +342,15 @@ const FF = (() => {
     tabs.innerHTML = '';
     body.innerHTML = '';
 
-    // 保存按钮放在产物顶部
+    // 保存按钮 + 人工按钮
     const saveBar = document.createElement('div');
-    saveBar.style.cssText = 'margin-bottom:16px;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#f0fff4;border:1px solid #c6f6d5;border-radius:8px;';
+    saveBar.style.cssText = 'margin-bottom:16px;display:flex;gap:12px;align-items:center;padding:12px 16px;background:#f0fff4;border:1px solid #c6f6d5;border-radius:8px;flex-wrap:wrap;';
     saveBar.innerHTML =
       `<button class="btn btn-primary" id="btn-save-archive" type="button" style="padding:8px 20px;font-size:13px;">💾 保存到历史归档</button>` +
+      `<button class="btn" id="btn-need-human" type="button" style="padding:8px 20px;font-size:13px;background:#fff4ec;border:1px solid #ffd8a8;color:var(--brand-1);font-weight:600;">🙋 需要人工</button>` +
       `<span style="font-size:12px;color:var(--text-3);">保存后可在工作台「历史报告归档」中回看</span>` +
-      `<span id="save-msg" style="font-size:12px;color:var(--green);display:none;margin-left:8px;">✓ 已保存</span>`;
+      `<span id="save-msg" style="font-size:12px;color:var(--green);display:none;margin-left:8px;">✓ 已保存</span>` +
+      `<span id="human-msg" style="font-size:12px;color:var(--brand-1);display:none;margin-left:8px;">✓ 已发送飞书通知</span>`;
     body.appendChild(saveBar);
 
     artifacts.forEach((a, i) => {
@@ -358,6 +390,50 @@ const FF = (() => {
         if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 3000); }
         saveBtn.disabled = true;
         saveBtn.textContent = '✓ 已保存';
+        showToast('已保存到历史归档', 'success');
+      });
+    }
+
+    // 绑定「需要人工」按钮事件
+    const humanBtn = document.getElementById('btn-need-human');
+    if (humanBtn && opts.collectFn) {
+      humanBtn.addEventListener('click', async () => {
+        const data = opts.collectFn();
+        const summary = [
+          `📊 模块：${data.module || '日常取数'}`,
+          `👤 需求人：${data.owner || '未填写'}`,
+          `🎮 产品：${data.product || '未指定'}`,
+          `📝 需求：${data.goal || data.query_desc || '未填写'}`,
+          `📅 时间：${(data.date_range || []).join(' ~ ') || '未指定'}`,
+          data.dims && data.dims.length ? `📐 维度：${data.dims.join('、')}` : '',
+          data.filter ? `🔍 过滤：${data.filter}` : '',
+        ].filter(Boolean).join('\n');
+
+        const msgContent = `🙋 需要人工协助\n\n${summary}\n\n⏰ ${new Date().toLocaleString('zh-CN')}`;
+
+        // 发送飞书 Webhook 通知
+        try {
+          humanBtn.disabled = true;
+          humanBtn.textContent = '发送中...';
+          await fetch('https://open.feishu.cn/open-apis/bot/v2/hook/c29ef9ff-e3f5-432d-b559-9cf338fdd044', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              msg_type: 'text',
+              content: { text: msgContent }
+            })
+          });
+          const msg = document.getElementById('human-msg');
+          if (msg) { msg.style.display = 'inline'; msg.textContent = '✓ 已发送飞书通知'; setTimeout(() => msg.style.display = 'none', 5000); }
+          humanBtn.textContent = '✓ 已通知';
+          showToast('已发送飞书通知', 'success');
+        } catch (err) {
+          humanBtn.disabled = false;
+          humanBtn.textContent = '🙋 需要人工';
+          const msg = document.getElementById('human-msg');
+          if (msg) { msg.style.display = 'inline'; msg.textContent = '⚠️ 发送失败，请手动通知'; msg.style.color = 'var(--red)'; setTimeout(() => msg.style.display = 'none', 5000); }
+          showToast('发送失败，请手动通知', 'error', 5000);
+        }
       });
     }
 
@@ -439,12 +515,18 @@ const FF = (() => {
     const chipFields = ['metrics', 'user_metrics', 'dims', 'ret_days', 'ltv_type', 'ltv_windows',
       'ret_dims', 'ab_metrics', 'ab_guardrails', 'ab_dims', 'fn_metrics', 'fn_dims',
       'seg_dims', 'seg_metrics', 'diag_metric', 'diag_dims', 'product_type', 'product_cat',
-      'dq_dims', 'cc_confounders'];
+      'dq_dims', 'dq_filter_pre', 'cc_confounders'];
+    // 映射：collect() 存的 key → 实际 DOM input name（处理命名不一致）
+    const chipNameMap = { 'dims': 'dq_dims', 'filter_pre': 'dq_filter_pre' };
     chipFields.forEach(name => {
       const values = data[name];
       if (Array.isArray(values)) {
         values.forEach(v => {
-          const inp = document.querySelector(`input[name="${name}"][value="${CSS.escape(v)}"]`);
+          let inp = document.querySelector(`input[name="${name}"][value="${CSS.escape(v)}"]`);
+          // 若找不到，尝试映射名（如 data.dims → input[name="dq_dims"]）
+          if (!inp && chipNameMap[name]) {
+            inp = document.querySelector(`input[name="${chipNameMap[name]}"][value="${CSS.escape(v)}"]`);
+          }
           if (inp) {
             inp.checked = true;
             const chip = inp.closest('.chip');
@@ -453,6 +535,31 @@ const FF = (() => {
         });
       }
     });
+    // 额外处理：data.dims 实际对应 DOM name="dq_dims"（collect 存 dims，DOM 用 dq_dims）
+    if (Array.isArray(data.dims) && !document.querySelector('input[name="dims"]')) {
+      data.dims.forEach(v => {
+        const inp = document.querySelector(`input[name="dq_dims"][value="${CSS.escape(v)}"]`);
+        if (inp) {
+          inp.checked = true;
+          const chip = inp.closest('.chip');
+          if (chip) chip.classList.add('checked');
+        }
+      });
+    }
+    // 额外处理：过滤条件预设 chips — 根据 dq_filter 文本内容反向勾选对应 chip
+    if (data.filter && typeof data.filter === 'string') {
+      const filterPresets = ['只看APP', '只看成年人', '只看新用户', '剔除机器人(UNO)'];
+      filterPresets.forEach(preset => {
+        if (data.filter.includes(preset)) {
+          const inp = document.querySelector(`input[name="dq_filter_pre"][value="${CSS.escape(preset)}"]`);
+          if (inp) {
+            inp.checked = true;
+            const chip = inp.closest('.chip');
+            if (chip) chip.classList.add('checked');
+          }
+        }
+      });
+    }
     // goal / desc textarea
     if (data.goal) {
       const goal = document.getElementById('goal') || document.getElementById('fn_goal') ||
@@ -563,11 +670,155 @@ const FF = (() => {
     initCustomChips();
     initCopy();
     initOutputTabs();
+    initRealTimeValidation();
+    initDraftAutoSave();
+    initBackToTop();
     // 检查是否从归档恢复
     setTimeout(() => {
       const record = getRestoreData();
       if (record && record.data) restoreForm(record.data);
     }, 300);
+  }
+
+  /* ---------- 草稿自动保存 ---------- */
+  function initDraftAutoSave() {
+    const form = document.querySelector('form');
+    if (!form) return;
+    const pageKey = 'draft_' + location.pathname.replace(/[^a-z0-9]/gi, '_');
+
+    // 检查是否有草稿（排除归档恢复的情况）
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('restore')) {
+      const saved = localStorage.getItem(pageKey);
+      if (saved) {
+        try {
+          const draft = JSON.parse(saved);
+          const age = Date.now() - (draft._ts || 0);
+          if (age < 7 * 24 * 3600 * 1000) { // 7天内有效
+            const ago = age < 60000 ? '刚刚' : age < 3600000 ? Math.floor(age/60000) + '分钟前' : Math.floor(age/3600000) + '小时前';
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background:#fff8e1;color:#b8860b;padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
+            banner.innerHTML = `⚠️ 检测到未完成的草稿（${ago}保存）<button id="draft-restore" style="padding:5px 14px;border-radius:6px;border:1px solid #b8860b;background:#fff;color:#b8860b;font-size:12px;font-weight:600;cursor:pointer;">恢复填写</button><button id="draft-discard" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--text-3);font-size:12px;cursor:pointer;">放弃草稿</button>`;
+            const wrap = document.querySelector('.form-wrap') || form.parentNode;
+            wrap.insertBefore(banner, wrap.children[2] || wrap.firstChild);
+            document.getElementById('draft-restore').addEventListener('click', () => {
+              restoreForm(draft);
+              banner.remove();
+            });
+            document.getElementById('draft-discard').addEventListener('click', () => {
+              localStorage.removeItem(pageKey);
+              banner.remove();
+            });
+          } else {
+            localStorage.removeItem(pageKey); // 过期清理
+          }
+        } catch(e) { localStorage.removeItem(pageKey); }
+      }
+    }
+
+    // 自动保存：监听表单变化，防抖 2 秒后存 localStorage
+    let saveTimer;
+    const autoSave = () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const data = {};
+        form.querySelectorAll('input, textarea, select').forEach(el => {
+          if (!el.id && !el.name) return;
+          const key = el.id || el.name;
+          if (el.type === 'checkbox' || el.type === 'radio') {
+            if (el.checked) data[key] = el.value;
+          } else if (el.value && el.value.trim()) {
+            data[key] = el.value;
+          }
+        });
+        // 保存选中的 chips
+        form.querySelectorAll('.chip input:checked').forEach(inp => {
+          const name = inp.name;
+          if (!data['_chips_' + name]) data['_chips_' + name] = [];
+          data['_chips_' + name].push(inp.value);
+        });
+        data._ts = Date.now();
+        localStorage.setItem(pageKey, JSON.stringify(data));
+      }, 2000);
+    };
+    form.addEventListener('input', autoSave);
+    form.addEventListener('change', autoSave);
+
+    // 提交成功后清除草稿
+    form.addEventListener('submit', () => {
+      setTimeout(() => localStorage.removeItem(pageKey), 500);
+    });
+  }
+
+  /* ---------- 回到顶部 ---------- */
+  function initBackToTop() {
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.innerHTML = '↑';
+    btn.title = '回到顶部';
+    document.body.appendChild(btn);
+    window.addEventListener('scroll', () => {
+      btn.classList.toggle('show', window.scrollY > 400);
+    });
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  /* ---------- 实时校验 ---------- */
+  function initRealTimeValidation() {
+    // 必填文本/日期/select 字段：blur 时校验
+    document.querySelectorAll('[data-required]').forEach(el => {
+      el.addEventListener('blur', () => validateField(el));
+      el.addEventListener('input', () => {
+        // 输入时如果之前是错误状态，实时清除
+        const field = el.closest('.field') || el.closest('.fcard');
+        if (field && field.classList.contains('error')) {
+          if (el.value && el.value.trim()) {
+            field.classList.remove('error');
+            field.classList.add('valid');
+          }
+        }
+      });
+    });
+
+    // 日期范围校验：开始日期 < 结束日期
+    initDateRangeValidation();
+  }
+
+  function validateField(el) {
+    const field = el.closest('.field') || el.closest('.fcard');
+    if (!field) return;
+    const empty = !el.value || !el.value.trim();
+    field.classList.toggle('error', empty);
+    field.classList.toggle('valid', !empty);
+    // 更新错误提示文字
+    const errMsg = field.querySelector('.err-msg');
+    if (errMsg) errMsg.textContent = empty ? '此项为必填' : '';
+  }
+
+  function initDateRangeValidation() {
+    const startIds = ['date_start', 'cohort_start', 'focus_start'];
+    const endIds = ['date_end', 'cohort_end', 'focus_end'];
+    startIds.forEach((sid, i) => {
+      const startEl = document.getElementById(sid);
+      const endEl = document.getElementById(endIds[i]);
+      if (!startEl || !endEl) return;
+      // 联动：开始日期改变时限制结束日期的 min
+      startEl.addEventListener('change', () => {
+        if (startEl.value) endEl.min = startEl.value;
+        if (endEl.value && startEl.value && endEl.value < startEl.value) {
+          endEl.value = startEl.value;
+        }
+      });
+      // 联动：结束日期改变时限制开始日期的 max
+      endEl.addEventListener('change', () => {
+        if (endEl.value) startEl.max = endEl.value;
+        if (startEl.value && endEl.value && startEl.value > endEl.value) {
+          startEl.value = endEl.value;
+        }
+      });
+    });
   }
 
   /* ---------- Wizard 引导模式 ---------- */
@@ -583,15 +834,23 @@ const FF = (() => {
     steps.forEach((s, i) => {
       const dot = document.createElement('div');
       dot.className = 'wiz-step-dot' + (i === 0 ? ' active' : '');
+      dot.style.cursor = 'pointer';
       dot.innerHTML =
         `<div class="dot">${i + 1}</div>` +
         `<span class="dot-label">${s.title}</span>` +
         (i < steps.length - 1 ? '<div class="line"></div>' : '');
+      dot.addEventListener('click', () => go(i));
       progressWrap.appendChild(dot);
     });
     const form = document.querySelector('form') || document.querySelector('.form-wrap');
     const firstCard = cards[0];
     form.insertBefore(progressWrap, firstCard);
+
+    // 已填写内容回顾面板（插在进度条和卡片之间）
+    const recap = document.createElement('div');
+    recap.className = 'wiz-recap';
+    recap.style.display = 'none';
+    form.insertBefore(recap, firstCard);
 
     // 给每个 fcard 注入问答提示（仅在 guide 模式可见）
     cards.forEach((card, i) => {
@@ -622,6 +881,63 @@ const FF = (() => {
     let current = 0;
     const total = Math.min(cards.length, steps.length);
 
+    // 从一个卡片中提取「已填写」的内容摘要
+    function summarizeCard(card) {
+      const raw = [];
+      // 已勾选的 chips（含自定义）
+      card.querySelectorAll('.chip input:checked').forEach(inp => {
+        const v = (inp.value || '').trim();
+        if (v) raw.push(v);
+      });
+      // 文本 / 数字 / 日期 / 下拉 / textarea（跳过隐藏的镜像 select 和自定义输入框）
+      card.querySelectorAll('input[type=text], input[type=date], input[type=number], textarea, select').forEach(el => {
+        if (el.classList.contains('chip-add-input')) return;
+        if (el.closest('.wiz-recap')) return;
+        if (el.tagName === 'SELECT' && el.offsetParent === null) return; // 隐藏镜像 select
+        const v = (el.value || '').trim();
+        if (v) raw.push(v);
+      });
+      // 去重：完全相同 + 互为子串的只保留较长者
+      const items = [];
+      raw.forEach(v => {
+        if (items.some(x => x === v)) return;            // 完全相同
+        if (items.some(x => x.includes(v))) return;      // v 是已有项子串
+        const subIdx = items.findIndex(x => v.includes(x)); // 已有项是 v 的子串
+        if (subIdx >= 0) { items[subIdx] = v; return; }
+        items.push(v);
+      });
+      return items.map(t => t.length > 40 ? t.slice(0, 40) + '…' : t);
+    }
+
+    function renderRecap() {
+      // 第一步不显示
+      if (current === 0) { recap.style.display = 'none'; return; }
+      const blocks = [];
+      for (let i = 0; i < current; i++) {
+        const card = cards[i];
+        if (!card) continue;
+        const title = (steps[i] && steps[i].title) || `第 ${i + 1} 步`;
+        const items = summarizeCard(card);
+        const inner = items.length
+          ? items.map(t => `<span class="wiz-recap-tag">${esc(t)}</span>`).join('')
+          : `<span class="wiz-recap-empty">（未填）</span>`;
+        blocks.push(
+          `<div class="wiz-recap-row" data-step="${i}">` +
+            `<span class="wiz-recap-step">${i + 1}. ${esc(title)}</span>` +
+            `<span class="wiz-recap-items">${inner}</span>` +
+            `<button type="button" class="wiz-recap-edit" data-step="${i}">修改</button>` +
+          `</div>`
+        );
+      }
+      recap.innerHTML =
+        `<div class="wiz-recap-head">📝 已填写内容</div>` + blocks.join('');
+      recap.style.display = 'block';
+      // 「修改」跳回对应步骤
+      recap.querySelectorAll('.wiz-recap-edit').forEach(btn => {
+        btn.addEventListener('click', () => go(parseInt(btn.dataset.step, 10)));
+      });
+    }
+
     function go(idx) {
       if (idx < 0 || idx >= total) return;
       current = idx;
@@ -633,6 +949,7 @@ const FF = (() => {
       counter.textContent = `${current + 1} / ${total}`;
       btnPrev.disabled = current === 0;
       btnNext.textContent = current === total - 1 ? '✅ 完成并生成' : '下一步 →';
+      renderRecap();
       progressWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
       // 通知回调
       if (steps[current] && steps[current].onEnter) steps[current].onEnter(current);
@@ -643,6 +960,26 @@ const FF = (() => {
         const submitBtn = form.querySelector('[type=submit]');
         if (submitBtn) submitBtn.click();
       } else {
+        // 校验当前步骤的必填项
+        const currentCard = cards[current];
+        let stepOk = true;
+        if (currentCard) {
+          currentCard.querySelectorAll('[data-required]').forEach(el => {
+            const empty = !el.value || !el.value.trim();
+            const field = el.closest('.field') || el.closest('.fcard');
+            if (field) {
+              field.classList.toggle('error', empty);
+              field.classList.toggle('valid', !empty);
+            }
+            if (empty) stepOk = false;
+          });
+        }
+        if (!stepOk) {
+          // 滚动到第一个错误字段
+          const firstErr = currentCard.querySelector('.field.error');
+          if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return; // 阻止跳转
+        }
         go(current + 1);
       }
     });
@@ -662,7 +999,7 @@ const FF = (() => {
 
   return {
     init, initDynamic, collectRows, clearContainer, getCheckedChips, validate,
-    renderArtifacts, val, esc, nonEmpty,
+    renderArtifacts, val, esc, nonEmpty, showToast,
     initSegToggle, addCustomChip, parseCsvHeader, wireChip, initWizard,
     getArchives, saveArchive, deleteArchive, getRestoreData, restoreForm,
   };

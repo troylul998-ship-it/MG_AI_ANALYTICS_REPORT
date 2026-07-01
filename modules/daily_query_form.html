@@ -1,9 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日常取数工作台 · AI 数据分析平台</title>
+  <title>日常取数 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/daily_query_form.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="../assets/style.css" as="style">
+  <link rel="preload" href="../assets/form.css" as="style">
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/form.css">
 </head>
@@ -11,7 +17,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="logo">📊</div>
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
     <h1>AI 数据分析平台</h1>
     <span class="sub">日常取数工作台</span>
     <nav><a href="../index.html">← 返回工作台</a></nav>
@@ -40,6 +46,10 @@
     <div class="fcard">
       <h3><span class="n">1</span> 基本信息</h3>
       <div class="field">
+        <label>需求人 <span class="help">选填，谁提的需求</span></label>
+        <input type="text" id="owner" placeholder="如：张三、运营组">
+      </div>
+      <div class="field">
         <label>产品 <span class="req">*</span></label>
         <div class="chips" id="chips-product-dq">
           <label class="chip"><input type="radio" name="product_dq" value="P10">P10</label>
@@ -66,19 +76,61 @@
           <input type="date" id="date_end">
         </div>
       </div>
+      <div class="date-shortcuts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        <button type="button" class="date-quick" data-range="7">近7天</button>
+        <button type="button" class="date-quick" data-range="14">近14天</button>
+        <button type="button" class="date-quick" data-range="30">近30天</button>
+        <button type="button" class="date-quick" data-range="month">本月</button>
+        <button type="button" class="date-quick" data-range="lastmonth">上月</button>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>🔍 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="dq_global_search_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="dq-search-status">未启用</span>
+        </div>
+        <div id="dq-search-input-wrap" style="display:none;">
+          <input type="text" id="dq_search_keywords" placeholder="输入关键词或 Confluence 链接，如：三方支付、广告eCPM、https://confluence.mattel163.cn/..." style="width:100%;">
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">AI 生成 SQL 前会先查阅 Confluence 中与该关键词/链接相关的所有文档，确保口径准确。</p>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>📊 看板口径 <span class="help">选填，启用后 DAU 计算将使用看板标准口径（含成年人、APP端等过滤条件）</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="dq_dashboard_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="dq-dashboard-status">未启用</span>
+        </div>
+        <div id="dq-dashboard-desc" style="display:none;">
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，DAU 和广告收入将严格遵循看板口径：DAU 需 is_adult=1 + UPPER(client)='APP'（UNO 额外剔除机器人）；广告收入统一用活跃表 advalue_sum_1d 字段（UNO2 无分类型）。</p>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>🔬 SQL 自检 <span class="help">选填，启用后 AI 会在生成 SQL 前先通过 omnieye 实际运行验证查询</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="dq_sql_verify_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="dq-sql-verify-status">未启用</span>
+        </div>
+        <div id="dq-sql-verify-desc" style="display:none;">
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，AI 会通过 omnieye 平台实际执行自检 SQL 查询：① 验证字段是否存在及枚举格式 ② 检查跨表 JOIN 字段名是否一致 ③ 确认过滤字段写法。所有自检结果确认无误后才输出最终 SQL。</p>
+        </div>
+      </div>
     </div>
 
-    <!-- 2 需求描述 -->
+    <!-- 2 需求描述 + 维度 -->
     <div class="fcard">
       <h3><span class="n">2</span> 你想取什么数据？</h3>
       <div class="field">
         <label>需求描述 <span class="req">*</span></label>
-        <textarea id="query_desc" data-required rows="4" placeholder="用白话写，如：&#10;• 帮我拉 P10 最近 7 天分平台的 DAU 和付费人数&#10;• 我要 UNO2 上周每天的广告收入，分 RV 和 INT&#10;• 取 SKB 新用户 D7 留存率，分渠道"></textarea>
-        <div class="err-msg">必填</div>
-      </div>
-      <div class="field">
-        <label>常用取数场景 <span class="help">点选快速填充</span></label>
-        <div class="chips" id="chips-dq-presets">
+        <div class="chips" id="chips-dq-presets" style="margin-bottom:10px;">
           <label class="chip"><input type="radio" name="dq_preset" value="分平台 DAU 和付费人数">DAU+付费人数</label>
           <label class="chip"><input type="radio" name="dq_preset" value="每日广告收入，分 RV/INT">广告收入</label>
           <label class="chip"><input type="radio" name="dq_preset" value="新用户 D1/D3/D7/D14/D30 留存率">留存率</label>
@@ -86,29 +138,79 @@
           <label class="chip"><input type="radio" name="dq_preset" value="3PP 转移比例趋势">3PP转移</label>
           <label class="chip"><input type="radio" name="dq_preset" value="">自定义 ↑</label>
         </div>
+        <textarea id="query_desc" data-required rows="4" placeholder="用白话写，如：&#10;• 帮我拉 P10 最近 7 天分平台的 DAU 和付费人数&#10;• 我要 UNO2 上周每天的广告收入，分 RV 和 INT&#10;• 取 SKB 新用户 D7 留存率，分渠道"></textarea>
+        <div class="err-msg">必填</div>
       </div>
-    </div>
 
-    <!-- 3 补充（选填） -->
-    <div class="fcard">
-      <h3><span class="n">3</span> 补充信息 <span class="help" style="font-weight:400">选填</span></h3>
+      <hr style="border:none;border-top:1px dashed var(--border);margin:20px 0;">
+
       <div class="field">
-        <label>输出维度 <span class="help">希望按什么拆分</span></label>
+        <label>输出维度 <span class="help">希望按什么拆分，没有就跳过</span></label>
         <div class="chips" id="chips-dq-dims" data-custom="dq_dims">
-          <label class="chip"><input type="checkbox" name="dq_dims" value="platform">设备平台</label>
-          <label class="chip"><input type="checkbox" name="dq_dims" value="date">按天</label>
-          <label class="chip"><input type="checkbox" name="dq_dims" value="channel">渠道</label>
-          <label class="chip"><input type="checkbox" name="dq_dims" value="reg_days">注册天数</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="date">分天</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="platform">平台</label>
           <label class="chip"><input type="checkbox" name="dq_dims" value="country">国家</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="area_type">US&T地区</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="area_group">US&Group地区</label>
+          <label class="chip"><input type="checkbox" name="dq_dims" value="reg_days">注册天数</label>
         </div>
       </div>
       <div class="field">
         <label>额外过滤条件 <span class="help">选填</span></label>
+        <div class="chips" id="chips-dq-filter-presets" style="margin-bottom:8px;">
+          <label class="chip"><input type="checkbox" name="dq_filter_pre" value="只看APP">只看APP</label>
+          <label class="chip"><input type="checkbox" name="dq_filter_pre" value="只看成年人">只看成年人</label>
+          <label class="chip"><input type="checkbox" name="dq_filter_pre" value="只看新用户">只看新用户</label>
+          <label class="chip"><input type="checkbox" name="dq_filter_pre" value="剔除机器人(UNO)">剔除机器人(UNO)</label>
+        </div>
         <input type="text" id="dq_filter" placeholder="如：只看 APP 端、只看新用户、排除内部账号">
       </div>
+    </div>
+
+    <!-- 3 数据源 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 数据源 <span class="help" style="font-weight:400">选填</span></h3>
+
       <div class="field">
-        <label>历史 SQL 参考 <span class="help">选填，有类似 SQL 可贴这里</span></label>
-        <textarea id="dq_sql_ref" rows="3" placeholder="粘贴历史 SQL，AI 会参考其中的表名和字段" style="font-family:monospace;font-size:12px;"></textarea>
+        <label>📊 数据列 <span class="help">已根据前面选择自动生成，可手动增删</span></label>
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:10px;">定义每列含义，AI 据此处理数据。也可拖入 CSV 文件或粘贴表头一行自动识别列名。</p>
+        <div class="csv-detect">
+          <div class="csv-drop" id="dq-csv-drop">📎 点击选择 CSV 文件，或把文件拖到这里 —— <b>自动识别列名</b></div>
+          <input type="text" id="dq-csv-paste" placeholder="或粘贴表头一行后回车" style="flex:0 0 220px;">
+        </div>
+        <div id="dq-map-rows"></div>
+        <button type="button" class="btn-add" id="dq-add-map">+ 添加列映射</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+
+      <div class="field">
+        <label>📋 埋点 / 日志参考 <span class="help">选填，提供后 SQL 会引用真实表和字段</span></label>
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:10px;">填写相关埋点名、Confluence 文档链接、可获取的指标，AI 生成 SQL 时会参考这些真实口径。</p>
+        <div class="chips" id="chips-dq-log-presets" style="margin-bottom:10px;">
+          <label class="chip"><input type="checkbox" name="dq_log_pre" value="active">活跃日志</label>
+          <label class="chip"><input type="checkbox" name="dq_log_pre" value="pay">付费日志</label>
+          <label class="chip"><input type="checkbox" name="dq_log_pre" value="ad">广告日志</label>
+          <label class="chip"><input type="checkbox" name="dq_log_pre" value="login">登录日志</label>
+          <label class="chip"><input type="checkbox" name="dq_log_pre" value="retain">留存日志</label>
+        </div>
+        <div id="dq-log-ref-rows"></div>
+        <button type="button" class="btn-add" id="dq-add-log-ref">+ 添加埋点参考</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;">
+
+      <div class="field">
+        <label>📝 历史 SQL 参考 <span class="help">选填，有类似指标的历史 SQL 可贴在这里</span></label>
+        <p style="font-size:12px;color:var(--text-3);margin-bottom:10px;">AI 会参考历史 SQL 文档中的表名、字段名、JOIN 逻辑和过滤条件来编写新 SQL。</p>
+        <div class="chips" id="chips-dq-sql-presets" style="margin-bottom:10px;">
+          <label class="chip"><input type="checkbox" name="dq_sql_pre" value="dau">DAU 取数</label>
+          <label class="chip"><input type="checkbox" name="dq_sql_pre" value="revenue">付费收入</label>
+          <label class="chip"><input type="checkbox" name="dq_sql_pre" value="retention">留存率</label>
+          <label class="chip"><input type="checkbox" name="dq_sql_pre" value="ad_rev">广告收入</label>
+        </div>
+        <div id="dq-sql-ref-rows"></div>
+        <button type="button" class="btn-add" id="dq-add-sql-ref">+ 添加历史 SQL</button>
       </div>
     </div>
 
@@ -125,7 +227,7 @@
 
 </div>
 
-<script src="../assets/form-framework.js"></script>
-<script src="../assets/modules/daily_query.js"></script>
+<script src="../assets/form-framework.js" defer></script>
+<script src="../assets/modules/daily_query.js" defer></script>
 </body>
 </html>

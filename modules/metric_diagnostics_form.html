@@ -1,14 +1,20 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>指标诊断 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/metric_diagnostics_form.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="../assets/style.css" as="style">
+  <link rel="preload" href="../assets/form.css" as="style">
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/form.css">
 </head>
 <body class="mode-guide">
-<header class="topbar"><div class="topbar-inner"><div class="logo">📊</div><h1>AI 数据分析平台</h1><span class="sub">指标诊断</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
+<header class="topbar"><div class="topbar-inner"><div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div><h1>AI 数据分析平台</h1><span class="sub">指标诊断</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
 <div class="form-wrap">
   <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>🩺 指标诊断</h2><p>诊断指标为何变化：定位变动、量化驱动因素、区分混合效应与段内变动。</p></div>
   <div class="mode-switch">
@@ -40,7 +46,7 @@
   </form>
   <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
 </div>
-<script src="../assets/form-framework.js"></script>
+<script src="../assets/form-framework.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   FF.init();

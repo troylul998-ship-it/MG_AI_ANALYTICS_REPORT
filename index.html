@@ -1,9 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 数据分析平台 · 工作台</title>
+  <title>工作台 · AI 数据分析平台</title>
+  <meta name="description" content="AI 数据分析平台 — 需求录入→生成SQL→出报告→推飞书，全程AI辅助。覆盖日常取数、付费分析、AB实验、漏斗、留存LTV等8大分析场景。">
+  <meta property="og:title" content="AI 数据分析平台 · 工作台">
+  <meta property="og:description" content="把重复的分析，变成标准化 AI 流程。8大分析模块，全程AI辅助。">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/index.html">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="assets/style.css" as="style">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -11,66 +20,82 @@
 <!-- 顶栏 -->
 <header class="topbar">
   <div class="topbar-inner">
-    <div class="logo">📊</div>
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
     <h1>AI 数据分析平台</h1>
     <span class="sub">Mobile Growth · 变现 & 三方支付</span>
+    <div style="flex:1;"></div>
     <nav>
       <a href="#modules">分析模块</a>
       <a href="#flow">工作流程</a>
       <a href="#kb">知识库</a>
     </nav>
+    <div style="position:relative;margin-left:16px;">
+      <input type="text" id="site-search" placeholder="🔍 搜索..." style="width:160px;padding:7px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f7f8fa;outline:none;transition:all .2s;" onfocus="this.style.width='260px';this.style.borderColor='var(--brand-1)';this.style.background='#fff'" onblur="setTimeout(()=>{if(!this.value){this.style.width='160px';this.style.borderColor='var(--border)';this.style.background='#f7f8fa'}},200)">
+      <div id="search-dropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:6px;width:380px;max-height:420px;overflow-y:auto;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;padding:8px 0;"></div>
+    </div>
   </div>
 </header>
 
 <div class="container">
 
+  <!-- 前置工具 -->
+  <section style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#fff4ec;border:1px solid #ffd8a8;border-radius:var(--radius);padding:14px 22px;">
+      <span style="font-size:13px;font-weight:600;color:var(--text-1);">🔧 前置工具安装</span>
+      <span style="font-size:12px;color:var(--text-3);">使用前需安装以下 AI 工具，点击直接跳转安装页</span>
+      <a href="https://ai-hub.mattel163.com/knowledge/article/10" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--text-1);text-decoration:none;transition:all .2s;">📘 飞书 Lark CLI</a>
+      <a href="https://ai-hub.mattel163.com/knowledge/article/9" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--text-1);text-decoration:none;transition:all .2s;">📗 Confluence AI</a>
+      <a href="https://ai-hub.mattel163.com/knowledge/article/11" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--text-1);text-decoration:none;transition:all .2s;">📊 Omnieye MCP</a>
+      <a href="https://kiro.dev/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--text-1);text-decoration:none;transition:all .2s;">⚡ Kiro IDE</a>
+    </div>
+  </section>
+
   <!-- Hero + 双模式 -->
   <section class="hero">
-    <h2>把重复的分析工作，变成标准化的 AI 流程</h2>
+    <h2>把重复的分析，变成标准化 AI 流程</h2>
     <p>
-      从飞书需求到飞书报告卡片，全流程 AI 辅助：自动转录需求、生成 SQL、产出可交互 HTML 报告、
-      回写飞书文档与卡片。既服务专业数据分析师，也让运营小白能独立完成分析。
+      需求录入 → 生成 SQL → 出报告 → 推飞书，全程 AI 辅助。专业分析师提速，运营小白也能独立完成。
     </p>
     <div class="modes">
       <div class="mode-card">
-        <h4>🧭 引导模式（新手推荐）</h4>
-        <p>用白话描述你想解决的问题，系统帮你整理分析方案、生成 SQL，并输出分析思路框架（为什么这么做、怎么看结果、怎么做决策）。</p>
+        <h4>🧭 引导模式</h4>
+        <p>用白话描述问题，系统帮你整理方案、生成 SQL、给出分析思路。新手推荐。</p>
       </div>
       <div class="mode-card">
-        <h4>⚡ 快速模式（熟手）</h4>
-        <p>直接填写技术参数：分析指标、数据表、日期范围、CSV 列映射等。跳过引导，最快拿到 SQL 与分析契约。</p>
+        <h4>⚡ 快速模式</h4>
+        <p>直接填指标、数据表、日期范围，跳过引导，最快拿到 SQL。</p>
       </div>
     </div>
   </section>
 
   <!-- 工作流程条 -->
   <section class="flow" id="flow">
-    <h3>🔁 标准工作流程（精简后 4 个人工节点）</h3>
+    <h3>🔁 标准流程</h3>
     <div class="flow-steps">
       <div class="flow-step">
         <div class="num">1</div>
-        <div class="label">需求录入</div>
-        <div class="who">飞书自动预填 / 手填表单</div>
+        <div class="label">录入需求</div>
+        <div class="who">飞书预填 / 手填</div>
       </div>
       <div class="flow-step">
         <div class="num">2</div>
-        <div class="label">生成 SQL + 分析契约</div>
-        <div class="who">AI 自动产出</div>
+        <div class="label">生成 SQL</div>
+        <div class="who">AI 产出</div>
       </div>
       <div class="flow-step">
         <div class="num">3</div>
-        <div class="label">跑数回传 CSV</div>
-        <div class="who">你执行 SQL</div>
+        <div class="label">跑数回传</div>
+        <div class="who">你执行</div>
       </div>
       <div class="flow-step">
         <div class="num">4</div>
-        <div class="label">生成 HTML 报告</div>
-        <div class="who">AI 出图 + 结论</div>
+        <div class="label">出报告</div>
+        <div class="who">AI 出图</div>
       </div>
       <div class="flow-step">
         <div class="num">5</div>
-        <div class="label">确认 → 飞书交付</div>
-        <div class="who">文档 + 卡片推送</div>
+        <div class="label">推飞书</div>
+        <div class="who">文档 + 卡片</div>
       </div>
     </div>
   </section>
@@ -79,7 +104,7 @@
   <section id="modules">
     <div class="section-head">
       <h3>分析模块</h3>
-      <span class="desc">选择一个分析场景，填表生成 SQL 与分析契约</span>
+      <span class="desc">选场景，填表，出 SQL 与分析契约</span>
     </div>
 
     <div class="grid">
@@ -87,8 +112,8 @@
       <a class="module-card" href="modules/daily_query_form.html">
         <span class="badge badge-ready">可用</span>
         <div class="icon">🛠️</div>
-        <h4>日常取数工作台</h4>
-        <p>普通取数 SQL：选表、描述需求，快速产出可执行 SQL，不套完整报告骨架。日常高频场景。</p>
+        <h4>日常取数</h4>
+        <p>选表、描述需求，快速出可执行 SQL，不套报告骨架。</p>
         <div class="meta"><span class="tag">高频</span><span class="tag-muted tag">轻量</span></div>
       </a>
 
@@ -96,7 +121,7 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">💰</div>
         <h4>付费 / 收入分析</h4>
-        <p>IAP / 3PP 内嵌 / 3PP 主站渠道收入、ARPU、付费率、渠道转移比例与付费漏斗分析。</p>
+        <p>渠道收入、ARPU、付费率、3PP 转移与付费漏斗。</p>
         <div class="meta"><span class="tag-blue tag">核心域</span><span class="tag">变现+3PP</span></div>
       </a>
 
@@ -104,7 +129,7 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">🧪</div>
         <h4>AB 实验分析</h4>
-        <p>实验组 vs 对照组指标对比、显著性检验、DID 基线校正，输出实验结论与建议。</p>
+        <p>实验组 vs 对照组对比、显著性检验、DID 校正。</p>
         <div class="meta"><span class="tag-blue tag">实验</span></div>
       </a>
 
@@ -112,7 +137,7 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">🌪️</div>
         <h4>漏斗转化分析</h4>
-        <p>定义漏斗步骤、分组下钻维度，计算整体/步骤转化率、跳失率与漏斗耗时。</p>
+        <p>定义漏斗步骤，算整体/步骤转化率、跳失率、耗时。</p>
         <div class="meta"><span class="tag-blue tag">转化</span></div>
       </a>
 
@@ -120,7 +145,7 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">📈</div>
         <h4>留存 & LTV 分析</h4>
-        <p>Cohort 分组、留存节点（D1~D60）、LTV 计算方法与时间窗口，支持版本/渠道对比。</p>
+        <p>Cohort 分组、留存节点、LTV 计算，支持版本/渠道对比。</p>
         <div class="meta"><span class="tag-blue tag">生命周期</span></div>
       </a>
 
@@ -128,15 +153,15 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">👥</div>
         <h4>用户分群画像</h4>
-        <p>按行为/付费/设备等维度划分人群，对比各群体规模、特征与价值贡献。</p>
+        <p>按行为/付费/设备分群，对比规模、特征、价值。</p>
         <div class="meta"><span class="tag-blue tag">人群</span></div>
       </a>
 
       <a class="module-card" href="modules/causal_chain_form.html">
         <span class="badge badge-ready">可用</span>
         <div class="icon">🔗</div>
-        <h4>因果链验证分析</h4>
-        <p>定义因果链路、中介变量、混淆因素，逐环节验证因果关系（Treatment→Mediator→Outcome）。</p>
+        <h4>因果链验证</h4>
+        <p>定义因果链路与中介变量，逐环节验证因果关系。</p>
         <div class="meta"><span class="tag-amber tag">进阶</span></div>
       </a>
 
@@ -144,37 +169,45 @@
         <span class="badge badge-ready">可用</span>
         <div class="icon">🩺</div>
         <h4>指标诊断</h4>
-        <p>诊断指标为何变化：定位变动、量化驱动因素、区分混合效应与段内变动，产出归因结论。</p>
+        <p>定位指标变动、量化驱动因素、产出归因结论。</p>
         <div class="meta"><span class="tag-amber tag">归因</span></div>
+      </a>
+
+      <a class="module-card" href="modules/daily_report_form.html">
+        <span class="badge badge-ready">可用</span>
+        <div class="icon">📊</div>
+        <h4>日报/周报分析</h4>
+        <p>OmniEye 提数 → CSV 整理 → AI 分析 → 飞书文档 → 卡片推送，全流程自动化。</p>
+        <div class="meta"><span class="tag">自动化</span><span class="tag-blue tag">日报</span></div>
       </a>
 
     </div>
   </section>
 
-  <!-- 知识库占位 -->
+  <!-- 知识库 -->
   <section id="kb" style="margin-top:40px;">
     <div class="section-head">
-      <h3>分析知识库</h3>
-      <span class="desc">数据口径、表结构、分析方法论（后续接入飞书 / Confluence）</span>
+      <h3>知识库</h3>
+      <span class="desc">口径、表结构、方法论</span>
     </div>
     <div class="grid">
       <a class="module-card" href="dictionary.html">
         <span class="badge badge-ready">可用</span>
         <div class="icon">📚</div>
         <h4>数据口径字典</h4>
-        <p>各产品表名、字段、埋点逻辑与口径差异（UNO/P10/SKB/UNO2）+ 广告/三方指标定义。</p>
+        <p>各产品表名、字段、口径差异 + 广告/三方指标定义。</p>
       </a>
-      <div class="module-card">
-        <span class="badge badge-soon">规划中</span>
+      <a class="module-card" href="methodology.html">
+        <span class="badge badge-ready">可用</span>
         <div class="icon">🧠</div>
         <h4>分析方法论</h4>
-        <p>5 大分析技能：数据质量、指标诊断、KPI 设计、可视化、报告构建。</p>
-      </div>
+        <p>付费/广告根因定位、分析工作流、数据质量、KPI、可视化与报告。</p>
+      </a>
       <a class="module-card" href="archive.html">
         <span class="badge badge-ready">可用</span>
         <div class="icon">🗂️</div>
         <h4>历史报告归档</h4>
-        <p>已保存的分析记录与产物，点击可回看完整信息。</p>
+        <p>已保存的分析记录与产物，点击回看。</p>
       </a>
     </div>
   </section>
@@ -184,6 +217,83 @@
 <footer class="footer">
   AI 数据分析平台 · 内部工具 · 仅供 Mobile Growth 团队使用
 </footer>
+
+<script>
+// 全站搜索
+(function(){
+  const SEARCH_INDEX = [
+    { title: '日常取数', desc: '选产品、描述需求、快速出 SQL', url: 'modules/daily_query_form.html', tags: 'DAU 付费 广告 留存 SQL 取数 查询' },
+    { title: '付费/收入分析', desc: '渠道收入、ARPU、3PP转移与付费漏斗', url: 'modules/revenue_analysis_form.html', tags: '收入 ARPU 付费率 3PP 转移 渠道 付费 revenue' },
+    { title: 'AB 实验分析', desc: '实验组 vs 对照组、DID 校正', url: 'modules/ab_test_form.html', tags: 'AB 实验 对照 DID 显著性 p值 ABtest 实验组 对照组' },
+    { title: '留存/LTV 分析', desc: 'D1~D180 留存率、IAA LTV', url: 'modules/retention_ltv_form.html', tags: '留存 retention LTV D7 D30 新增 生命周期' },
+    { title: '漏斗分析', desc: '转化漏斗、各步骤转化率', url: 'modules/funnel_analysis_form.html', tags: '漏斗 转化率 步骤 funnel 转化' },
+    { title: '用户分群画像', desc: '按行为/付费/设备分群，对比规模、特征、价值', url: 'modules/user_segmentation_form.html', tags: '分群 画像 用户 细分 segmentation 人群' },
+    { title: '因果链验证', desc: '定义因果链路与中介变量，逐环节验证因果关系', url: 'modules/causal_chain_form.html', tags: '因果 归因 causal 中介变量 验证' },
+    { title: '指标诊断', desc: '定位指标变动、量化驱动因素、产出归因结论', url: 'modules/metric_diagnostics_form.html', tags: '诊断 归因 指标 异动 下降 上升 波动' },
+    { title: '日报/周报分析', desc: 'OmniEye提数→CSV整理→AI分析→飞书文档→卡片推送，全流程自动化', url: 'modules/daily_report_form.html', tags: '日报 周报 daily report 推送 飞书 卡片 OmniEye 变现 自动化 IAA 收入 eCPM ARPU' },
+    { title: '数据口径字典', desc: '表结构、字段、指标口径汇总', url: 'dictionary.html', tags: '字典 字段 口径 表 advalue payment been_reg_days 三方 广告 eCPM' },
+    { title: '数据口径字典 - UNO', desc: 'UNO (MN01) 活跃表全字段', url: 'dictionary.html#p-uno', tags: 'UNO MN01 role_id match gold diamond' },
+    { title: '数据口径字典 - P10', desc: 'P10 (MN02) 活跃表全字段', url: 'dictionary.html#p-p10', tags: 'P10 MN02 account_id pve pvp chapter wild skip' },
+    { title: '数据口径字典 - SKB', desc: 'SKB (MN04) 活跃表全字段', url: 'dictionary.html#p-skb', tags: 'SKB MN04 pve pvp advalue no_ads ticket' },
+    { title: '数据口径字典 - UNO2', desc: 'UNO2 (MN08) 活跃表全字段', url: 'dictionary.html#p-uno2', tags: 'UNO2 MN08 route pve coin diamond' },
+    { title: '广告变现指标', desc: 'eCPM、Freq、ARPU、LTV 公式', url: 'dictionary.html#p-ad', tags: '广告 eCPM Freq ARPU LTV RV INT Banner advalue 变现' },
+    { title: '三方支付指标', desc: '转移比例、漏斗、SDK、RM埋点', url: 'dictionary.html#p-3pp', tags: '三方 3PP 转移 omni_server_payment pay_channel RM remember 二选一 弹窗' },
+    { title: '常用SQL模板', desc: 'LTV、漏斗、UNION等SQL模板', url: 'dictionary.html#p-sql', tags: 'SQL 模板 CTE UNION LTV 漏斗' },
+    { title: '常用过滤条件', desc: 'APP端、双端、新用户、地区分组', url: 'dictionary.html#p-filters', tags: '过滤 APP platform country area_type area_group been_reg_days 注册天数' },
+    { title: 'SQL处理逻辑', desc: '类型转换、时间函数、JSON处理', url: 'dictionary.html#p-logic', tags: 'SQL cast date_diff json split substr CASE' },
+    { title: '广告取数案例', desc: '16个实战SQL需求归档', url: 'dictionary.html#p-ad-cases', tags: '案例 广告 需求 实战' },
+    { title: '分析方法论', desc: '分析框架、归因逻辑、报告模板', url: 'methodology.html', tags: '方法论 框架 归因 报告 模板 分析' },
+    { title: '方法论 - 付费根因定位', desc: '付费收入波动的系统化根因定位方法', url: 'methodology.html#m-pay', tags: '付费 收入 根因 波动 拆解 ARPU 付费率 客单价 诊断' },
+    { title: '方法论 - 广告漏斗分析', desc: 'IAA 全链路漏斗：加载→播放→转化', url: 'methodology.html#m-ad', tags: '广告 漏斗 IAA eCPM Freq 加载 播放 变现 RV INT' },
+    { title: '方法论 - 辛普森悖论 & AB实验', desc: '数据分析避坑：辛普森悖论、AB 实验设计', url: 'methodology.html#m-simpson', tags: '辛普森 悖论 AB 实验 ABtest 对照组 实验组 显著性 p值 样本量 分流' },
+    { title: '方法论 - 数据质量评估', desc: '评估数据集是否可信、分析是否可靠', url: 'methodology.html#m-quality', tags: '数据质量 可信 缺失 异常值 校验 QA' },
+    { title: '方法论 - 分析工作流', desc: '标准化分析流程：活动类与复杂探索类', url: 'methodology.html#m-flow', tags: '工作流 流程 埋点 复用 追溯 活动分析' },
+    { title: '方法论 - AI 探索助手', desc: '非数分职能的 AI 数据分析探索助手规范', url: 'methodology.html#m-assist', tags: 'AI 助手 探索 运营 产品 对话 引导 小白' },
+    { title: '方法论 - KPI 设计 & 市场估算', desc: 'KPI 框架、目标设定、TAM/SAM/SOM', url: 'methodology.html#m-kpi', tags: 'KPI 目标 TAM SAM SOM 市场 估算 北极星' },
+    { title: '方法论 - 数据可视化', desc: '图表选择、可视化设计与 QA', url: 'methodology.html#m-viz', tags: '可视化 图表 折线图 柱状图 散点图 热力图 dashboard' },
+    { title: '方法论 - 分析报告 & 仪表盘', desc: '构建分析报告、仪表盘和业务分析', url: 'methodology.html#m-report', tags: '报告 仪表盘 dashboard 汇报 PPT 结论 建议' },
+    { title: '方法论 - 指标诊断 & KPI报告', desc: '诊断指标变更、生成KPI更新报告', url: 'methodology.html#m-diag', tags: '诊断 指标 KPI 异动 归因 变化 报告' },
+    { title: '历史归档', desc: '历史分析报告归档', url: 'archive.html', tags: '归档 历史 报告' },
+  ];
+
+  const input = document.getElementById('site-search');
+  const dropdown = document.getElementById('search-dropdown');
+  if (!input || !dropdown) return;
+
+  input.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { dropdown.style.display = 'none'; return; }
+    const results = SEARCH_INDEX.filter(item => {
+      const text = (item.title + ' ' + item.desc + ' ' + item.tags).toLowerCase();
+      return q.split(/\s+/).every(word => text.includes(word));
+    });
+    if (!results.length) {
+      dropdown.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-3);font-size:13px;">未找到相关内容</div>';
+    } else {
+      dropdown.innerHTML = results.map(r =>
+        `<a href="${r.url}${r.url.includes('#') ? '&' : '#'}search=${encodeURIComponent(q)}" style="display:block;padding:10px 16px;text-decoration:none;border-bottom:1px solid #f0f0f0;transition:background .1s;" onmouseover="this.style.background='#fff5f0'" onmouseout="this.style.background='transparent'">
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);">${highlight(r.title, q)}</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px;">${highlight(r.desc, q)}</div>
+        </a>`
+      ).join('');
+    }
+    dropdown.style.display = 'block';
+  });
+
+  input.addEventListener('blur', () => { setTimeout(() => dropdown.style.display = 'none', 200); });
+  input.addEventListener('focus', () => { if (input.value.trim()) input.dispatchEvent(new Event('input')); });
+
+  function highlight(text, q) {
+    const words = q.split(/\s+/).filter(Boolean);
+    let result = text;
+    words.forEach(w => {
+      const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      result = result.replace(re, '<mark style="background:#ffe0b2;padding:0 1px;border-radius:2px;">$1</mark>');
+    });
+    return result;
+  }
+})();
+</script>
 
 </body>
 </html>
