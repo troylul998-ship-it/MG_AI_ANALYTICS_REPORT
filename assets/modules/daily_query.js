@@ -575,6 +575,7 @@ function buildPrompt(d) {
     L.push(`   使用 MCP 工具 \`sql_query\` 执行自检 SQL，执行参数：`);
     L.push(`   - project：\`${verifyProject}\``);
     L.push('   - sql：下方各 Step 中的自检 SQL 语句');
+    L.push('   - ⚠️ **超时规则：单个自检语句超过 1 分钟没有返回结果，则视为运行失败，直接换一种自检 SQL 语句或跳过该步骤继续下一步。不要无限等待。**');
     L.push('');
     L.push('   **Step 1：字段存在性验证（严格 — 最关键步骤）**');
     L.push('   对所有涉及的表，执行 `SELECT * FROM 表名 WHERE date=\'最近一天\' LIMIT 5`（禁止使用 SHOW COLUMNS FROM），从返回结果的 columns 列名列表中**逐一核对**你 SQL 中用到的每个字段是否真实存在。');
