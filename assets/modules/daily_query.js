@@ -365,65 +365,80 @@ function buildPrompt(d) {
   // ═══════════════════════════════════════════════════════════
   L.push('# 1. 角色与目标');
   L.push('');
-  L.push('你是资深数据分析师，精通 Presto/Trino SQL。');
-  L.push('任务：基于下方需求，输出一段可直接执行的取数 SQL。');
+  L.push('你是资深数据分析师，精通 Presto/Trino。请基于以下需求编写一段可直接执行的取数 SQL。');
   L.push('');
 
   // ═══════════════════════════════════════════════════════════
-  // # 2. 知识来源与优先级
+  // # 2. 知识来源（必须执行的前置步骤）
   // ═══════════════════════════════════════════════════════════
-  L.push('# 2. 知识来源与优先级');
-  L.push('');
-  L.push('生成 SQL 时，字段名、表名、过滤条件的权威来源按以下优先级从高到低排列（冲突时以高优先级为准）：');
-  L.push('');
-  if (d.dashboard_mode && d.global_search) {
-    L.push('1. 看板口径（本 Prompt 第 3 节提供）');
-    L.push('2. Confluence 搜索结果（本 Prompt 第 2.1 节指定的关键词）');
-    L.push('3. 数据口径字典：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
-    L.push('4. 埋点文档 / 历史 SQL（本 Prompt 第 3 节提供）');
-    L.push('5. 模型自身知识（最低优先级，仅在上述来源均无覆盖时使用）');
-  } else if (d.dashboard_mode) {
-    L.push('1. 看板口径（本 Prompt 第 3 节提供）');
-    L.push('2. 数据口径字典：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
-    L.push('3. 埋点文档 / 历史 SQL（本 Prompt 第 3 节提供）');
-    L.push('4. 模型自身知识（最低优先级）');
-  } else if (d.global_search) {
-    L.push('1. Confluence 搜索结果（本 Prompt 第 2.1 节指定的关键词）');
-    L.push('2. 数据口径字典：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
-    L.push('3. 埋点文档 / 历史 SQL（本 Prompt 第 3 节提供）');
-    L.push('4. 模型自身知识（最低优先级）');
-  } else {
-    L.push('1. 数据口径字典：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
-    L.push('2. 埋点文档 / 历史 SQL（本 Prompt 第 3 节提供）');
-    L.push('3. 模型自身知识（最低优先级）');
-  }
+  L.push('# 2. 知识来源（必须执行的前置步骤）');
   L.push('');
 
-  // 2.1 全局搜索前置任务（条件）
+  // 2.1 全局搜索
   if (d.global_search) {
-    L.push('## 2.1 前置任务：Confluence 搜索（必须执行）');
+    L.push('## 2.1 前置任务：全局搜索【必须执行】');
     L.push('');
-    L.push('[必须执行] 这是一个实际操作步骤，不是参考建议。编写 SQL 之前，你必须使用 MCP 工具在 Confluence（https://confluence.mattel163.cn）中搜索以下内容，浏览所有相关文档，提取表名、字段名、过滤条件、指标口径：');
+    L.push('> **编写 SQL 之前，必须先执行以下搜索任务，将搜索结果作为写 SQL 的背景知识。**');
+    L.push('');
+    L.push('请在 Confluence（https://confluence.mattel163.cn）中搜索以下关键词或访问以下链接，浏览所有相关文档的完整内容：');
     L.push('');
     L.push('```');
     L.push(d.global_search);
     L.push('```');
     L.push('');
-    L.push('执行要求：');
-    L.push('1. 搜索并浏览所有相关 Confluence 文档页面');
-    L.push('2. 从中提取与本次取数相关的表名、字段名、过滤条件');
-    L.push('3. 搜索到的信息作为编写 SQL 的权威参考');
+    L.push('要求：');
+    L.push('1. 搜索并浏览与上述关键词/链接相关的所有 Confluence 文档页面');
+    L.push('2. 从中提取与本次取数相关的表名、字段名、过滤条件、指标口径');
+    L.push('3. 将搜索到的信息作为编写 SQL 的权威参考，优先级高于你的已有知识');
+    L.push('4. 如果搜索到的口径与数据口径字典有冲突，以搜索结果为准');
     L.push('');
   }
 
   // 2.2 数据口径字典
-  L.push('## 2.2 数据口径字典（必须执行）');
+  L.push('## 2.2 数据口径字典【必须参考】');
   L.push('');
-  L.push('[必须执行] 这是一个实际操作步骤。编写 SQL 前，你必须访问并阅读以下字典页面的全部内容，从中获取真实的表名、字段名、过滤条件和指标公式。严禁跳过此步骤直接编写 SQL。');
+  L.push('> **编写 SQL 前，必须先阅读以下数据口径字典页面的全部内容，严格遵循其中定义的表名、字段名、过滤条件和指标公式。不得自行编造任何字段或过滤逻辑。**');
   L.push('');
-  L.push('字典地址：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
+  L.push('📖 字典地址：https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/dictionary.html');
   L.push('');
-  L.push('字典涵盖：各产品数据源总览、核心字段定义、常用过滤条件标准写法、生命周期分段、付费分层、广告类型、地区分组维度、广告变现指标公式、三方支付指标口径。');
+  L.push('字典涵盖：');
+  L.push('- 各产品数据源总览（表名、主键、广告收入字段）');
+  L.push('- 各产品核心字段定义（UNO/P10/SKB/UNO2）');
+  L.push('- 常用过滤条件标准写法（APP端、双端、新用户、成年人）');
+  L.push('- 生命周期分段（LT7/LT30/LT60/LT90/LT180）');
+  L.push('- 付费分层定义（pay_activity_type 0~7）');
+  L.push('- 广告类型（RV/INT/Banner）');
+  L.push('- 地区分组维度（T地区、Group地区 完整 CASE WHEN）');
+  L.push('- 广告变现指标公式（eCPM/Freq/ARPU/LTV）');
+  L.push('- 三方支付指标口径');
+  L.push('');
+
+  // 2.3 知识来源优先级
+  L.push('## 2.3 知识来源优先级');
+  L.push('');
+  L.push('生成 SQL 时，字段名、表名、过滤条件的权威来源按以下优先级从高到低：');
+  L.push('');
+  if (d.dashboard_mode && d.global_search) {
+    L.push('1. 看板口径（本 Prompt 第 3 节提供）');
+    L.push('2. Confluence 搜索结果（第 2.1 节）');
+    L.push('3. 数据口径字典（第 2.2 节）');
+    L.push('4. 埋点文档 / 历史 SQL（第 3 节）');
+    L.push('5. 模型自身知识（最低优先级，仅在上述来源均无覆盖时使用）');
+  } else if (d.dashboard_mode) {
+    L.push('1. 看板口径（本 Prompt 第 3 节提供）');
+    L.push('2. 数据口径字典（第 2.2 节）');
+    L.push('3. 埋点文档 / 历史 SQL（第 3 节）');
+    L.push('4. 模型自身知识（最低优先级）');
+  } else if (d.global_search) {
+    L.push('1. Confluence 搜索结果（第 2.1 节）');
+    L.push('2. 数据口径字典（第 2.2 节）');
+    L.push('3. 埋点文档 / 历史 SQL（第 3 节）');
+    L.push('4. 模型自身知识（最低优先级）');
+  } else {
+    L.push('1. 数据口径字典（第 2.2 节）');
+    L.push('2. 埋点文档 / 历史 SQL（第 3 节）');
+    L.push('3. 模型自身知识（最低优先级）');
+  }
   L.push('');
 
   // ═══════════════════════════════════════════════════════════
@@ -432,38 +447,33 @@ function buildPrompt(d) {
   L.push('# 3. 数据源与 Schema');
   L.push('');
 
-  // 3.1 主表信息
+  // 3.1 主表
   L.push('## 3.1 主表');
   L.push('');
-  L.push('| 属性 | 值 |');
-  L.push('|------|-----|');
-  L.push(`| 产品 | ${d.product} |`);
-  L.push(`| 活跃/主表 | \`${meta.active_table || '（请确认）'}\` |`);
-  L.push(`| 用户主键 | \`${meta.uid || '（请确认）'}\` |`);
-  L.push(`| 引擎 | Presto/Trino |`);
-  L.push(`| 时间范围 | ${d.date_range[0] || '不限'} ~ ${d.date_range[1] || '不限'} |`);
+  L.push(`- 产品：${d.product}`);
+  L.push(`- 活跃/主表：${meta.active_table || '（请确认）'}`);
+  L.push(`- 用户主键：${meta.uid || '（请确认）'}`);
+  L.push('- 引擎：Presto/Trino；客户端 UPPER(client)=\'APP\'；平台 UPPER(platform) IN (\'IOS\',\'ANDROID\')');
+  if (meta.note) L.push(`- ⚠️ ${meta.note}`);
+  if (d.date_range[0] || d.date_range[1]) L.push(`- 时间范围：${d.date_range[0] || '不限'} ~ ${d.date_range[1] || '不限'}`);
   L.push('');
-  if (meta.note) {
-    L.push(`> 注意：${meta.note}`);
-    L.push('');
-  }
 
   // 3.2 看板口径（条件）
   if (d.dashboard_mode) {
-    L.push('## 3.2 看板口径');
+    L.push('## 3.2 看板口径【必须参考】');
     L.push('');
-    L.push('[必须] 用户已启用看板口径模式，以下 DAU 和广告收入的计算口径为强制要求。');
+    L.push('> **重要：用户已启用看板口径模式。以下 DAU 和广告收入的计算口径为强制要求，必须严格遵循，不得自行修改表名或过滤条件。**');
     L.push('');
-    L.push('| 产品 | 活跃表 | DAU 过滤条件 | 总广告收入字段 | RV 收入字段 | INT 收入字段 |');
-    L.push('|------|--------|-------------|--------------|------------|-------------|');
-    L.push('| UNO | dm_mn01_player_active_info | is_adult=1 + client=APP + 剔除机器人 | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
-    L.push('| P10 | dm_mn02_player_active_info | is_adult=1 + client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
-    L.push('| SKB | dm_mn04_sdk_player_active_info | is_adult=1 + client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
-    L.push('| UNO2 | dm_mn08_player_active_info | is_adult=1 + client=APP | advalue_sum_1d | 明细表按adtype | 明细表按adtype |');
+    L.push('### 各产品看板口径汇总');
     L.push('');
-
-    // DAU SQL 示例
-    L.push('### DAU SQL 参考');
+    L.push('| 产品 | 活跃表 | DAU过滤条件 | 总广告收入 | RV收入 | INT收入 |');
+    L.push('|------|--------|------------|-----------|--------|---------|');
+    L.push('| UNO | dw_ods_mn01.dm_mn01_player_active_info | is_adult=1 AND client=APP AND 剔除机器人 | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| P10 | dw_ods_common_mn02.dm_mn02_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| SKB | dw_ods_common_mn04.dm_mn04_sdk_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | advalue_reward_sum_1d | advalue_interstitial_sum_1d |');
+    L.push('| UNO2 | dw_ods_mn08.dm_mn08_player_active_info | is_adult=1 AND client=APP | advalue_sum_1d | 明细表计算 | 明细表计算 |');
+    L.push('');
+    L.push('### 看板 DAU SQL 参考');
     L.push('');
     if (d.product === 'UNO' || d.product === 'ALL') {
       L.push('**UNO:**');
@@ -505,37 +515,36 @@ function buildPrompt(d) {
     }
     L.push('');
     L.push('### 广告收入取法');
-    L.push('- 总广告收入统一用活跃表 `advalue_sum_1d`');
-    L.push('- 分类型：RV = `advalue_reward_sum_1d`，INT = `advalue_interstitial_sum_1d`');
-    L.push('- UNO2 分类型需从 `dw_ods_mn08.c_client_app_ad_log` (log_subtype=advalue) 按 adtype 分组，安卓需 /1000000');
+    L.push('- 总广告收入统一用活跃表 `advalue_sum_1d` 字段');
+    L.push('- 分广告类型：RV 用 `advalue_reward_sum_1d`，INT 用 `advalue_interstitial_sum_1d`');
+    L.push('- UNO2 总收入用 `advalue_sum_1d`；分类型需从 `dw_ods_mn08.c_client_app_ad_log` (log_subtype=advalue) 按 adtype 分组计算，安卓需 /1000000');
     L.push('');
   }
 
   // 3.3 埋点/日志参考（条件）
   if (d.log_refs && d.log_refs.length) {
-    L.push('## 3.3 埋点 / 日志参考');
+    L.push('## 3.3 埋点 / 日志参考【必须参考】');
     L.push('');
-    L.push('[必须] 编写 SQL 时优先参考以下埋点文档中的表名、字段名和口径定义。');
+    L.push('> **重要：编写 SQL 时必须优先参考以下埋点文档中的表名、字段名和口径定义，严禁自行猜测字段。**');
     L.push('');
-    L.push('| 埋点名 | 文档链接 | 可获取字段 |');
-    L.push('|--------|----------|-----------|');
     d.log_refs.forEach(r => {
-      L.push(`| ${r.log_name || '-'} | ${r.doc_url || '-'} | ${r.fields || '-'} |`);
+      let line = `- 埋点：${r.log_name}`;
+      if (r.doc_url) line += ` | 文档：${r.doc_url}`;
+      if (r.fields) line += ` | 可获取：${r.fields}`;
+      L.push(line);
     });
     L.push('');
   }
 
   // 3.4 历史 SQL 参考（条件）
   if (d.sql_refs && d.sql_refs.length) {
-    L.push('## 3.4 历史 SQL 参考');
+    L.push('## 3.4 历史 SQL 参考【必须参考】');
     L.push('');
-    L.push('[必须] 以下历史 SQL 经过验证可执行，编写新 SQL 时优先参考其表名、JOIN 逻辑、字段名和过滤条件。');
+    L.push('> **重要：以下历史 SQL 是经过验证可执行的，编写新 SQL 时必须优先参考其中的表名、JOIN 逻辑、字段名和过滤条件，保持口径一致。**');
     L.push('');
     d.sql_refs.forEach(r => {
       if (r.sql_label) L.push(`### ${r.sql_label}`);
-      L.push('```sql');
-      L.push(r.sql_code);
-      L.push('```');
+      L.push('```sql'); L.push(r.sql_code); L.push('```');
     });
     L.push('');
   }
@@ -547,23 +556,6 @@ function buildPrompt(d) {
   L.push('');
   L.push(d.query_desc);
   L.push('');
-  if (d.filter) {
-    let filterText = d.filter;
-    const filterMap = {
-      '只看APP': "UPPER(client) = 'APP'",
-      '只看成年人': 'is_adult = 1',
-      '只看新用户': 'been_reg_days = 1',
-      '剔除机器人(UNO)': "NOT regexp_like(LOWER(account_id), '(ai|fb)\\.163\\.com')",
-    };
-    Object.entries(filterMap).forEach(([k, v]) => {
-      filterText = filterText.replace(k, v);
-    });
-    L.push('**额外过滤条件：**');
-    L.push('```sql');
-    L.push(filterText);
-    L.push('```');
-    L.push('');
-  }
 
   // ═══════════════════════════════════════════════════════════
   // # 5. 输出规格
@@ -573,66 +565,74 @@ function buildPrompt(d) {
 
   if (d.dims.length) {
     L.push('## 输出维度');
-    L.push('');
     d.dims.forEach(dim => L.push(`- ${dim}`));
+    L.push('');
+    // 维度 SQL 片段
+    if (d.dims.includes('area_type')) {
+      L.push('### area_type (T地区) SQL 片段');
+      L.push("```sql");
+      L.push("CASE");
+      L.push("  WHEN UPPER(country) IN ('US') THEN 'US'");
+      L.push("  WHEN UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR') THEN 'T1'");
+      L.push("  WHEN UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR') THEN 'T2'");
+      L.push("  ELSE 'T3'");
+      L.push("END AS area_type");
+      L.push("```");
+      L.push('');
+    }
+    if (d.dims.includes('area_group')) {
+      L.push('### area_group (Group地区) SQL 片段');
+      L.push("```sql");
+      L.push("CASE");
+      L.push("  WHEN country = 'US' THEN 'US'");
+      L.push("  WHEN country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW') THEN 'GroupA'");
+      L.push("  WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB'");
+      L.push("  ELSE 'GroupC'");
+      L.push("END AS area_group");
+      L.push("```");
+      L.push('');
+    }
+    if (d.dims.includes('reg_days')) {
+      L.push('### reg_days (注册天数分段) SQL 片段');
+      L.push("```sql");
+      L.push("CASE");
+      L.push("  WHEN been_reg_days = 1                       THEN 'A:1'");
+      L.push("  WHEN been_reg_days BETWEEN 2   AND 7         THEN 'B:2~7'");
+      L.push("  WHEN been_reg_days BETWEEN 8   AND 15        THEN 'C:8~15'");
+      L.push("  WHEN been_reg_days BETWEEN 16  AND 30        THEN 'D:16~30'");
+      L.push("  WHEN been_reg_days BETWEEN 31  AND 60        THEN 'E:31~60'");
+      L.push("  WHEN been_reg_days BETWEEN 61  AND 90        THEN 'F:61~90'");
+      L.push("  WHEN been_reg_days BETWEEN 91  AND 180       THEN 'G:91~180'");
+      L.push("  WHEN been_reg_days BETWEEN 181 AND 360       THEN 'H:181~360'");
+      L.push("  WHEN been_reg_days >= 361                    THEN 'I:360+'");
+      L.push("  ELSE 'Z:others'");
+      L.push("END AS been_reg_days_type");
+      L.push("```");
+      L.push('');
+    }
+  }
+
+  if (d.filter) {
+    L.push('## 额外过滤');
+    let filterText = d.filter;
+    const filterMap = {
+      '只看APP': "AND UPPER(client) = 'APP'",
+      '只看成年人': 'AND is_adult = 1 -- 剔除未成年',
+      '只看新用户': 'AND been_reg_days = 1 -- 注册天数=1 当日新增',
+      '剔除机器人(UNO)': "AND NOT regexp_like(LOWER(account_id), '(ai|fb)\\.163\\.com') -- 仅UNO产品生效",
+    };
+    Object.entries(filterMap).forEach(([k, v]) => {
+      filterText = filterText.replace(k, v);
+    });
+    L.push(filterText);
     L.push('');
   }
 
   if (d.column_map && d.column_map.length) {
-    L.push('## 输出列定义');
-    L.push('');
+    L.push('## 数据列定义');
     L.push('| 列名 | 含义 | 类型 |');
     L.push('|------|------|------|');
     d.column_map.forEach(c => L.push(`| ${c.col_name} | ${c.col_desc} | ${c.col_type} |`));
-    L.push('');
-  }
-
-  L.push('## 命名规范');
-  L.push('- 列名使用英文蛇形命名（snake_case）');
-  L.push('- 每个 CTE 加简短注释说明其作用');
-  L.push('');
-
-  // 维度 SQL 片段（放在输出规格下，作为参考代码）
-  if (d.dims.includes('area_type')) {
-    L.push('## area_type (T地区) 参考片段');
-    L.push('```sql');
-    L.push("CASE");
-    L.push("  WHEN UPPER(country) IN ('US') THEN 'US'");
-    L.push("  WHEN UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR') THEN 'T1'");
-    L.push("  WHEN UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR') THEN 'T2'");
-    L.push("  ELSE 'T3'");
-    L.push("END AS area_type");
-    L.push('```');
-    L.push('');
-  }
-  if (d.dims.includes('area_group')) {
-    L.push('## area_group (Group地区) 参考片段');
-    L.push('```sql');
-    L.push("CASE");
-    L.push("  WHEN country = 'US' THEN 'US'");
-    L.push("  WHEN country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW') THEN 'GroupA'");
-    L.push("  WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB'");
-    L.push("  ELSE 'GroupC'");
-    L.push("END AS area_group");
-    L.push('```');
-    L.push('');
-  }
-  if (d.dims.includes('reg_days')) {
-    L.push('## reg_days (注册天数分段) 参考片段');
-    L.push('```sql');
-    L.push("CASE");
-    L.push("  WHEN been_reg_days = 1                       THEN 'A:1'");
-    L.push("  WHEN been_reg_days BETWEEN 2   AND 7         THEN 'B:2~7'");
-    L.push("  WHEN been_reg_days BETWEEN 8   AND 15        THEN 'C:8~15'");
-    L.push("  WHEN been_reg_days BETWEEN 16  AND 30        THEN 'D:16~30'");
-    L.push("  WHEN been_reg_days BETWEEN 31  AND 60        THEN 'E:31~60'");
-    L.push("  WHEN been_reg_days BETWEEN 61  AND 90        THEN 'F:61~90'");
-    L.push("  WHEN been_reg_days BETWEEN 91  AND 180       THEN 'G:91~180'");
-    L.push("  WHEN been_reg_days BETWEEN 181 AND 360       THEN 'H:181~360'");
-    L.push("  WHEN been_reg_days >= 361                    THEN 'I:360+'");
-    L.push("  ELSE 'Z:others'");
-    L.push("END AS been_reg_days_type");
-    L.push('```');
     L.push('');
   }
 
@@ -641,67 +641,88 @@ function buildPrompt(d) {
   // ═══════════════════════════════════════════════════════════
   L.push('# 6. 生成规则');
   L.push('');
-  L.push('[必须] 从数据口径字典获取真实表名、字段名、过滤条件和指标公式，不得自行编造任何字段或过滤逻辑');
-  L.push('[必须] 优先参考本 Prompt 提供的埋点文档和历史 SQL，保持口径一致');
-  L.push('[必须] 统计三方相关指标时，优先使用三方中间表（如 `dm_mnXX_player_3pp_payment_info`），避免直接查 `omni_server_payment` 原始表');
-  L.push('[必须] UNO 产品的 account_id 需做 split 处理：`split(account_id, \'@\')[1]`，用于与外部表 JOIN 时必须先 split');
-  L.push('[必须] 默认过滤条件：`UPPER(client) = \'APP\'`，`UPPER(platform) IN (\'IOS\', \'ANDROID\')`');
-  L.push('[建议] 复杂查询使用 CTE 分层，每层职责单一');
-  L.push('[禁止] 不得在输出中解读数据结果或添加分析结论，本 Prompt 职责仅为生成 SQL');
+  L.push('1. **必须先阅读数据口径字典页面**，从中获取真实表名、字段名、过滤条件和指标公式，不得自行编造');
+  L.push('2. **必须优先参考上方提供的埋点文档和历史 SQL**，保持口径一致');
+  L.push('3. **统计三方相关指标时，能用三方中间表的尽量用三方中间表**（如 `dm_mnXX_player_3pp_payment_info`），避免直接查 `omni_server_payment` 原始表。中间表每天刷新，字段包含 `third_payment_sum_1d`、`third_ingame_payment_sum_1d`、`third_web_payment_sum_1d` 等，可直接获取三方总收入/内嵌收入/主站收入');
+  L.push('4. **UNO 产品的 account_id 需要做 split 处理**：`split(account_id, \'@\')[1] AS account_id`。UNO 原始 account_id 格式为 `xxx@yyy`，取 `@` 后面部分才是真实 account_id，用于与三方中间表等外部表 JOIN 时必须先 split');
+  L.push('5. 输出可直接执行的完整 SQL');
+  L.push('6. 列名用英文蛇形命名');
+  L.push('7. 加简短注释说明每个 CTE 的作用');
   L.push('');
 
   // ═══════════════════════════════════════════════════════════
-  // # 7. 自检流程（条件）
+  // # 7. 交付与自检流程
   // ═══════════════════════════════════════════════════════════
   if (d.sql_verify_mode) {
-    L.push('# 7. 自检流程（必须执行）');
+    L.push('# 7. 交付与自检流程');
     L.push('');
-    L.push('[必须执行] 这是实际操作步骤，不是可选建议。在输出最终 SQL 之前，你必须使用 MCP 工具 `sql_query` 逐步执行以下自检查询，每一步都必须实际运行 SQL 并根据返回结果判断。严禁跳过自检直接输出 SQL。');
+    L.push('## 第一步：先输出初版 SQL');
     L.push('');
-    L.push('**执行参数：**');
+    L.push('根据上述需求和规则，**先生成并输出一版完整可执行的 SQL**，告诉用户：');
+    L.push('');
+    L.push('> 以上是根据需求生成的初版 SQL，你可以先去 Omnieye 运行试试。');
+    L.push('> 如果运行报错或者对结果有疑问/不置信，请把报错信息或查询结果发给我，我会启动 SQL 自检流程帮你排查和修正。');
+    L.push('> ⚠️ 提示：SQL 自检需要逐步验证字段、枚举值和 JOIN 逻辑，可能需要较长时间（3-5 分钟）。');
+    L.push('');
+    L.push('## 第二步：用户反馈后启动自检');
+    L.push('');
+    L.push('当用户反馈报错信息或表示对结果不置信时，**必须执行以下完整自检流程**，使用 Omnieye 的 MCP 工具 `sql_query` 逐一执行自检 SQL 查询，确认无误后输出修正版最终 SQL。');
+    L.push('');
+    L.push('**自检执行方式：**');
+    L.push(`使用 MCP 工具 \`sql_query\` 执行自检 SQL，执行参数：`);
     L.push(`- project：\`${verifyProject}\``);
-    L.push('- 超时规则：单个自检语句超过 1 分钟未返回 → 视为失败，换写法或跳过该条，不要无限等待');
+    L.push('- sql：下方各 Step 中的自检 SQL 语句');
+    L.push('- ⚠️ **超时规则：单个自检语句超过 1 分钟没有返回结果，则视为运行失败，直接换一种自检 SQL 语句或跳过该步骤继续下一步。不要无限等待。**');
     L.push('');
 
     // Step 1
-    L.push('## Step 1：字段存在性验证');
+    L.push('## Step 1：字段存在性验证（严格 — 最关键步骤）');
     L.push('');
-    L.push('- **执行：** 对所有涉及的表运行 `SELECT * FROM 表名 WHERE date=\'最近一天\' LIMIT 5`');
-    L.push('- **判断标准：** 返回结果的列名列表中，SQL 中用到的每个字段都存在');
-    L.push('- **不通过时处理：**');
-    L.push('  1. 确认需求确实需要该字段');
-    L.push('  2. 依次查找同产品其他表（omni_server_login / c_client_app_ad_log / dm_mnXX_player_info）');
-    L.push('  3. 找到后确认 JOIN 字段，在最终 SQL 中通过 JOIN 补充');
+    L.push('对所有涉及的表，执行 `SELECT * FROM 表名 WHERE date=\'最近一天\' LIMIT 5`（禁止使用 SHOW COLUMNS FROM），从返回结果的 columns 列名列表中**逐一核对**你 SQL 中用到的每个字段是否真实存在。');
     L.push('');
-    L.push('> 注意：不同产品活跃表字段差异很大（如 SKB 有 os_ver 但 UNO2 没有），不要假设表结构一致。');
+    L.push('- 如果某个字段在返回结果的列名中不存在，**严禁在最终 SQL 中使用该字段**');
+    L.push('- **字段不存在时的处理流程（必须执行）**：');
+    L.push('  1. 先确认需求中确实需要该字段（如 os_ver、device_model 用于过滤）');
+    L.push('  2. 尝试在同产品的其他表中查找该字段：依次对登录表（omni_server_login）、广告明细表（c_client_app_ad_log）、全量用户表（dm_mnXX_player_info）等执行 `SELECT * FROM 其他表 WHERE date=\'最近一天\' LIMIT 5`');
+    L.push('  3. 找到包含目标字段的表后，确认该表与主表之间的 JOIN 字段（如 account_id、role_id）');
+    L.push('  4. 在最终 SQL 中通过 JOIN 补充缺失字段，而不是凭印象假设字段存在');
+    L.push('- **特别注意**：不同产品的活跃表字段差异很大（如 SKB 有 os_ver 但 UNO2 没有，UNO 有 device_model 但 UNO2 活跃表没有），绝对不要假设所有表结构一致');
+    L.push('- **典型案例**：UNO2 活跃表 dm_mn08_player_active_info 不含 os_ver/device_model 字段，需从 omni_server_login（字段名为 os）或 c_client_app_ad_log（字段名为 os）中获取');
     L.push('');
 
     // Step 2
     L.push('## Step 2：字段枚举值/格式检查');
     L.push('');
-    L.push('- **执行：** 对 WHERE / CASE WHEN 中涉及比较的字段运行：');
-    L.push('  ```sql');
-    L.push('  SELECT 字段名, COUNT(1) AS cnt');
-    L.push('  FROM 表名');
-    L.push(`  WHERE date BETWEEN '${d.date_range[0] || '开始日期'}' AND '${d.date_range[1] || '结束日期'}'`);
-    L.push('  GROUP BY 字段名');
-    L.push('  ORDER BY cnt DESC');
-    L.push('  ```');
-    L.push('- **判断标准：** 实际枚举值与 SQL 过滤写法一致（大小写、格式、前缀）');
-    L.push('- **不通过时处理：** 根据实际枚举值调整过滤条件；对数量极少的异常值评估是否需排除');
+    L.push('对 WHERE 条件或 CASE WHEN 中涉及比较判断的字段，执行以下查询检查所有枚举值及其分布：');
+    L.push('');
+    L.push('```sql');
+    L.push('SELECT 字段名, COUNT(1) AS cnt');
+    L.push('FROM 表名');
+    L.push(`WHERE date BETWEEN '${d.date_range[0] || '指定开始日期'}' AND '${d.date_range[1] || '指定结束日期'}'`);
+    L.push('GROUP BY 字段名');
+    L.push('ORDER BY cnt DESC');
+    L.push('```');
+    L.push('');
+    L.push('通过 COUNT 分布可以发现脏数据（如数量极少的异常枚举值），确认实际枚举值是否符合 SQL 中的过滤写法。例如：');
+    L.push('- os/os_ver 字段格式是纯数字 `"13"` 还是带前缀 `"android 13"`？是否有异常值？');
+    L.push('- platform 是大写 `"IOS"` 还是混合 `"iOS"`？是否有脏数据如空值或非法值？');
+    L.push('- adtype 是 `"banner"` 还是 `"Banner"`？是否存在多种大小写混用？');
+    L.push('- client 是 `"APP"` 还是 `"app"`？是否有其他异常值？');
+    L.push('根据实际枚举值及其数量分布调整 SQL 中的过滤条件写法，对数量极少的异常枚举值考虑是否需要排除。');
     L.push('');
 
     // Step 3
     L.push('## Step 3：JOIN 字段一致性验证');
     L.push('');
-    L.push('- **执行：** 对 JOIN 的两张表分别运行 `SELECT DISTINCT 用户字段 FROM 表名 WHERE date=\'某天\' LIMIT 5`');
-    L.push('- **判断标准：**');
-    L.push('  - 字段名一致（account_id vs sdk_account_id？）');
-    L.push('  - 值格式一致（有无前缀/后缀？）');
-    L.push('  - 粒度匹配（是否需要先聚合？）');
-    L.push('- **不通过时处理：** 用正确字段名关联，必要时先做 DISTINCT/聚合');
+    L.push('当需要多表 JOIN 时（特别是 Step 1 中因字段不存在而需要补表的情况），分别对两张表执行 `SELECT DISTINCT 用户字段 FROM 表名 WHERE date=\'某天\' LIMIT 5`，确认：');
     L.push('');
-    L.push('常见 JOIN 映射：');
+    L.push('- 两侧 JOIN 字段名是否相同（如一边叫 `account_id`，另一边可能叫 `sdk_account_id`）');
+    L.push('- 字段值格式是否一致（如一边有前缀/后缀，另一边是纯 ID）');
+    L.push('- 两侧数据粒度是否匹配（如登录表一天可能有多条记录，需要先做 DISTINCT 或聚合）');
+    L.push('');
+    L.push('如果字段名不同，需要用正确的字段名做关联（如 `a.account_id = b.sdk_account_id`）。');
+    L.push('');
+    L.push('**常见 JOIN 映射参考**：');
     L.push('- 活跃表 role_id ↔ 广告表 role_id（UNO2 可直接关联）');
     L.push('- 活跃表 account_id ↔ 登录表 account_id');
     L.push('- 活跃表 role_id ↔ 广告表 sdk_account_id（需确认具体产品）');
@@ -710,12 +731,17 @@ function buildPrompt(d) {
     // Step 4
     L.push('## Step 4：输出自检结论');
     L.push('');
-    L.push('所有自检完成后，在最终 SQL 之前输出结论摘要，格式：');
+    L.push('所有自检完成后，在最终 SQL 之前列出简要结论，格式如：');
     L.push('```');
     L.push('自检结论：');
-    L.push('✅/❌ <表名>.<字段> — <状态说明>');
+    L.push('❌ dm_mn08_player_active_info 不存在 os_ver/device_model 字段');
+    L.push('✅ 已改用 omni_server_login 表获取 os + device_model 字段，通过 account_id + date JOIN 活跃表');
+    L.push('✅ omni_server_login.os 格式为纯数字/版本号（安卓 "10"/"15"，iOS "26.5"/"18.6.2"）');
+    L.push('✅ c_client_app_ad_log 存在 role_id 字段，可直接与活跃表 role_id JOIN');
+    L.push('✅ platform 字段值为大写（"IOS", "ANDROID"）');
+    L.push('✅ device_model 格式：三星为 "samsung SM-xxx"，iPhone 为 "iPhone17,2"');
     L.push('```');
-    L.push('如果发现字段不存在，必须说明：发现了什么 → 从哪张表找到替代 → 如何 JOIN 补充。');
+    L.push('如果自检发现字段不存在等问题，必须说明：发现了什么 → 从哪张表找到替代 → 如何 JOIN 补充。');
     L.push('');
   }
 
@@ -725,8 +751,14 @@ function buildPrompt(d) {
   L.push(`# ${d.sql_verify_mode ? '8' : '7'}. 输出格式`);
   L.push('');
   if (d.sql_verify_mode) {
+    L.push('**首次输出（第一步）：**');
+    L.push('1. 初版 SQL（带 CTE 注释，可直接执行）');
+    L.push('2. 询问用户是否需要自检（见第 7 节话术）');
+    L.push('');
+    L.push('**自检后输出（第二步，用户反馈后）：**');
     L.push('1. 自检结论摘要（Step 4 格式）');
-    L.push('2. 最终 SQL（带 CTE 注释，可直接执行）');
+    L.push('2. 修正后的最终 SQL（带 CTE 注释，可直接执行）');
+    L.push('3. 说明相比初版 SQL 修改了什么');
   } else {
     L.push('1. 最终 SQL（带 CTE 注释，可直接执行）');
   }
@@ -736,6 +768,7 @@ function buildPrompt(d) {
 
   return L.join('\n');
 }
+
 
 function buildAnalysisTemplate(d) {
   const L = [];
