@@ -52,11 +52,11 @@
       <div class="field">
         <label>产品 <span class="req">*</span></label>
         <div class="chips" id="chips-product-dq">
-          <label class="chip"><input type="radio" name="product_dq" value="P10">P10</label>
-          <label class="chip"><input type="radio" name="product_dq" value="SKB">SKB</label>
-          <label class="chip"><input type="radio" name="product_dq" value="UNO">UNO</label>
-          <label class="chip"><input type="radio" name="product_dq" value="UNO2">UNO2</label>
-          <label class="chip"><input type="radio" name="product_dq" value="ALL">全部</label>
+          <label class="chip"><input type="checkbox" name="product_dq" value="P10">P10</label>
+          <label class="chip"><input type="checkbox" name="product_dq" value="SKB">SKB</label>
+          <label class="chip"><input type="checkbox" name="product_dq" value="UNO">UNO</label>
+          <label class="chip"><input type="checkbox" name="product_dq" value="UNO2">UNO2</label>
+          <label class="chip"><input type="checkbox" name="product_dq" value="ALL">全部</label>
         </div>
         <select id="product" data-required style="display:none;">
           <option value="">请选择</option>
@@ -111,7 +111,7 @@
         </div>
       </div>
       <div class="field" style="margin-top:16px;">
-        <label>🔬 SQL 自检 <span class="help">选填，启用后 AI 会在生成 SQL 前先通过 omnieye 实际运行验证查询</span></label>
+        <label>🔬 SQL 自检 <span class="help">选填，启用后 AI 会先给初版 SQL，当你对结果不置信时触发自检</span></label>
         <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
           <label class="toggle-switch">
             <input type="checkbox" id="dq_sql_verify_toggle">
@@ -120,7 +120,7 @@
           <span style="font-size:13px;font-weight:500;" id="dq-sql-verify-status">未启用</span>
         </div>
         <div id="dq-sql-verify-desc" style="display:none;">
-          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后，AI 会通过 omnieye 平台实际执行自检 SQL 查询：① 验证字段是否存在及枚举格式 ② 检查跨表 JOIN 字段名是否一致 ③ 确认过滤字段写法。所有自检结果确认无误后才输出最终 SQL。</p>
+          <p style="font-size:11px;color:var(--text-3);margin-top:4px;">启用后流程：① AI 先快速输出初版 SQL，你直接去 Omnieye 跑 ② 如果报错或对结果有疑问，把报错/结果贴回来 ③ AI 启动完整自检（通过 omnieye MCP 验证字段存在性、枚举值格式、JOIN 字段一致性）→ 输出修正版 SQL。没问题就不用等自检，有问题再触发。</p>
         </div>
       </div>
     </div>
