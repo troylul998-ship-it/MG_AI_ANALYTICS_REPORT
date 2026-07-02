@@ -649,6 +649,239 @@
 <tr><td><code>server_label</code></td><td>array</td><td>服务端标签</td><td>s_player_label最后一组</td></tr>
 <tr><td><code>client_label</code></td><td>array</td><td>客户端标签</td><td>c_client_player_label最后一组</td></tr>
 </table>
+
+<h3>SKB 产品数据表详解</h3>
+<p class="panel-desc">以下为 SKB (MN04) 各明细日志表的核心字段、注意事项和示例 SQL，便于快速取数。</p>
+
+<h4>1. 用户登录信息表 <code>dw_ods_mn04.s_login</code></h4>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户唯一账号ID</td><td>主键</td></tr>
+<tr><td><code>log_time</code></td><td>string</td><td>登录时间戳</td><td>精确到秒</td></tr>
+<tr><td><code>date</code></td><td>string</td><td>登录日期/分区字段</td><td>分区字段，加速查询</td></tr>
+<tr><td><code>is_new</code></td><td>int</td><td>是否新用户</td><td>1=首次登录，0=非首次</td></tr>
+</table>
+<div class="note">⚠️ 注意：date 是分区字段，WHERE 条件必须包含以加速查询；同一用户一天多次登录，统计 DAU 需用 <code>COUNT(DISTINCT account_id)</code> 去重；<code>is_new=1</code> 仅在该用户首次登录记录中出现。</div>
+<pre>-- 示例：统计每日 DAU 和新增用户
+SELECT date,
+       COUNT(DISTINCT account_id) AS dau,
+       COUNT(DISTINCT CASE WHEN is_new = 1 THEN account_id END) AS new_users
+FROM dw_ods_mn04.s_login
+WHERE date BETWEEN '2026-01-01' AND '2026-01-31'
+GROUP BY date
+ORDER BY date</pre>
+
+<h4>2. 事件日志表 <code>dw_ods_mn04.c_event</code></h4>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户账号ID</td><td></td></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区字段</td><td>必须包含在 WHERE 条件中</td></tr>
+<tr><td><code>log_time</code></td><td>string</td><td>事件时间戳</td><td></td></tr>
+<tr><td><code>event_name</code></td><td>string</td><td>事件名称</td><td>日数据量≥10000条保留原值，&lt;10000条统一为'other'</td></tr>
+<tr><td><code>event_type</code></td><td>string</td><td>事件标签</td><td>事件分类标签</td></tr>
+<tr><td><code>original_event_name</code></td><td>string</td><td>原始事件名</td><td>当 event_name='other' 时查此字段获取原始名</td></tr>
+</table>
+<div class="info-note">💡 日数据量 ≥10000 的 event_name 保留原值；&lt;10000 条的统一归为 'other'，需用 <code>original_event_name</code> 查看原始名称。提取 JSON 字段值使用 <code>json_extract_scalar()</code>。</div>
+<pre>-- 示例：查询特定事件的用户参与
+SELECT date, event_name,
+       COUNT(DISTINCT account_id) AS users,
+       COUNT(*) AS events
+FROM dw_ods_mn04.c_event
+WHERE date = '2026-01-15'
+  AND event_name = 'pve_start'
+GROUP BY date, event_name</pre>
+
+<h4>3. 用户活跃信息表 <code>dw_ods_common_mn04.dm_mn04_player_active_info</code></h4>
+<div class="info-note">💡 注意：这是 SKB 的非 SDK 版活跃表。上方已有完整字段列表，以下补充常用分析维度字段。</div>
+<table>
+<tr><th>字段</th><th>类型</th><th>常用分析维度</th></tr>
+<tr><td><code>udid</code></td><td>string</td><td>设备维度去重</td></tr>
+<tr><td><code>platform</code></td><td>string</td><td>iOS/Android 拆分</td></tr>
+<tr><td><code>country</code></td><td>string</td><td>国家维度分析</td></tr>
+<tr><td><code>media_source</code></td><td>string</td><td>渠道归因</td></tr>
+<tr><td><code>label</code></td><td>array</td><td>用户标签分群</td></tr>
+<tr><td><code>f_login_date</code></td><td>string</td><td>注册日期，计算 LT</td></tr>
+<tr><td><code>online_sum_1d</code></td><td>bigint</td><td>当日在线时长(秒)</td></tr>
+<tr><td><code>been_reg_days</code></td><td>bigint</td><td>生命周期天数</td></tr>
+<tr><td><code>login_days</code></td><td>bigint</td><td>累计登录天数</td></tr>
+<tr><td><code>login_days_tag</code></td><td>string</td><td>活跃天数分段标签</td></tr>
+<tr><td><code>payment_sum_1d</code></td><td>double</td><td>当日 IAP 收入</td></tr>
+<tr><td><code>advalue_sum_1d</code></td><td>double</td><td>当日 IAA 收入</td></tr>
+<tr><td><code>advalue_reward_sum_1d</code></td><td>double</td><td>当日 RV 广告收入</td></tr>
+<tr><td><code>advalue_interstitial_sum_1d</code></td><td>double</td><td>当日 INT 广告收入</td></tr>
+<tr><td><code>free_coin_get_sum_1d</code></td><td>bigint</td><td>免费金币产出</td></tr>
+<tr><td><code>free_coin_consume_sum_1d</code></td><td>bigint</td><td>免费金币消耗</td></tr>
+<tr><td><code>paid_coin_get_sum_1d</code></td><td>bigint</td><td>付费金币产出</td></tr>
+<tr><td><code>paid_coin_consume_sum_1d</code></td><td>bigint</td><td>付费金币消耗</td></tr>
+<tr><td><code>max_pve_id</code></td><td>bigint</td><td>关卡进度</td></tr>
+<tr><td><code>pve_cnt_1d</code></td><td>bigint</td><td>当日 PVE 局数</td></tr>
+<tr><td><code>ad_reward_cnt_1d</code></td><td>bigint</td><td>当日 RV 播放次数</td></tr>
+<tr><td><code>ad_interstitial_cnt_1d</code></td><td>bigint</td><td>当日 INT 播放次数</td></tr>
+<tr><td><code>pvp_online_times_1d</code></td><td>bigint</td><td>当日在线 PVP 局数</td></tr>
+<tr><td><code>pvp_offline_times_1d</code></td><td>bigint</td><td>当日离线 PVP 局数</td></tr>
+<tr><td><code>pay_lift_tag</code></td><td>bigint</td><td>付费沉默标签</td></tr>
+<tr><td><code>pay_lift_tag_name</code></td><td>string</td><td>付费沉默标签名称</td></tr>
+</table>
+
+<h4>4. 关卡日志表 <code>dw_ods_mn04.c_pvelog</code></h4>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区</td><td></td></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户ID</td><td></td></tr>
+<tr><td><code>log_time</code></td><td>string</td><td>时间戳</td><td></td></tr>
+<tr><td><code>pve_id</code></td><td>bigint</td><td>关卡ID</td><td>floor((pve_id-10000)/1000) = 章节ID</td></tr>
+<tr><td><code>ticket</code></td><td>bigint</td><td>门票消耗</td><td></td></tr>
+<tr><td><code>end_coin</code></td><td>bigint</td><td>结算金币</td><td></td></tr>
+<tr><td><code>cost_coin</code></td><td>bigint</td><td>消耗金币</td><td></td></tr>
+<tr><td><code>get_coin</code></td><td>bigint</td><td>获得金币</td><td></td></tr>
+<tr><td><code>use_count_2003</code></td><td>bigint</td><td>局前道具：随机skipbo使用数</td><td>item_id=2003</td></tr>
+<tr><td><code>use_count_2008</code></td><td>bigint</td><td>局前道具：龙卷风使用数</td><td>item_id=2008</td></tr>
+<tr><td><code>use_count_2007</code></td><td>bigint</td><td>局前道具：其他道具使用数</td><td>item_id=2007</td></tr>
+<tr><td><code>use_wild_count</code></td><td>bigint</td><td>局内道具：万能牌使用数</td><td></td></tr>
+<tr><td><code>use_withdraw_count</code></td><td>bigint</td><td>局内道具：撤回使用数</td><td></td></tr>
+<tr><td><code>use_cat_count</code></td><td>bigint</td><td>局内道具：猫使用数</td><td></td></tr>
+<tr><td><code>use_count_2006</code></td><td>bigint</td><td>局内道具：2006道具使用数</td><td></td></tr>
+<tr><td><code>use_extracard_count</code></td><td>bigint</td><td>局内道具：额外手牌使用数</td><td></td></tr>
+<tr><td><code>star_num</code></td><td>int</td><td>通关星数</td><td>0=未通关，1~3=通关星级</td></tr>
+<tr><td><code>if_first</code></td><td>int</td><td>是否首次打该关</td><td>1=首次</td></tr>
+<tr><td><code>try_times</code></td><td>bigint</td><td>第几次尝试</td><td>该关卡的尝试序号</td></tr>
+<tr><td><code>use_time</code></td><td>bigint</td><td>通关耗时(秒)</td><td></td></tr>
+</table>
+<pre>-- 示例：关卡胜率分析
+SELECT pve_id,
+       COUNT(*) AS attempts,
+       SUM(CASE WHEN star_num > 0 THEN 1 ELSE 0 END) AS passes,
+       ROUND(SUM(CASE WHEN star_num > 0 THEN 1 ELSE 0 END) * 1.0 / COUNT(*), 4) AS pass_rate,
+       AVG(use_time) AS avg_time
+FROM dw_ods_mn04.c_pvelog
+WHERE date BETWEEN '2026-01-01' AND '2026-01-07'
+GROUP BY pve_id
+ORDER BY pve_id</pre>
+
+<h4>5. 付费表 <code>dw_ods_mn04.s_payment</code></h4>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户ID</td><td></td></tr>
+<tr><td><code>log_time</code></td><td>string</td><td>付费时间戳</td><td></td></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区</td><td></td></tr>
+<tr><td><code>is_fpaid</code></td><td>int</td><td>是否首充</td><td>1=首充</td></tr>
+<tr><td><code>order_id</code></td><td>string</td><td>订单ID</td><td>唯一标识一笔订单</td></tr>
+<tr><td><code>product_id</code></td><td>string</td><td>商店产品ID</td><td>App Store/Google Play 商品标识</td></tr>
+<tr><td><code>recharge_id</code></td><td>bigint</td><td>游戏内商品ID</td><td>用于区分付费来源/类型</td></tr>
+<tr><td><code>pay_status</code></td><td>int</td><td>支付状态</td><td>0=失败，1=成功，2=退单，3=补单</td></tr>
+<tr><td><code>pay_channel</code></td><td>string</td><td>支付渠道</td><td>apple/google/third_party 等</td></tr>
+<tr><td><code>payment</code></td><td>double</td><td>实际支付金额(USD)</td><td></td></tr>
+<tr><td><code>recharge_type</code></td><td>string</td><td>充值类型</td><td></td></tr>
+</table>
+<div class="note">⚠️ 统计付费数据必须筛选 <code>pay_status = 1</code>（成功订单）。关联 <code>c_recharge_popup</code> 可追溯付费来源弹窗。</div>
+<pre>-- 示例：每日付费概览
+SELECT date,
+       COUNT(DISTINCT account_id) AS pay_users,
+       SUM(payment) AS revenue,
+       COUNT(order_id) AS orders,
+       SUM(payment) / NULLIF(COUNT(DISTINCT account_id), 0) AS arppu
+FROM dw_ods_mn04.s_payment
+WHERE date BETWEEN '2026-01-01' AND '2026-01-31'
+  AND pay_status = 1
+GROUP BY date
+ORDER BY date</pre>
+
+<h4>6. 道具产销表 <code>dw_ods_mn04.c_itemlog</code></h4>
+<table>
+<tr><th>字段</th><th>类型</th><th>含义</th><th>说明</th></tr>
+<tr><td><code>account_id</code></td><td>string</td><td>用户ID</td><td></td></tr>
+<tr><td><code>date</code></td><td>string</td><td>日期分区</td><td></td></tr>
+<tr><td><code>item_id</code></td><td>bigint</td><td>道具ID</td><td>1000=免费金币，1001=付费金币等</td></tr>
+<tr><td><code>item_behavior</code></td><td>int</td><td>产销类型</td><td>1=产出，2=消耗</td></tr>
+<tr><td><code>change_num</code></td><td>bigint</td><td>变化数量</td><td></td></tr>
+<tr><td><code>reason</code></td><td>string</td><td>原因</td><td>产出/消耗来源</td></tr>
+<tr><td><code>subreason</code></td><td>string</td><td>子原因</td><td>更细分的来源</td></tr>
+</table>
+<pre>-- 示例：金币产销分析
+SELECT date,
+       SUM(CASE WHEN item_behavior = 1 THEN change_num ELSE 0 END) AS produce,
+       SUM(CASE WHEN item_behavior = 2 THEN ABS(change_num) ELSE 0 END) AS consume
+FROM dw_ods_mn04.c_itemlog
+WHERE date = '2026-01-15'
+  AND item_id = 1000  -- 免费金币
+GROUP BY date</pre>
+
+<h4>7. 广告表</h4>
+<table>
+<tr><th>表名</th><th>用途</th><th>关键筛选</th></tr>
+<tr><td><code>dw_ods_mn04.c_adentrance</code></td><td>广告入口出现</td><td>统计入口曝光</td></tr>
+<tr><td><code>dw_ods_mn04.c_adplay</code></td><td>广告播放</td><td>筛选 <code>status=1</code>（播放成功）</td></tr>
+<tr><td><code>dw_ods_mn04.c_advalue</code></td><td>广告价值（带 siteid）</td><td>安卓 value 需 /1000000</td></tr>
+<tr><td><code>dw_ods_common_mn04.c_advalue</code></td><td>SDK 记录的广告价值</td><td>无 siteid 维度</td></tr>
+</table>
+<div class="info-note">💡 安卓广告 value 需除以 1000000：<code>IF(platform='IOS', value, value/1000000)</code></div>
+
+<p><b>siteid 广告位分类映射：</b></p>
+<pre>CASE
+  WHEN siteid IN ('skipbo_rv_pve_revive','skipbo_rv_pve_pre_buff','skipbo_rv_pve_extra_card',
+                  'skipbo_rv_pve_add_hand','skipbo_rv_pve_reward_double','skipbo_rv_pve_star_chest')
+    THEN 'RV_PVE'
+  WHEN siteid IN ('skipbo_rv_main_lucky_spin','skipbo_rv_main_free_coin','skipbo_rv_main_piggybank')
+    THEN 'RV_Main'
+  WHEN siteid IN ('skipbo_rv_pvp_revive','skipbo_rv_pvp_reward_double')
+    THEN 'RV_PVP'
+  WHEN siteid LIKE '%interstitial%' THEN 'Interstitial'
+  WHEN siteid LIKE '%banner%' THEN 'Banner'
+  ELSE 'Other'
+END AS ad_category</pre>
+
+<h4>8. SQL 语法速查表 (Presto/Trino)</h4>
+<table>
+<tr><th>分类</th><th>语法</th><th>说明</th></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">逻辑判断</td></tr>
+<tr><td>AND / OR / NOT</td><td><code>WHERE a=1 AND (b=2 OR c=3)</code></td><td>组合条件</td></tr>
+<tr><td>IN</td><td><code>WHERE x IN ('a','b','c')</code></td><td>多值匹配</td></tr>
+<tr><td>BETWEEN</td><td><code>WHERE date BETWEEN '2026-01-01' AND '2026-01-31'</code></td><td>范围查询（含两端）</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">比较操作符</td></tr>
+<tr><td>=, &lt;&gt;, &lt;, &gt;, &lt;=, &gt;=</td><td><code>WHERE amount &gt; 0</code></td><td>标准比较</td></tr>
+<tr><td>IS NULL / IS NOT NULL</td><td><code>WHERE x IS NOT NULL</code></td><td>空值判断</td></tr>
+<tr><td>LIKE</td><td><code>WHERE name LIKE '%skip%'</code></td><td>模糊匹配</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">条件表达式</td></tr>
+<tr><td>CASE WHEN</td><td><code>CASE WHEN x&gt;0 THEN 'pos' ELSE 'neg' END</code></td><td>条件分支</td></tr>
+<tr><td>IF</td><td><code>IF(platform='IOS', val, val/1000000)</code></td><td>简单二选一</td></tr>
+<tr><td>COALESCE</td><td><code>COALESCE(a, b, 0)</code></td><td>返回首个非 NULL 值</td></tr>
+<tr><td>NULLIF</td><td><code>NULLIF(cnt, 0)</code></td><td>值相等返回 NULL（防除零）</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">类型转换</td></tr>
+<tr><td>CAST</td><td><code>CAST(x AS BIGINT)</code></td><td>显式类型转换</td></tr>
+<tr><td>TRY_CAST</td><td><code>TRY_CAST(x AS DOUBLE)</code></td><td>失败返回 NULL，不报错</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">字符串函数</td></tr>
+<tr><td>CONCAT</td><td><code>CONCAT(a, '_', b)</code></td><td>字符串拼接</td></tr>
+<tr><td>SUBSTR</td><td><code>SUBSTR(str, 1, 10)</code></td><td>子串截取</td></tr>
+<tr><td>REPLACE</td><td><code>REPLACE(str, 'old', 'new')</code></td><td>字符串替换</td></tr>
+<tr><td>SPLIT</td><td><code>SPLIT(str, ',')[1]</code></td><td>分割取元素</td></tr>
+<tr><td>REGEXP_LIKE</td><td><code>REGEXP_LIKE(str, '^[0-9]+')</code></td><td>正则匹配</td></tr>
+<tr><td>LOWER / UPPER</td><td><code>UPPER(platform)</code></td><td>大小写转换</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">日期时间函数</td></tr>
+<tr><td>DATE_PARSE</td><td><code>DATE_PARSE(str, '%Y-%m-%d %H:%i:%s')</code></td><td>字符串→时间戳</td></tr>
+<tr><td>DATE_FORMAT</td><td><code>DATE_FORMAT(ts, '%Y-%m-%d')</code></td><td>时间戳→字符串</td></tr>
+<tr><td>DATE_DIFF</td><td><code>DATE_DIFF('day', date1, date2)</code></td><td>日期差值</td></tr>
+<tr><td>DATE_ADD</td><td><code>DATE_ADD('day', -7, CURRENT_DATE)</code></td><td>日期加减</td></tr>
+<tr><td>DATE_TRUNC</td><td><code>DATE_TRUNC('week', dt)</code></td><td>截断到周/月</td></tr>
+<tr><td>CURRENT_DATE / NOW()</td><td><code>WHERE date = CAST(CURRENT_DATE AS VARCHAR)</code></td><td>当前日期/时间</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">JSON 函数</td></tr>
+<tr><td>JSON_EXTRACT_SCALAR</td><td><code>JSON_EXTRACT_SCALAR(col, '$.key')</code></td><td>提取 JSON 标量值</td></tr>
+<tr><td>JSON_EXTRACT</td><td><code>JSON_EXTRACT(col, '$.arr[0]')</code></td><td>提取 JSON 对象/数组</td></tr>
+<tr><td>CAST + JSON</td><td><code>CAST(JSON_EXTRACT(col,'$.val') AS BIGINT)</code></td><td>JSON 值转类型</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">聚合函数</td></tr>
+<tr><td>COUNT / COUNT(DISTINCT)</td><td><code>COUNT(DISTINCT account_id)</code></td><td>计数/去重计数</td></tr>
+<tr><td>SUM / AVG</td><td><code>SUM(payment)</code></td><td>求和/平均</td></tr>
+<tr><td>MIN / MAX</td><td><code>MAX(pve_id)</code></td><td>最值</td></tr>
+<tr><td>APPROX_PERCENTILE</td><td><code>APPROX_PERCENTILE(val, 0.5)</code></td><td>近似分位数（中位数）</td></tr>
+<tr><td>ARRAY_AGG</td><td><code>ARRAY_AGG(DISTINCT x)</code></td><td>聚合为数组</td></tr>
+<tr><td>MAP_AGG</td><td><code>MAP_AGG(key, val)</code></td><td>聚合为 Map</td></tr>
+<tr><td colspan="3" style="background:#f0f0f0;font-weight:600;">窗口函数</td></tr>
+<tr><td>ROW_NUMBER</td><td><code>ROW_NUMBER() OVER(PARTITION BY id ORDER BY dt)</code></td><td>行号</td></tr>
+<tr><td>RANK / DENSE_RANK</td><td><code>RANK() OVER(ORDER BY revenue DESC)</code></td><td>排名</td></tr>
+<tr><td>LAG / LEAD</td><td><code>LAG(val, 1) OVER(ORDER BY date)</code></td><td>前/后行取值</td></tr>
+<tr><td>SUM() OVER</td><td><code>SUM(rev) OVER(ORDER BY date ROWS UNBOUNDED PRECEDING)</code></td><td>累计求和</td></tr>
+<tr><td>NTILE</td><td><code>NTILE(4) OVER(ORDER BY payment_sum DESC)</code></td><td>等分分桶</td></tr>
+</table>
+
 </div>
 
 <!-- UNO2 -->

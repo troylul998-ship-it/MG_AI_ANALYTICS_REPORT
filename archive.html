@@ -269,9 +269,15 @@ function showDetail(record) {
     html += `<div class="detail-tab" data-idx="input">📝 输入信息</div>`;
     html += `</div>`;
     record.artifacts.forEach((a, i) => {
-      html += `<pre class="detail-content" data-idx="${i}" style="${i>0?'display:none':''}">${FF.esc(a.content)}</pre>`;
+      html += `<div class="detail-content-wrap" data-idx="${i}" style="position:relative;${i>0?'display:none':''}">`;
+      html += `<button class="copy-btn" onclick="copyContent(this)" style="position:sticky;top:0;float:right;margin:8px 0 -28px;padding:4px 10px;font-size:11px;cursor:pointer;border:1px solid #ddd;border-radius:4px;background:#fff;z-index:2;">📋 复制</button>`;
+      html += `<pre class="detail-content" style="margin:0;">${FF.esc(a.content)}</pre>`;
+      html += `</div>`;
     });
-    html += `<pre class="detail-content" data-idx="input" style="display:none">${FF.esc(JSON.stringify(record.data, null, 2))}</pre>`;
+    html += `<div class="detail-content-wrap" data-idx="input" style="position:relative;display:none;">`;
+    html += `<button class="copy-btn" onclick="copyContent(this)" style="position:sticky;top:0;float:right;margin:8px 0 -28px;padding:4px 10px;font-size:11px;cursor:pointer;border:1px solid #ddd;border-radius:4px;background:#fff;z-index:2;">📋 复制</button>`;
+    html += `<pre class="detail-content" style="margin:0;">${FF.esc(JSON.stringify(record.data, null, 2))}</pre>`;
+    html += `</div>`;
   }
 
   panel.innerHTML = html;
@@ -280,11 +286,21 @@ function showDetail(record) {
   panel.querySelectorAll('.detail-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       panel.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-      panel.querySelectorAll('.detail-content').forEach(c => c.style.display = 'none');
+      panel.querySelectorAll('.detail-content-wrap').forEach(c => c.style.display = 'none');
       tab.classList.add('active');
-      panel.querySelector(`.detail-content[data-idx="${tab.dataset.idx}"]`).style.display = '';
+      panel.querySelector(`.detail-content-wrap[data-idx="${tab.dataset.idx}"]`).style.display = '';
     });
   });
+}
+
+function copyContent(btn) {
+  const pre = btn.parentElement.querySelector('pre');
+  if (pre) {
+    navigator.clipboard.writeText(pre.textContent).then(() => {
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => { btn.textContent = '📋 复制'; }, 2000);
+    });
+  }
 }
 
 function closeDetail() {
