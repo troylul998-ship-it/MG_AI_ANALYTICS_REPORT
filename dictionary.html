@@ -105,6 +105,7 @@
 <div class="sidebar-item" data-panel="p-sql"><span class="icon">📝</span>常用SQL模板</div>
 <div class="sidebar-item" data-panel="p-filters"><span class="icon">🔍</span>常用过滤条件</div>
 <div class="sidebar-item" data-panel="p-sql-logic"><span class="icon">⚙️</span>SQL 处理逻辑</div>
+<div class="sidebar-item" data-panel="p-ad-tiering"><span class="icon">🪜</span>广告分层SQL</div>
 </div>
 </aside>
 
@@ -1582,6 +1583,118 @@ group by 1, 2</pre>
 <tr><td>免费用户判断</td><td><code>t2.l_payment_date is null</code></td><td>JOIN 全量表判断历史是否有付费记录</td></tr>
 <tr><td>UNO 分组号段</td><td><code>try_cast(substr(role_id, -6, 2) as bigint) between 0 and 9</code></td><td>AB 分流用角色ID倒数5-6位</td></tr>
 </table>
+</div>
+
+<!-- 广告分层SQL -->
+<div class="dict-panel" id="p-ad-tiering">
+<h2>🪜 广告分层SQL</h2>
+<p class="panel-desc">广告用户分层通用 SQL 沉淀，按产品分类。分层流程分多步骤，本模块持续补充。复用时只改顶部 <code>vars</code> CTE 即可。</p>
+
+<div class="info-note">📐 <b>分层流程</b>：Step1 eCPM 分桶 → （后续步骤待补充）。每一步产出作为下一步的输入。</div>
+
+<h3>Step1 · eCPM 分桶通用 SQL</h3>
+<p style="font-size:12px;color:var(--text-3);margin:-2px 0 10px;">口径：单产品每日活跃用户在「每次点击/播放」聚合后的 eCPM 分桶；一个玩家可出现在多个 eCPM 点位上，整体去重人数看 CUBE 的 <code>ALL</code> 行。</p>
+
+<h4>UNO2 (MN08)</h4>
+<pre>-- ============================================================
+-- UNO2 用户分层 Step1：单产品每用户当天每次点击下的 eCPM 分桶【通用模板】
+-- ------------------------------------------------------------
+-- 复用方式：只改顶部 vars CTE 即可，下游逻辑无需改动。
+--   * start_date / end_date：统计日期区间（闭区间）
+--   * platform_filter / adtype_filter / mediation_filter：
+--       维度筛选数组，约定「空数组 ARRAY[] = 不筛选，取全部」
+--       例：只看安卓 rewardvideo → platform_filter=ARRAY['ANDROID']，
+--           adtype_filter=ARRAY['rewardvideo']
+-- ------------------------------------------------------------
+-- UNO2 口径说明：
+--   1) 活跃中间表：dw_ods_mn08.dm_mn08_player_active_info
+--   2) 广告明细表：dw_ods_mn08.c_client_app_ad_log，单表按 log_subtype
+--      区分 'adplay'（播放）/ 'advalue'（收入），条件聚合即可
+--   3) 广告日志账号字段为 sdk_account_id（活跃表为 account_id）
+--   4) 安卓 advalue 的 value 需 /1000000，IOS 不除
+-- ============================================================
+
+WITH vars AS (
+    SELECT
+        '2026-06-16'                        AS start_date,
+        '2026-06-22'                        AS end_date,
+        CAST(ARRAY[] AS ARRAY(VARCHAR))     AS platform_filter,   -- 例 ARRAY['IOS','ANDROID']；空=全部
+        CAST(ARRAY[] AS ARRAY(VARCHAR))     AS adtype_filter,     -- 例 ARRAY['rewardvideo','interstitial']；空=全部
+        CAST(ARRAY[] AS ARRAY(VARCHAR))     AS mediation_filter   -- 例 ARRAY['admob','max']；空=全部
+),
+player_base AS
+(
+    SELECT  a.date
+           ,lower(a.account_id) AS account_id
+           ,MAX(a.platform)     AS platform
+    FROM   dw_ods_mn08.dm_mn08_player_active_info a
+    CROSS JOIN vars v
+    WHERE  a.date BETWEEN v.start_date AND v.end_date
+      AND (cardinality(v.platform_filter) = 0 OR contains(v.platform_filter, a.platform))
+    GROUP BY a.date
+           ,a.account_id
+),
+ad_data AS
+(
+    -- 单表扫描，log_subtype 区分播放/收入
+    SELECT  ad.date
+           ,lower(ad.sdk_account_id) AS account_id
+           ,ad.adtype
+           ,ad.entranceid
+           ,ad.platform
+           ,ad.mediation
+           ,SUM(CASE WHEN ad.log_subtype = 'adplay'  THEN 1 ELSE 0 END) AS play_times
+           ,SUM(CASE WHEN ad.log_subtype = 'advalue'
+                     THEN if(ad.platform = 'IOS', ad.value, ad.value/1000000)
+                     ELSE 0 END)                                        AS revenue
+    FROM dw_ods_mn08.c_client_app_ad_log ad
+    CROSS JOIN vars v
+    WHERE ad.date BETWEEN v.start_date AND v.end_date
+      AND ad.log_subtype IN ('adplay', 'advalue')
+      AND (cardinality(v.platform_filter)  = 0 OR contains(v.platform_filter,  ad.platform))
+      AND (cardinality(v.adtype_filter)    = 0 OR contains(v.adtype_filter,    ad.adtype))
+      AND (cardinality(v.mediation_filter) = 0 OR contains(v.mediation_filter, ad.mediation))
+    GROUP BY ad.date
+           ,ad.sdk_account_id
+           ,ad.adtype
+           ,ad.entranceid
+           ,ad.platform
+           ,ad.mediation
+),
+player_ecpm AS
+(
+    SELECT  p.date
+           ,p.account_id
+           ,p.platform
+           ,COALESCE(a.adtype,'None')     AS adtype
+           ,COALESCE(a.entranceid,'None') AS entrance_id
+           ,COALESCE(a.mediation,'None')  AS mediation
+           ,COALESCE(a.play_times,0)      AS play_cnt
+           ,COALESCE(a.revenue,0)         AS revenue
+           ,CASE WHEN COALESCE(a.play_times,0) = 0 THEN 0
+                 ELSE CEIL(a.revenue * 1000.0 / a.play_times) END AS ecpm_value
+    FROM player_base p
+    LEFT JOIN ad_data a
+      ON p.date = a.date AND p.account_id = a.account_id
+)
+SELECT  date
+       ,platform
+       ,mediation
+       ,COALESCE(adtype,'ALL')                      AS adtype
+       ,COALESCE(entrance_id,'ALL')                 AS entrance_id
+       ,COALESCE(CAST(ecpm_value AS VARCHAR),'ALL') AS ecpm_value
+       ,COUNT(DISTINCT account_id)                                   AS user_count
+       ,COUNT(DISTINCT CASE WHEN play_cnt > 0 THEN account_id END)   AS ad_user_count
+       ,SUM(play_cnt)                                                AS total_plays
+       ,ROUND(SUM(revenue),4)                                        AS total_revenue
+       ,ROUND(AVG(CASE WHEN play_cnt > 0 THEN revenue * 1000.0 / play_cnt END),2) AS avg_ecpm
+FROM   player_ecpm
+GROUP BY date
+       ,platform
+       ,mediation
+       ,CUBE(adtype,entrance_id,ecpm_value)</pre>
+
+<div class="info-note">🔜 UNO / P10 / SKB 版本及后续分层步骤待补充。</div>
 </div>
 
 </main><!-- end dict-content -->

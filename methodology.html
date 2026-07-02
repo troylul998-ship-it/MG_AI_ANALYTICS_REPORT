@@ -100,6 +100,7 @@
 <div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
 <div class="sidebar-item" data-panel="m-daily"><span class="icon">📰</span>日报分析模板</div>
 <div class="sidebar-item" data-panel="m-card"><span class="icon">💬</span>日报卡片推送</div>
+<div class="sidebar-item" data-panel="m-skb-ref"><span class="icon">🛹</span>SKB 数分结论参考</div>
 </div>
 </aside>
 
@@ -752,37 +753,69 @@ ARPU    = 付费金额 / 活跃用户数 = 付费率 × ARPPU</div>
 <div class="m-lead" style="border-left-color:#e74c3c;">以下规则为强制性要求，违反将导致日报不合格。</div>
 <table>
 <tr><th>规则</th><th>说明</th><th>❌ 错误示例</th><th>✅ 正确示例</th></tr>
-<tr><td><b>不列具体数值</b></td><td>分产品分析中不出现 $xx、xx%、xxmin 等具体数字。数值只在"收入概况表"中展示。</td><td>"IOS 收入 $27,077（环比 -5.01%），AND ARPU $0.0216（+4.51%）"</td><td>"ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。"</td></tr>
+<tr><td><b>整体行保留环比</b></td><td>"整体"维度的第一句保留收入环比数值（如"-1.90%"），后接各指标方向性归因。其他维度（平台/渠道/点位）不列数值。</td><td>"收入小幅回落，eCPM与AdARPU均小幅下滑是主要原因。"</td><td>"收入 -1.90%，DAU 基本稳定，频次小幅提升；但 eCPM(log) 与 AdARPU 下滑。"</td></tr>
+<tr><td><b>不列具体数值（除整体环比外）</b></td><td>平台/渠道/点位维度不出现 $xx、xx%、xxmin 等具体数字。数值只在"收入概况表"和"整体"行中展示。</td><td>"IOS 收入 $27,077（环比 -5.01%），AND ARPU $0.0216（+4.51%）"</td><td>"双端 ARPU 均有下滑，主要受 eCPM 下降影响，DAU 频次小幅增长。"</td></tr>
 <tr><td><b>不加 emoji 标记</b></td><td>分析正文和收入概况表中不使用 ⚠️⬆️ 等 emoji 标注数值。</td><td>"DAU 11.63万（-10.10%⚠️）"<br>"AdARPU $0.1595（+6.28%⬆️）"</td><td>"DAU 11.63万（-10.10%）"<br>"AdARPU $0.1595（+6.28%）"</td></tr>
 <tr><td><b>因果链条完整</b></td><td>归因不止说"xx是主因"，要完整描述"什么变了 → 导致什么 → 有什么对冲/加剧"。</td><td>"DAU 下降是收入下滑主因。"</td><td>"DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。"</td></tr>
+<tr><td><b>平台要指出原因</b></td><td>平台维度不仅描述方向（涨/跌），要明确归因到具体指标（eCPM、DAU、频次哪个主导）。</td><td>"AND 端降幅略大于 IOS 端，双端表现较为一致。"</td><td>"双端 ARPU 均有下滑，主要受 eCPM 下降影响，DAU 频次小幅增长。"</td></tr>
+<tr><td><b>渠道分平台+正负对冲</b></td><td>渠道维度需分平台说明，指出正负因素的对冲关系，而不只说"有回落"。</td><td>"双端头部 applovin eCPM 均有所回落。"</td><td>"iOS主要是AL增长拉高大盘，And虽然AL也有增长，但Unity和Moloco下滑起到负向对冲。"</td></tr>
+<tr><td><b>点位指出品类变化</b></td><td>点位维度不说"各点位稳定"，要指出哪类点位（INT/RV/活动）频次在变化，以及变化对大盘的影响方向。</td><td>"核心 int_gamefinish 频次基本持平，各点位表现稳定。"</td><td>"INT和对局相关点位，以及活动点位频次有所增长，带动大盘。"</td></tr>
+<tr><td><b>在线时长必须带数值</b></td><td>点位维度中，在线时长是<b>唯一必须保留数值波动</b>的指标（与平台/渠道全程禁数值相反），需写出环比百分比（如"-2.72%"）。</td><td>"在线时长小幅回落"（缺数值）<br>"在线时长基本持平"（该给数值时不给）</td><td>"在线时长 -2.72%，……"<br>"在线时长小幅回落 -1.87%，……"</td></tr>
 <tr><td><b>融入业务背景</b></td><td>结合实际业务事件（活动上下线、功能开放等）做归因，不纯粹堆砌数据方向。</td><td>"收入增长主要来自价格端。"</td><td>"主要是挖蘑菇新开，RV 频次明显增长，eCPM 也有小幅增长共同带来。"</td></tr>
 <tr><td><b>用词中性前瞻</b></td><td>近期趋势和关键结论用中性专业语言，避免"亮眼""创新高"等煽动性用词。</td><td>"表现亮眼""创近期新高""最亮眼产品"</td><td>"效率端修复""高位盘继续承压""需观察量端恢复"</td></tr>
 </table>
 
-<h4>标准化写法参考</h4>
+<h4>标准化写法参考（基于业务审核迭代 · 最新 2026.07.02）</h4>
+<div class="m-lead" style="border-left-color:#27ae60;">以下为经过业务同学审核校正后的标准写法，作为 AI 生成日报的金标准对照。注意：平台/渠道维度全程无数值，渠道分平台点名主导渠道，点位优先归因业务事件。</div>
 <div class="tmpl">UNO
-整体：收入 -4.13%，DAU 明显下滑拖累收入，频次与 AdARPU 回升形成部分对冲，但 eCPM(log) 回落限制收入修复。
-平台：ARPU 表现分化，AND 端小幅回升，iOS 端小幅下滑。
-渠道：双端eCPM均有所下滑，且主要受以AL为主大部分渠道的影响。
-点位：在线时长明显回升；核心 int_gamefinish 频次小幅回落，结算礼包、活动token、rv_commonevent_SORT 形成一定支撑，使得大盘频次有所增长。
+整体：收入基本持平微涨，DAU 小幅下滑但频次明显回升形成有效对冲，eCPM(log) 小幅走弱限制收入向上弹性，AdARPU 在频次提升带动下小幅回升。
+平台：双端 ARPU 均有小幅提升，主要受到DAU频次增长影响
+渠道：双端 eCPM 小幅回落，IOS受以AL为主大部分渠道下滑影响，AND受以moloco为主大部分渠道下滑影响
+点位：DAU频次受外观点位奖励更新影响，单点位频次提升明显影响大盘。
 
 UNO2
-整体：收入 -4.45%，DAU 大幅下滑；但频次、eCPM(log) 与 AdARPU 均回升，效率端修复明显，对收入下滑形成部分对冲。
-平台：双端arpu有所回升，AND端提升更明显受DAU下滑影响较多，IOS主要是eCPM和DAU频次回升影响。
-渠道：IOS端受AL等渠道影响eCPM有小幅回升，AND端则较为稳定。
-点位：在线时长小幅回升，受DAU下滑影响，gamefinish 频次明显提升，多个 RV 点位均有提升，共同影响大盘。
+整体：收入小幅下滑，DAU 明显回升但频次与 AdARPU 下滑形成对冲，eCPM(log) 基本持平，DAU频次下滑使得arpu下降
+平台：双端arpu均有所下滑，主要受DAU频次下滑影响，eCPM也有小幅下滑
+渠道：双端RV eCPM有所回升，INT和banner eCPM有所下滑，影响大盘
+点位：在线时长-2.72%，INT、banner、对局相关点位频次均有所下滑影响大盘
 
 P10
-整体：收入 -2.29%，DAU 与频次均有提升；但 eCPM(log) 与 AdARPU 明显下滑。
-平台：双端收入与 ARPU 均下滑，主要是eCPM下滑导致。
-渠道：双端基本全渠道有下滑趋势，其中AL的负面影响较为明显。
-点位：在线时长小幅回升；Gameplay 插页频次有所提升，Drawcard 活动游戏内道具、主动弹出有提升，拉高整体频次，集中在int广告。
+整体：收入继续下行，DAU 缩量与 eCPM(log) 下滑双重拖累，频次基本持平未能形成有效支撑，AdARPU 随价格端走弱而回落。
+平台：双端 ARPU 同步下滑，主要是eCPM下滑，DAU频次也有小幅减弱
+渠道：双端主要是AL下滑拉低大盘
+点位：在线时长基本持平；Gameplay 插页频次小幅下滑，Drawcard 活动点位频次也有所回落，但整体频次波动幅度较小。
 
 SKB
-整体：收入 +8.95%，DAU 基本稳定，频次、eCPM(log) 与 AdARPU 同步提升，效率端修复是收入增长核心。
-平台：双端收入与 ARPU 均提升，主要是挖蘑菇新开，RV频次明显增长，eCPM也有小幅增长共同带来。
-渠道：双端头部 applovin eCPM 均回升，iOS 端 unity 也有回升，其次RV频次明显增长也有结构性利好。
-点位：在线时长小幅回升；pvp_offline_banner_entrance 频次小幅提升，int_round_over 回升，rv_dig_hunter重启，是收入和效率改善的重要来源。</div>
+整体：收入继续回落，频次小幅下滑叠加 eCPM(log) 是主因，DAU 基本持平，各效率指标同向走弱但幅度有限。
+平台：双端 ARPU 均有回落，主要是eCPM下滑，DAU频次下滑集中在横幅广告。
+渠道：双端主要是AL下滑拉低大盘，其中And侧Moloco也有明显下滑
+点位：在线时长基本持平；pvp_offline_banner_entrance 频次有所下降，int_offline_round_over 和 int_round_over 频次也略有回落，大盘频次小幅走弱。</div>
+
+<h4>AI 常见偏差与修正要点（迭代沉淀）</h4>
+<div class="m-lead" style="border-left-color:#f39c12;">以下为 AI 生成 vs 业务修改的常见偏差模式，AI 生成时需避免。</div>
+<table>
+<tr><th>偏差类型</th><th>AI 典型写法</th><th>业务正确写法</th><th>修正规则</th></tr>
+<tr><td>整体缺环比数值</td><td>"收入小幅回落"</td><td>"收入 -1.90%"</td><td>"整体"维度第一句必须带收入环比</td></tr>
+<tr><td>平台只描述方向不说原因</td><td>"AND 端降幅略大于 IOS 端"</td><td>"主要受eCPM下降影响，DAU频次小幅增长"</td><td>平台维度必须指出 ARPU 变化的驱动指标</td></tr>
+<tr><td>渠道过于笼统</td><td>"双端头部 applovin eCPM 均有所回落"</td><td>"双端eCPM均下滑，且主要受AL渠道影响"</td><td>渠道简洁直接，指出核心影响渠道即可</td></tr>
+<tr><td>渠道缺乏正负对冲</td><td>"applovin eCPM 保持稳定"</td><td>"iOS主要是AL增长拉高大盘，And的Unity和Moloco下滑起到负向对冲"</td><td>分平台说明，正负因素对冲都要体现</td></tr>
+<tr><td>点位"稳定"空话</td><td>"各点位表现稳定"</td><td>"INT和对局相关点位频次增长，带动大盘"</td><td>点位必须指出哪类点位变化、对大盘影响</td></tr>
+<tr><td>点位在线时长缺变化率</td><td>"在线时长小幅回落"</td><td>"在线时长小幅回落 -1.87%"</td><td>在线时长必须带变化率百分比（点位维度唯一保留数值项）</td></tr>
+<tr><td>关键结论点位部分过于泛化</td><td>"UNO 各点位表现稳定"</td><td>"UNO INT和对局相关点位及活动点位频次增长带动大盘"</td><td>结论中也要体现具体的点位品类变化方向</td></tr>
+</table>
+
+<h4>AI 常见偏差与修正要点（第二轮迭代 · 2026.07.02）</h4>
+<div class="m-lead" style="border-left-color:#f39c12;">第二轮对比新发现的偏差模式，其中"平台/渠道列数值"为重复犯错项，需重点规避。</div>
+<table>
+<tr><th>偏差类型</th><th>AI 典型写法</th><th>业务正确写法</th><th>修正规则</th></tr>
+<tr><td>⚠️平台维度仍列数值（重复犯错）</td><td>"IOS 端 ARPU 基本持平（$0.0604 vs $0.0599），AND 端小幅回升（$0.0213 vs $0.0209）"</td><td>"双端 ARPU 均有小幅提升，主要受到DAU频次增长影响"</td><td>平台维度绝对不出现 $x vs $x 数值对比，只说方向+驱动指标</td></tr>
+<tr><td>⚠️渠道维度仍列数值（重复犯错）</td><td>"双端 RV eCPM 小幅走弱（RV eCPM $27.47 vs $28.18），INT eCPM 也回落（$15.98 vs $16.50）"</td><td>"双端主要是AL下滑拉低大盘，其中And侧Moloco也有明显下滑"</td><td>渠道维度绝对不出现 eCPM 具体数值，只说渠道名+方向</td></tr>
+<tr><td>渠道未分平台指出主导渠道</td><td>"双端 eCPM 有所回落，IOS applovin 下行，AND 各渠道走弱"</td><td>"IOS受以AL为主大部分渠道下滑影响，AND受以moloco为主大部分渠道下滑影响"</td><td>IOS 与 AND 主导渠道常不同，需分别点名（如 IOS=AL、AND=moloco）</td></tr>
+<tr><td>渠道未分广告类型</td><td>"双端 RV eCPM 基本持平，INT 稳定，渠道端无明显拖累"</td><td>"双端RV eCPM有所回升，INT和banner eCPM有所下滑，影响大盘"</td><td>eCPM 变化常按广告类型（RV/INT/Banner）分化，需分类型说方向</td></tr>
+<tr><td>方向判断偏保守/误判</td><td>"gamefinish 频次保持稳定，Banner 随 DAU 回升有所恢复"</td><td>"INT、banner、对局相关点位频次均有所下滑影响大盘"</td><td>不回避负向判断，数据显示下滑就明确说"下滑拖累大盘"，不用"稳定/恢复"模糊</td></tr>
+<tr><td>点位缺业务事件归因</td><td>"核心 int_gamefinish 频次有所回升，参与率提升带动大盘"</td><td>"DAU频次受外观点位奖励更新影响，单点位频次提升明显影响大盘"</td><td>点位异动优先归因到已知业务事件（如外观奖励更新、活动上线）</td></tr>
+<tr><td>整体传导链可更直接</td><td>"量端修复的增量被效率端小幅走弱抵消"</td><td>"DAU频次下滑使得arpu下降"</td><td>整体归因可直接点明指标传导（频次↓→ARPU↓），不必过度包装</td></tr>
+</table>
 
 <h3>4. 关键结论</h3>
 <p>标题：<code>🔍 关键结论</code>，子标题：<code>⭐ 日报重点</code></p>
@@ -948,6 +981,128 @@ SKB
 <li><strong>发送方式</strong>：使用 MCP <code>im_v1_message_create</code>，<code>receive_id_type: "chat_id"</code>，<code>msg_type: "interactive"</code></li>
 </ul>
 
+</div>
+
+<!-- SKB 数分结论参考 -->
+<div class="m-panel" id="m-skb-ref">
+<div class="m-lead">基于 SKB 历史分析沉淀的标准分析框架与结论参考。适用于活动复盘、PVE 实验、变现实验等场景的分析模板和指标结构。</div>
+
+<h3>活动分析标准框架</h3>
+<p>活动类分析遵循以下标准结构，确保覆盖面完整、结论可对比：</p>
+
+<h4>1. 整体数据概览</h4>
+<table>
+<tr><th>指标</th><th>用途</th><th>说明</th></tr>
+<tr><td>IAP_ARPU</td><td>付费收入人均</td><td>活动期间 vs 活动前，环比变化</td></tr>
+<tr><td>IAA_ARPU</td><td>广告收入人均</td><td>活动期间 vs 活动前，环比变化</td></tr>
+<tr><td>ARPU (Total)</td><td>总收入人均</td><td>IAP + IAA 总和除以 DAU</td></tr>
+</table>
+<p>核心判断：活动对整体收入的拉升幅度，拆分 IAP 和 IAA 各自贡献。</p>
+
+<h4>2. 付费拆解</h4>
+<ul>
+<li><b>按付费项分组</b>：活动礼包、PVE 道具、活动商店、Starpass、常规礼包等，看哪类付费贡献主增量</li>
+<li><b>按玩家分层</b>：超R（累计≥$500）、大R（$100~$500）、中R（$30~$100）、小R（<$30），各层级付费人数与金额占比变化</li>
+</ul>
+
+<h4>3. 玩家结构</h4>
+<table>
+<tr><th>生命周期段</th><th>天数范围</th><th>关注点</th></tr>
+<tr><td>新手期</td><td>1-30 天</td><td>新增留存率、首充转化</td></tr>
+<tr><td>成长期</td><td>31-90 天</td><td>关卡推进速度、付费习惯养成</td></tr>
+<tr><td>成熟期</td><td>91-180 天</td><td>内容消耗节奏、活动参与深度</td></tr>
+<tr><td>老玩家</td><td>181-600 天</td><td>活跃度维持、回流贡献</td></tr>
+<tr><td>核心玩家</td><td>600+ 天</td><td>高 ARPU 稳定性、流失风险</td></tr>
+</table>
+<p>关注：各段人数变化趋势，确认增长驱动来源（新增扩量 or 老用户留存优化）。</p>
+
+<h4>4. 活动参与漏斗</h4>
+<div class="step-box"><span class="num">1</span><b>活跃</b><p style="margin:6px 0 0;">DAU 基数（活跃表）</p></div>
+<div class="step-box"><span class="num">2</span><b>加载</b><p style="margin:6px 0 0;">活动页面加载人数</p></div>
+<div class="step-box"><span class="num">3</span><b>打开</b><p style="margin:6px 0 0;">点击进入活动界面的人数</p></div>
+<div class="step-box"><span class="num">4</span><b>参与</b><p style="margin:6px 0 0;">产生有效活动行为（如完成任一活动任务）</p></div>
+<div class="step-box"><span class="num">5</span><b>完成</b><p style="margin:6px 0 0;">达成活动目标/领取最终奖励</p></div>
+<p>核心指标：参与率（参与/活跃）、完成率（完成/参与），追踪趋势变化。</p>
+
+<h4>5. PVE 参与</h4>
+<ul>
+<li><b>人均局数</b>：活动期间 PVE 人均对局数 vs 常态期</li>
+<li><b>参与率变化</b>：打 PVE 的用户占 DAU 比例的变动</li>
+<li><b>关卡推进</b>：活动期间玩家整体关卡进度是否加速</li>
+</ul>
+
+<h4>6. IAA 归因</h4>
+<ul>
+<li><b>RV 播放率</b>：观看 RV 用户 / 活跃用户，活动是否提升广告触达</li>
+<li><b>RV 次数</b>：人均播放次数变化</li>
+<li><b>eCPM 变化</b>：单次播放价值是否稳定</li>
+<li><b>各广告位贡献</b>：RV_PVE / RV_Main / RV_PVP / Interstitial 各自收入占比变化</li>
+</ul>
+
+<h3>PVE 实验分析框架</h3>
+<p>针对关卡难度、道具、奖励等 PVE 相关 AB 实验的标准分析维度。</p>
+
+<h4>1. 留存指标</h4>
+<table>
+<tr><th>指标</th><th>定义</th><th>看点</th></tr>
+<tr><td>新增次留</td><td>新用户 D2 留存率</td><td>实验对新手体验的影响</td></tr>
+<tr><td>新增 7 留</td><td>新用户 D7 留存率</td><td>中期留存影响</td></tr>
+</table>
+
+<h4>2. LTV 指标</h4>
+<table>
+<tr><th>指标</th><th>定义</th><th>看点</th></tr>
+<tr><td>ltv7 / ltv14</td><td>新增用户 7/14 日总 LTV</td><td>综合变现效率</td></tr>
+<tr><td>iap_ltv7</td><td>新增用户 7 日内购 LTV</td><td>付费贡献</td></tr>
+<tr><td>iaa_ltv7</td><td>新增用户 7 日广告 LTV</td><td>广告贡献</td></tr>
+</table>
+
+<h4>3. 付费指标</h4>
+<ul>
+<li><b>付费率</b>：实验组 vs 对照组付费转化率差异</li>
+<li><b>ARPPU</b>：付费用户人均付费金额变化</li>
+<li><b>首充率</b>：新用户首充转化率</li>
+</ul>
+
+<h4>4. 难度指标</h4>
+<ul>
+<li><b>关卡胜率</b>：各关卡通关率变化</li>
+<li><b>闯关漏斗</b>：关卡序列中玩家的流失点</li>
+<li><b>玩家进度分布</b>：用户达到各关卡段的人数分布</li>
+</ul>
+
+<h4>5. 关卡归因</h4>
+<p>定位哪些关卡变化带来了付费提升：对比实验组 vs 对照组在各关卡的道具使用率、付费弹窗触发率、实际付费转化差异，锁定收入提升的关键关卡节点。</p>
+
+<h3>变现实验分析框架</h3>
+<p>针对广告位调整、频次策略、广告形式等变现相关 AB 实验的标准分析维度。</p>
+
+<h4>1. 广告漏斗</h4>
+<table>
+<tr><th>环节</th><th>指标</th><th>公式</th></tr>
+<tr><td>入口出现</td><td>入口出现率</td><td>看到入口的用户 / DAU</td></tr>
+<tr><td>点击播放</td><td>播放率</td><td>点击播放的用户 / 看到入口的用户</td></tr>
+<tr><td>播放频次</td><td>人均播放次数</td><td>总播放次数 / 播放用户数</td></tr>
+</table>
+
+<h4>2. 收入影响</h4>
+<ul>
+<li><b>rv_arpu</b>：RV 广告人均收入变化</li>
+<li><b>iaa_arpu</b>：总广告人均收入变化</li>
+<li><b>总 ARPU</b>：确认广告变化是否影响总收入</li>
+</ul>
+
+<h4>3. eCPM 影响</h4>
+<p>核心权衡：频次 vs 单价的平衡。播放次数增加可能拉低 eCPM（广告填充率/竞价下降），需确认总收入 = 频次 × eCPM 的乘积效应是否正向。</p>
+
+<h4>4. IAP 影响（护栏指标）</h4>
+<ul>
+<li>确认广告变化对付费无负向影响：付费率不下降、ARPPU 不下降</li>
+<li>特别关注广告奖励是否替代了付费需求（如免费金币增加→购买金币减少）</li>
+<li>对比实验组 vs 对照组的道具产销结构变化</li>
+</ul>
+
+<div class="m-lead" style="border-left-color:var(--brand-1);margin-top:20px;"><b>使用原则</b>：以上框架为标准分析模板，实际分析时根据实验具体改动聚焦重点维度。活动类侧重参与漏斗和收入拆解；PVE 实验侧重留存和难度；变现实验侧重广告漏斗和 eCPM 平衡。所有实验必须设置护栏指标，防止单一指标优化牺牲其他维度。</div>
 </div>
 
 </main><!-- end m-content -->
