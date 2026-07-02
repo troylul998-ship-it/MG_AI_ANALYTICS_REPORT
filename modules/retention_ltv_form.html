@@ -72,6 +72,47 @@
           <label class="chip"><input type="radio" name="user_scope" value="custom">自定义</label>
         </div>
       </div>
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:18px 0;">
+      <div class="field" style="margin-top:16px;">
+        <label>&#128269; 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="ab_global_search_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="ab-search-status">未启用</span>
+        </div>
+        <div id="ab-search-input-wrap" style="display:none;">
+          <input type="text" id="ab_search_keywords" placeholder="输入关键词或 Confluence 链接" style="width:100%;">
+          <p style="font-size:11px;color:#999;margin-top:4px;">AI 生成 SQL 前会先查阅 Confluence 中与该关键词/链接相关的所有文档，确保口径准确。</p>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>&#128202; 看板口径 <span class="help">选填，启用后 DAU 计算将使用看板标准口径（含成年人、APP端等过滤条件）</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="ab_dashboard_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="ab-dashboard-status">未启用</span>
+        </div>
+        <div id="ab-dashboard-desc" style="display:none;">
+          <p style="font-size:11px;color:#999;margin-top:4px;">启用后，DAU 和广告收入将严格遵循看板口径：DAU 需 is_adult=1 + UPPER(client)='APP'；广告收入统一用活跃表 advalue_sum_1d 字段。</p>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>&#128300; SQL 自检 <span class="help">选填，启用后 AI 会先给初版 SQL，当你对结果不置信时触发自检</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="ab_sql_verify_toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:500;" id="ab-sql-verify-status">未启用</span>
+        </div>
+        <div id="ab-sql-verify-desc" style="display:none;">
+          <p style="font-size:11px;color:#999;margin-top:4px;">启用后流程：① AI 先快速输出初版 SQL，你直接去 Omnieye 跑 ② 如果报错或对结果有疑问，把报错/结果贴回来 ③ AI 启动完整自检 → 输出修正版 SQL。没问题就不用等自检，有问题再触发。</p>
+        </div>
+      </div>
     </div>
 
     <!-- 2 留存定义 -->
