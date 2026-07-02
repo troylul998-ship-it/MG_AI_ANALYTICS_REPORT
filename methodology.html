@@ -100,6 +100,7 @@
 <div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
 <div class="sidebar-item" data-panel="m-daily"><span class="icon">📰</span>日报分析模板</div>
 <div class="sidebar-item" data-panel="m-card"><span class="icon">💬</span>日报卡片推送</div>
+<div class="sidebar-item" data-panel="m-skb-ref"><span class="icon">🛹</span>SKB 数分结论参考</div>
 </div>
 </aside>
 
@@ -948,6 +949,128 @@ SKB
 <li><strong>发送方式</strong>：使用 MCP <code>im_v1_message_create</code>，<code>receive_id_type: "chat_id"</code>，<code>msg_type: "interactive"</code></li>
 </ul>
 
+</div>
+
+<!-- SKB 数分结论参考 -->
+<div class="m-panel" id="m-skb-ref">
+<div class="m-lead">基于 SKB 历史分析沉淀的标准分析框架与结论参考。适用于活动复盘、PVE 实验、变现实验等场景的分析模板和指标结构。</div>
+
+<h3>活动分析标准框架</h3>
+<p>活动类分析遵循以下标准结构，确保覆盖面完整、结论可对比：</p>
+
+<h4>1. 整体数据概览</h4>
+<table>
+<tr><th>指标</th><th>用途</th><th>说明</th></tr>
+<tr><td>IAP_ARPU</td><td>付费收入人均</td><td>活动期间 vs 活动前，环比变化</td></tr>
+<tr><td>IAA_ARPU</td><td>广告收入人均</td><td>活动期间 vs 活动前，环比变化</td></tr>
+<tr><td>ARPU (Total)</td><td>总收入人均</td><td>IAP + IAA 总和除以 DAU</td></tr>
+</table>
+<p>核心判断：活动对整体收入的拉升幅度，拆分 IAP 和 IAA 各自贡献。</p>
+
+<h4>2. 付费拆解</h4>
+<ul>
+<li><b>按付费项分组</b>：活动礼包、PVE 道具、活动商店、Starpass、常规礼包等，看哪类付费贡献主增量</li>
+<li><b>按玩家分层</b>：超R（累计≥$500）、大R（$100~$500）、中R（$30~$100）、小R（<$30），各层级付费人数与金额占比变化</li>
+</ul>
+
+<h4>3. 玩家结构</h4>
+<table>
+<tr><th>生命周期段</th><th>天数范围</th><th>关注点</th></tr>
+<tr><td>新手期</td><td>1-30 天</td><td>新增留存率、首充转化</td></tr>
+<tr><td>成长期</td><td>31-90 天</td><td>关卡推进速度、付费习惯养成</td></tr>
+<tr><td>成熟期</td><td>91-180 天</td><td>内容消耗节奏、活动参与深度</td></tr>
+<tr><td>老玩家</td><td>181-600 天</td><td>活跃度维持、回流贡献</td></tr>
+<tr><td>核心玩家</td><td>600+ 天</td><td>高 ARPU 稳定性、流失风险</td></tr>
+</table>
+<p>关注：各段人数变化趋势，确认增长驱动来源（新增扩量 or 老用户留存优化）。</p>
+
+<h4>4. 活动参与漏斗</h4>
+<div class="step-box"><span class="num">1</span><b>活跃</b><p style="margin:6px 0 0;">DAU 基数（活跃表）</p></div>
+<div class="step-box"><span class="num">2</span><b>加载</b><p style="margin:6px 0 0;">活动页面加载人数</p></div>
+<div class="step-box"><span class="num">3</span><b>打开</b><p style="margin:6px 0 0;">点击进入活动界面的人数</p></div>
+<div class="step-box"><span class="num">4</span><b>参与</b><p style="margin:6px 0 0;">产生有效活动行为（如完成任一活动任务）</p></div>
+<div class="step-box"><span class="num">5</span><b>完成</b><p style="margin:6px 0 0;">达成活动目标/领取最终奖励</p></div>
+<p>核心指标：参与率（参与/活跃）、完成率（完成/参与），追踪趋势变化。</p>
+
+<h4>5. PVE 参与</h4>
+<ul>
+<li><b>人均局数</b>：活动期间 PVE 人均对局数 vs 常态期</li>
+<li><b>参与率变化</b>：打 PVE 的用户占 DAU 比例的变动</li>
+<li><b>关卡推进</b>：活动期间玩家整体关卡进度是否加速</li>
+</ul>
+
+<h4>6. IAA 归因</h4>
+<ul>
+<li><b>RV 播放率</b>：观看 RV 用户 / 活跃用户，活动是否提升广告触达</li>
+<li><b>RV 次数</b>：人均播放次数变化</li>
+<li><b>eCPM 变化</b>：单次播放价值是否稳定</li>
+<li><b>各广告位贡献</b>：RV_PVE / RV_Main / RV_PVP / Interstitial 各自收入占比变化</li>
+</ul>
+
+<h3>PVE 实验分析框架</h3>
+<p>针对关卡难度、道具、奖励等 PVE 相关 AB 实验的标准分析维度。</p>
+
+<h4>1. 留存指标</h4>
+<table>
+<tr><th>指标</th><th>定义</th><th>看点</th></tr>
+<tr><td>新增次留</td><td>新用户 D2 留存率</td><td>实验对新手体验的影响</td></tr>
+<tr><td>新增 7 留</td><td>新用户 D7 留存率</td><td>中期留存影响</td></tr>
+</table>
+
+<h4>2. LTV 指标</h4>
+<table>
+<tr><th>指标</th><th>定义</th><th>看点</th></tr>
+<tr><td>ltv7 / ltv14</td><td>新增用户 7/14 日总 LTV</td><td>综合变现效率</td></tr>
+<tr><td>iap_ltv7</td><td>新增用户 7 日内购 LTV</td><td>付费贡献</td></tr>
+<tr><td>iaa_ltv7</td><td>新增用户 7 日广告 LTV</td><td>广告贡献</td></tr>
+</table>
+
+<h4>3. 付费指标</h4>
+<ul>
+<li><b>付费率</b>：实验组 vs 对照组付费转化率差异</li>
+<li><b>ARPPU</b>：付费用户人均付费金额变化</li>
+<li><b>首充率</b>：新用户首充转化率</li>
+</ul>
+
+<h4>4. 难度指标</h4>
+<ul>
+<li><b>关卡胜率</b>：各关卡通关率变化</li>
+<li><b>闯关漏斗</b>：关卡序列中玩家的流失点</li>
+<li><b>玩家进度分布</b>：用户达到各关卡段的人数分布</li>
+</ul>
+
+<h4>5. 关卡归因</h4>
+<p>定位哪些关卡变化带来了付费提升：对比实验组 vs 对照组在各关卡的道具使用率、付费弹窗触发率、实际付费转化差异，锁定收入提升的关键关卡节点。</p>
+
+<h3>变现实验分析框架</h3>
+<p>针对广告位调整、频次策略、广告形式等变现相关 AB 实验的标准分析维度。</p>
+
+<h4>1. 广告漏斗</h4>
+<table>
+<tr><th>环节</th><th>指标</th><th>公式</th></tr>
+<tr><td>入口出现</td><td>入口出现率</td><td>看到入口的用户 / DAU</td></tr>
+<tr><td>点击播放</td><td>播放率</td><td>点击播放的用户 / 看到入口的用户</td></tr>
+<tr><td>播放频次</td><td>人均播放次数</td><td>总播放次数 / 播放用户数</td></tr>
+</table>
+
+<h4>2. 收入影响</h4>
+<ul>
+<li><b>rv_arpu</b>：RV 广告人均收入变化</li>
+<li><b>iaa_arpu</b>：总广告人均收入变化</li>
+<li><b>总 ARPU</b>：确认广告变化是否影响总收入</li>
+</ul>
+
+<h4>3. eCPM 影响</h4>
+<p>核心权衡：频次 vs 单价的平衡。播放次数增加可能拉低 eCPM（广告填充率/竞价下降），需确认总收入 = 频次 × eCPM 的乘积效应是否正向。</p>
+
+<h4>4. IAP 影响（护栏指标）</h4>
+<ul>
+<li>确认广告变化对付费无负向影响：付费率不下降、ARPPU 不下降</li>
+<li>特别关注广告奖励是否替代了付费需求（如免费金币增加→购买金币减少）</li>
+<li>对比实验组 vs 对照组的道具产销结构变化</li>
+</ul>
+
+<div class="m-lead" style="border-left-color:var(--brand-1);margin-top:20px;"><b>使用原则</b>：以上框架为标准分析模板，实际分析时根据实验具体改动聚焦重点维度。活动类侧重参与漏斗和收入拆解；PVE 实验侧重留存和难度；变现实验侧重广告漏斗和 eCPM 平衡。所有实验必须设置护栏指标，防止单一指标优化牺牲其他维度。</div>
 </div>
 
 </main><!-- end m-content -->
