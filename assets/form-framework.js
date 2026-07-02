@@ -673,11 +673,39 @@ const FF = (() => {
     initRealTimeValidation();
     initDraftAutoSave();
     initBackToTop();
+    initFeatureToggles();
     // 检查是否从归档恢复
     setTimeout(() => {
       const record = getRestoreData();
       if (record && record.data) restoreForm(record.data);
     }, 300);
+  }
+
+  /* ---------- 功能开关自动绑定（全局搜索/看板口径/SQL自检）---------- */
+  function initFeatureToggles() {
+    // 每个 toggle 的：checkbox ID → 关联的展开区/状态元素 ID
+    const toggles = [
+      { toggle: 'ab_global_search_toggle', wrap: 'ab-search-input-wrap', status: 'ab-search-status' },
+      { toggle: 'ab_dashboard_toggle', wrap: 'ab-dashboard-desc', status: 'ab-dashboard-status' },
+      { toggle: 'ab_sql_verify_toggle', wrap: 'ab-sql-verify-desc', status: 'ab-sql-verify-status' },
+    ];
+    toggles.forEach(cfg => {
+      const inp = document.getElementById(cfg.toggle);
+      if (!inp) return;
+      const wrap = document.getElementById(cfg.wrap);
+      const status = document.getElementById(cfg.status);
+      const update = () => {
+        if (inp.checked) {
+          if (wrap) wrap.style.display = 'block';
+          if (status) { status.textContent = '已启用'; status.style.color = 'var(--brand-1)'; status.style.fontWeight = '600'; }
+        } else {
+          if (wrap) wrap.style.display = 'none';
+          if (status) { status.textContent = '未启用'; status.style.color = 'var(--text-3)'; status.style.fontWeight = '500'; }
+        }
+      };
+      inp.addEventListener('change', update);
+      update();
+    });
   }
 
   /* ---------- 草稿自动保存 ---------- */

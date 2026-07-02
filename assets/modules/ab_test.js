@@ -157,67 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-reset').addEventListener('click', () => { if (confirm('确认重置？')) location.reload(); });
-
-  // 全局搜索开关
-  const searchToggle = document.getElementById('ab_global_search_toggle');
-  const searchWrap = document.getElementById('ab-search-input-wrap');
-  const searchStatus = document.getElementById('ab-search-status');
-  if (searchToggle) {
-    searchToggle.addEventListener('change', () => {
-      if (searchToggle.checked) {
-        searchWrap.style.display = 'block';
-        searchStatus.textContent = '已启用';
-        searchStatus.style.color = 'var(--brand-1)';
-        searchStatus.style.fontWeight = '600';
-        document.getElementById('ab_search_keywords').focus();
-      } else {
-        searchWrap.style.display = 'none';
-        searchStatus.textContent = '未启用';
-        searchStatus.style.color = 'var(--text-3)';
-        searchStatus.style.fontWeight = '500';
-      }
-    });
-  }
-
-  // 看板口径开关
-  const dashboardToggle = document.getElementById('ab_dashboard_toggle');
-  const dashboardDesc = document.getElementById('ab-dashboard-desc');
-  const dashboardStatus = document.getElementById('ab-dashboard-status');
-  if (dashboardToggle) {
-    dashboardToggle.addEventListener('change', () => {
-      if (dashboardToggle.checked) {
-        dashboardDesc.style.display = 'block';
-        dashboardStatus.textContent = '已启用';
-        dashboardStatus.style.color = 'var(--brand-1)';
-        dashboardStatus.style.fontWeight = '600';
-      } else {
-        dashboardDesc.style.display = 'none';
-        dashboardStatus.textContent = '未启用';
-        dashboardStatus.style.color = 'var(--text-3)';
-        dashboardStatus.style.fontWeight = '500';
-      }
-    });
-  }
-
-  // SQL 自检开关
-  const sqlVerifyToggle = document.getElementById('ab_sql_verify_toggle');
-  const sqlVerifyDesc = document.getElementById('ab-sql-verify-desc');
-  const sqlVerifyStatus = document.getElementById('ab-sql-verify-status');
-  if (sqlVerifyToggle) {
-    sqlVerifyToggle.addEventListener('change', () => {
-      if (sqlVerifyToggle.checked) {
-        sqlVerifyDesc.style.display = 'block';
-        sqlVerifyStatus.textContent = '已启用';
-        sqlVerifyStatus.style.color = 'var(--brand-1)';
-        sqlVerifyStatus.style.fontWeight = '600';
-      } else {
-        sqlVerifyDesc.style.display = 'none';
-        sqlVerifyStatus.textContent = '未启用';
-        sqlVerifyStatus.style.color = 'var(--text-3)';
-        sqlVerifyStatus.style.fontWeight = '500';
-      }
-    });
-  }
+  // 三个功能开关（全局搜索/看板口径/SQL自检）由 form-framework.js 的 initFeatureToggles 自动绑定
 
   document.getElementById('ab-form').addEventListener('submit', e => {
     e.preventDefault();
