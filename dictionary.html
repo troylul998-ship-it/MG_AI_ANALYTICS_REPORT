@@ -120,7 +120,7 @@
 <h3>产品数据源总览</h3>
 <table>
 <tr><th>产品</th><th>活跃表</th><th>全量表</th><th>主键</th><th>广告收入字段</th><th>特殊说明</th></tr>
-<tr><td>UNO</td><td><code>dw_ods_mn01.dm_mn01_player_active_info</code></td><td><code>dw_ods_mn01.dm_mn01_player_info</code></td><td><code>role_id</code></td><td><code>advalue_sum_1d</code></td><td>广告日志: game_client_log; advalue来源: dw_dmdb.advalue_role_date</td></tr>
+<tr><td>UNO</td><td><code>dw_ods_mn01.dm_mn01_player_active_info</code></td><td><code>dw_ods_mn01.dm_mn01_player_info</code></td><td><code>role_id</code></td><td><code>advalue_sum_1d</code></td><td>广告明细: dw_ods_mn01.c_app_ad_log (log_type区分各环节: adplay/advalue/adload等, 主键roleid); 安卓advalue需/1000000; adplay需status='1'</td></tr>
 <tr><td>P10</td><td><code>dw_ods_common_mn02.dm_mn02_player_active_info</code></td><td><code>dw_ods_common_mn02.dm_mn02_player_info</code></td><td><code>account_id</code></td><td><code>advalue_sum_1d</code></td><td>iaa_sum 字段已于 2025-06-17 删除，用 advalue 替代</td></tr>
 <tr><td>SKB</td><td><code>dw_ods_common_mn04.dm_mn04_player_active_info</code></td><td><code>dw_ods_common_mn04.dm_mn04_player_info</code></td><td><code>account_id</code></td><td><code>advalue_sum_1d</code></td><td></td></tr>
 <tr><td>UNO2</td><td><code>dw_ods_mn08.dm_mn08_player_active_info</code></td><td><code>dw_ods_mn08.dm_mn08_player_info</code></td><td><code>role_id</code></td><td><code>advalue_sum_1d</code></td><td>广告明细: dw_ods_mn08.c_client_app_ad_log (log_subtype=advalue); 安卓需 /1000000</td></tr>
@@ -1938,7 +1938,81 @@ GROUP BY date
        ,mediation
        ,CUBE(adtype,entrance_id,ecpm_value)</pre>
 
-<div class="info-note">🔜 UNO / P10 / SKB 版本及后续分层步骤待补充。</div>
+<div class="info-note">🔜 P10 / SKB 版本及后续分层步骤待补充。</div>
+
+<h4>UNO (MN01)</h4>
+<div class="note">⚠️ UNO 广告明细表为 <code>dw_ods_mn01.c_app_ad_log</code>（单表），通过 <code>log_type</code> 字段区分各环节。主键为 <code>roleid</code>（非 account_id）。播放需 <code>log_type='adplay' AND status='1'</code>，收入需 <code>log_type='advalue'</code>。安卓 value 需 /1000000。</div>
+<pre>-- ============================================================
+-- UNO 用户分层 Step1：单产品每用户当天每次点击下的 eCPM 分桶
+-- ------------------------------------------------------------
+-- UNO 口径说明：
+--   1) 活跃中间表：dw_ods_mn01.dm_mn01_player_active_info (主键 role_id)
+--   2) 广告明细表：dw_ods_mn01.c_app_ad_log（单表）
+--      log_type 区分各环节: adplay(status='1'表示成功) / advalue(收入)
+--   3) 广告日志账号字段为 roleid（VARCHAR 化后与活跃表 role_id 对齐）
+--   4) 安卓 advalue 的 value 需 /1000000，IOS 不除
+--   5) 必须加 substr(log_time, 1, 10) = date 确保日志时间与分区一致
+-- ============================================================
+
+WITH player_base AS
+(
+    SELECT  date
+           ,cast(role_id AS varchar) AS account_id
+           ,MAX(platform)            AS platform
+    FROM   dw_ods_mn01.dm_mn01_player_active_info
+    WHERE  date BETWEEN '2026-06-16' AND '2026-06-22'
+    GROUP BY date, role_id
+),
+ad_data AS
+(
+    -- 单表扫描，log_type 区分播放/收入
+    SELECT  date
+           ,cast(roleid AS varchar) AS account_id
+           ,adtype
+           ,mediation
+           ,platform
+           ,'' AS entranceid
+           ,SUM(if(log_type = 'adplay' AND status = '1', 1, 0))                              AS play_times
+           ,SUM(CASE WHEN log_type = 'advalue' AND platform = 'IOS' THEN cast(value AS double)
+                     WHEN log_type = 'advalue' AND platform = 'ANDROID' THEN cast(value AS double)/1000000.0
+                     ELSE 0 END)                                                              AS revenue
+    FROM dw_ods_mn01.c_app_ad_log
+    WHERE date BETWEEN '2026-06-16' AND '2026-06-22'
+      AND log_type IN ('adplay', 'advalue')
+      AND substr(log_time, 1, 10) = date
+    GROUP BY date, roleid, adtype, mediation, platform
+),
+player_ecpm AS
+(
+    SELECT  p.date
+           ,p.account_id
+           ,p.platform
+           ,COALESCE(a.adtype,'None')     AS adtype
+           ,COALESCE(a.entranceid,'None') AS entrance_id
+           ,COALESCE(a.mediation,'None')  AS mediation
+           ,COALESCE(a.play_times,0)      AS play_cnt
+           ,COALESCE(a.revenue,0)         AS revenue
+           ,CASE WHEN COALESCE(a.play_times,0) = 0 THEN 0
+                 ELSE CEIL(a.revenue * 1000.0 / a.play_times) END AS ecpm_value
+    FROM player_base p
+    LEFT JOIN ad_data a
+      ON p.date = a.date AND p.account_id = a.account_id
+)
+SELECT  date
+       ,platform
+       ,COALESCE(mediation,'ALL')                   AS mediation
+       ,COALESCE(adtype,'ALL')                      AS adtype
+       ,COALESCE(entrance_id,'ALL')                 AS entrance_id
+       ,COALESCE(CAST(ecpm_value AS VARCHAR),'ALL') AS ecpm_value
+       ,COUNT(DISTINCT account_id)                                   AS user_count
+       ,COUNT(DISTINCT CASE WHEN play_cnt > 0 THEN account_id END)   AS ad_user_count
+       ,SUM(play_cnt)                                                AS total_plays
+       ,ROUND(SUM(revenue),4)                                        AS total_revenue
+       ,ROUND(AVG(CASE WHEN play_cnt > 0 THEN revenue * 1000.0 / play_cnt END),2) AS avg_ecpm
+FROM   player_ecpm
+GROUP BY date
+       ,platform
+       ,CUBE(mediation,adtype,entrance_id,ecpm_value)</pre>
 </div>
 
 </main><!-- end dict-content -->

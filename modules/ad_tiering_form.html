@@ -12,227 +12,334 @@
   <link rel="preload" href="../assets/form.css" as="style">
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/form.css">
+  <style>
+    .scene-switch{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:18px 0 24px;}
+    .scene-switch button{border:2px solid var(--border);background:var(--surface);cursor:pointer;padding:18px 16px;border-radius:var(--radius);font-size:14px;font-weight:600;color:var(--text-2);transition:all .2s;text-align:left;line-height:1.5;}
+    .scene-switch button:hover{border-color:var(--brand-1);background:#fff8f3;}
+    .scene-switch button.active{border-color:var(--brand-1);color:var(--brand-1);background:#fff8f3;box-shadow:0 0 0 3px rgba(232,89,12,0.1);}
+    .scene-switch button .scene-desc{display:block;font-size:12px;font-weight:400;color:var(--text-3);margin-top:3px;}
+    .scene-switch button.active .scene-desc{color:var(--brand-1);opacity:.7;}
+    @media(max-width:640px){.scene-switch{grid-template-columns:1fr;}}
+    .tab-panel{display:none;animation:fadeIn .25s;}
+    .tab-panel.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  </style>
 </head>
-<body class="mode-guide">
+<body>
 <header class="topbar"><div class="topbar-inner"><div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div><h1>AI 数据分析平台</h1><span class="sub">广告分层</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
 <div class="form-wrap">
-  <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>🪜 广告分层</h2><p>按用户 eCPM 分桶，分析各层级用户的广告参与度、收入贡献与 Freq，支持多维下钻。</p></div>
-  <div class="mode-switch">
-    <button data-mode="guide" class="active">🧭 引导模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步填写分层参数。</span></button>
-    <button data-mode="fast">⚡ 快速模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填全部参数。</span></button>
+  <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>🪜 广告分层</h2><p>以广告价值 eCPM 为目标，构建广告用户分层。</p></div>
+
+  <div class="scene-switch">
+    <button class="active" data-tab="tab-dist">📊 eCPM 分布<span class="scene-desc">看各桶用户规模与收入分布</span></button>
+    <button data-tab="tab-segment">👥 eCPM 分群<span class="scene-desc">自定义阈值，对比分群差异</span></button>
+    <button data-tab="tab-preset">🪜 分层预设<span class="scene-desc">高/中/低价值标准分层</span></button>
   </div>
-  <div class="mode-hint" id="hint-guide" style="display:none;"></div><div class="mode-hint" id="hint-fast" style="display:none;"></div>
-  <form id="ad-tier-form">
-    <div class="form-error-summary"></div>
 
-    <!-- Step 1: 基本信息 -->
-    <div class="fcard"><h3><span class="n">1</span> 基本信息</h3>
-      <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-tier-product"><label class="chip"><input type="radio" name="tier_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="tier_product" value="P10">P10</label><label class="chip"><input type="radio" name="tier_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="tier_product" value="UNO2">UNO2</label></div><select id="product" data-required style="display:none;"><option value="">请选择</option><option value="UNO">UNO</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
-      <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="date_end" data-required><div class="err-msg">必填</div></div></div>
-      <div class="field"><label>分析目标 <span class="help">选填</span></label><textarea id="tier_goal" rows="2" placeholder="如：分析各 eCPM 分桶用户的规模与广告收入贡献，找出高价值用户特征"></textarea></div>
-    </div>
-
-    <!-- Step 2: 筛选维度 -->
-    <div class="fcard"><h3><span class="n">2</span> 筛选维度</h3>
-      <div class="field"><label>平台 <span class="help">不选=全平台</span></label><div class="chips" id="chips-platform"><label class="chip"><input type="checkbox" name="tier_platform" value="IOS">iOS</label><label class="chip"><input type="checkbox" name="tier_platform" value="ANDROID">Android</label></div></div>
-      <div class="field"><label>广告类型 <span class="help">不选=全类型</span></label><div class="chips" id="chips-adtype"><label class="chip"><input type="checkbox" name="tier_adtype" value="rewardvideo">激励视频 (RV)</label><label class="chip"><input type="checkbox" name="tier_adtype" value="interstitial">插屏 (INT)</label><label class="chip"><input type="checkbox" name="tier_adtype" value="banner">Banner</label></div></div>
-      <div class="field"><label>聚合渠道 (Mediation) <span class="help">不选=全渠道</span></label><div class="chips" id="chips-mediation"><label class="chip"><input type="checkbox" name="tier_mediation" value="admob">AdMob</label><label class="chip"><input type="checkbox" name="tier_mediation" value="max">MAX</label><label class="chip"><input type="checkbox" name="tier_mediation" value="ironsource">IronSource</label></div></div>
-      <div class="field"><label>其他过滤条件 <span class="help">选填</span></label><input type="text" id="tier_extra_filter" placeholder="如：只看活跃天数>=7 / 只看 T1 国家"></div>
-    </div>
-
-    <!-- Step 3: 分桶设置 -->
-    <div class="fcard"><h3><span class="n">3</span> eCPM 分桶设置</h3>
-      <div class="field"><label>分桶方式 <span class="req">*</span></label><div class="chips" id="chips-bucket-mode"><label class="chip checked"><input type="radio" name="bucket_mode" value="auto" checked>自动等分（系统计算分位数）</label><label class="chip"><input type="radio" name="bucket_mode" value="custom">自定义阈值</label></div></div>
-      <div class="field" id="bucket-auto-wrap"><label>分桶数量</label><select id="bucket_count"><option value="5">5 桶（默认）</option><option value="4">4 桶</option><option value="10">10 桶</option><option value="20">20 桶</option></select></div>
-      <div class="field" id="bucket-custom-wrap" style="display:none;"><label>自定义阈值（逗号分隔，单位：美元）</label><input type="text" id="bucket_thresholds" placeholder="如：5,10,20,50,100 → 分为 [0,5),[5,10),[10,20),[20,50),[50,100),[100+]"></div>
-      <div class="field"><label>分桶粒度</label><div class="chips" id="chips-granularity"><label class="chip checked"><input type="radio" name="bucket_granularity" value="user_day" checked>用户×日</label><label class="chip"><input type="radio" name="bucket_granularity" value="user_avg">用户均值（日期聚合）</label></div></div>
-    </div>
-
-    <!-- Step 4: 输出指标 -->
-    <div class="fcard"><h3><span class="n">4</span> 输出指标</h3>
-      <div class="field"><label>需要输出的指标 <span class="help">不选则默认全输出</span></label><div class="chips" data-custom="tier_metrics"><label class="chip"><input type="checkbox" name="tier_metrics" value="user_count" checked>用户数</label><label class="chip"><input type="checkbox" name="tier_metrics" value="ad_user_count" checked>广告参与用户数</label><label class="chip"><input type="checkbox" name="tier_metrics" value="total_plays" checked>总播放次数</label><label class="chip"><input type="checkbox" name="tier_metrics" value="total_revenue" checked>总广告收入</label><label class="chip"><input type="checkbox" name="tier_metrics" value="avg_ecpm" checked>平均 eCPM</label><label class="chip"><input type="checkbox" name="tier_metrics" value="freq_per_user">人均频次 (Freq)</label><label class="chip"><input type="checkbox" name="tier_metrics" value="arpu">广告 ARPU</label><label class="chip"><input type="checkbox" name="tier_metrics" value="participation_rate">参与率</label></div></div>
-      <div class="field"><label>下钻维度 <span class="help">选填，CUBE 下钻</span></label><div class="chips" data-custom="tier_drills"><label class="chip"><input type="checkbox" name="tier_drills" value="adtype">广告类型</label><label class="chip"><input type="checkbox" name="tier_drills" value="entrance_id">广告入口</label><label class="chip"><input type="checkbox" name="tier_drills" value="mediation">聚合渠道</label><label class="chip"><input type="checkbox" name="tier_drills" value="platform">平台</label></div></div>
-    </div>
-
-    <!-- Step 5: 高级选项 -->
-    <div class="fcard"><h3><span class="n">5</span> 高级选项</h3>
-      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:8px 0 18px;">
-      <div class="field">
-        <label>&#128269; 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch"><input type="checkbox" id="tier_global_search_toggle"><span class="toggle-slider"></span></label>
-          <span style="font-size:13px;font-weight:500;" id="tier-search-status">未启用</span>
+  <!-- Tab 1: eCPM 分布 -->
+  <div class="tab-panel active" id="tab-dist">
+    <form id="form-dist">
+      <div class="form-error-summary"></div>
+      <div class="fcard">
+        <h3><span class="n">1</span> eCPM 分布</h3>
+        <p class="card-desc">查看每次广告点击下 eCPM 的去重人数、播放次数、收入的分布情况。</p>
+        <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-dist-product"><label class="chip"><input type="radio" name="dist_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="dist_product" value="P10">P10</label><label class="chip"><input type="radio" name="dist_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="dist_product" value="UNO2">UNO2</label></div><select id="dist_product_sel" data-required style="display:none;"><option value="">请选择</option><option value="UNO">UNO</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
+        <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="dist_date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="dist_date_end" data-required><div class="err-msg">必填</div></div></div>
+        <div class="date-shortcuts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;margin-bottom:12px;">
+          <button type="button" class="date-quick" data-range="1">前1天</button>
+          <button type="button" class="date-quick" data-range="7">近7天</button>
+          <button type="button" class="date-quick" data-range="14">近14天</button>
+          <button type="button" class="date-quick" data-range="30">近30天</button>
+          <button type="button" class="date-quick" data-range="month">本月</button>
+          <button type="button" class="date-quick" data-range="lastmonth">上月</button>
         </div>
-        <div id="tier-search-input-wrap" style="display:none;">
-          <input type="text" id="tier_search_keywords" placeholder="输入关键词或 Confluence 链接" style="width:100%;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">AI 生成 SQL 前会先查阅 Confluence 中与该关键词/链接相关的所有文档，确保口径准确。</p>
-        </div>
+        <div class="field"><label>平台 <span class="help">不选=全平台，可多选</span></label><div class="chips"><label class="chip"><input type="checkbox" name="dist_platform" value="split">分平台</label><label class="chip"><input type="checkbox" name="dist_platform" value="IOS">iOS</label><label class="chip"><input type="checkbox" name="dist_platform" value="ANDROID">Android</label></div></div>
+        <div class="field"><label>广告类型 <span class="help">不选=全类型，可多选</span></label><div class="chips"><label class="chip"><input type="checkbox" name="dist_adtype" value="split">分类型</label><label class="chip"><input type="checkbox" name="dist_adtype" value="rewardvideo">RV</label><label class="chip"><input type="checkbox" name="dist_adtype" value="interstitial">INT</label><label class="chip"><input type="checkbox" name="dist_adtype" value="banner">Banner</label></div></div>
+        <div class="field"><label>聚合渠道 <span class="help">不选=全渠道，可多选</span></label><div class="chips"><label class="chip"><input type="checkbox" name="dist_mediation" value="split">分聚合</label><label class="chip"><input type="checkbox" name="dist_mediation" value="max">MAX</label><label class="chip"><input type="checkbox" name="dist_mediation" value="admob">AdMob</label></div></div>
+        <div class="field"><label>地区 <span class="help">不选=不按地区拆分</span></label><div class="chips" id="chips-dist-area"><label class="chip"><input type="checkbox" name="dist_area" value="area_type">US&amp;T地区</label><label class="chip"><input type="checkbox" name="dist_area" value="area_group">US&amp;Group地区</label></div></div>
+        <div class="field"><label>eCPM 取整方式</label><div class="chips" id="chips-dist-round"><label class="chip checked"><input type="radio" name="dist_round" value="ceil" checked>向上取整（常用）</label><label class="chip"><input type="radio" name="dist_round" value="floor">向下取整</label></div></div>
+        <div class="field"><label>指标 <span class="help">选择输出的指标列</span></label><div class="chips" data-custom="dist_metrics"><label class="chip"><input type="checkbox" name="dist_metrics" value="play_users" checked>播放人数</label><label class="chip"><input type="checkbox" name="dist_metrics" value="play_count" checked>播放次数</label><label class="chip"><input type="checkbox" name="dist_metrics" value="iaa_revenue" checked>IAA收入</label></div></div>
+        <div class="field"><label>补充说明 <span class="help">选填</span></label><input type="text" id="dist_notes" placeholder="如：只看成年人"></div>
       </div>
-      <div class="field" style="margin-top:16px;">
-        <label>&#128202; 看板口径 <span class="help">选填，启用后限定 is_adult=1 + APP 端</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch"><input type="checkbox" id="tier_dashboard_toggle"><span class="toggle-slider"></span></label>
-          <span style="font-size:13px;font-weight:500;" id="tier-dashboard-status">未启用</span>
-        </div>
-        <div id="tier-dashboard-desc" style="display:none;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">启用后，用户基础池将严格遵循看板口径：is_adult=1 + UPPER(client)='APP'。</p>
-        </div>
-      </div>
-      <div class="field" style="margin-top:16px;">
-        <label>&#128300; SQL 自检 <span class="help">选填，启用后 AI 先输出初版 SQL，报错时触发自检</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch"><input type="checkbox" id="tier_sql_verify_toggle"><span class="toggle-slider"></span></label>
-          <span style="font-size:13px;font-weight:500;" id="tier-sql-verify-status">未启用</span>
-        </div>
-        <div id="tier-sql-verify-desc" style="display:none;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">启用后流程：① AI 先快速输出初版 SQL → ② 跑数有问题贴回来 → ③ AI 启动完整自检并修正。</p>
-        </div>
-      </div>
-      <div class="field" style="margin-top:16px;"><label>补充说明 <span class="help">选填</span></label><textarea id="tier_notes" rows="2" placeholder="额外口径或特殊需求"></textarea></div>
-    </div>
+      <div class="submit-bar"><button type="button" class="btn btn-ghost btn-reset">重置</button><button type="submit" class="btn btn-primary">✅ 生成 SQL</button></div>
+    </form>
+  </div>
 
-    <div class="submit-bar"><button type="button" class="btn btn-ghost" id="btn-reset">重置</button><button type="submit" class="btn btn-primary">✅ 完成并生成</button></div>
-  </form>
+  <!-- Tab 2: eCPM 分群 -->
+  <div class="tab-panel" id="tab-segment">
+    <form id="form-segment">
+      <div class="form-error-summary"></div>
+      <div class="fcard">
+        <h3><span class="n">1</span> eCPM 分群对比</h3>
+        <p class="card-desc">自定义 eCPM 阈值划分人群，对比各群体的付费、活跃、广告行为差异。</p>
+        <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-seg-product"><label class="chip"><input type="radio" name="seg_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="seg_product" value="P10">P10</label><label class="chip"><input type="radio" name="seg_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="seg_product" value="UNO2">UNO2</label></div><select id="seg_product_sel" data-required style="display:none;"><option value="">请选择</option><option value="UNO">UNO</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
+        <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="seg_date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="seg_date_end" data-required><div class="err-msg">必填</div></div></div>
+        <div class="field"><label>平台 <span class="help">不选=全平台</span></label><div class="chips"><label class="chip"><input type="checkbox" name="seg_platform" value="IOS">iOS</label><label class="chip"><input type="checkbox" name="seg_platform" value="ANDROID">Android</label></div></div>
+        <div class="field"><label>分群阈值 <span class="req">*</span> <span class="help">逗号分隔，单位美元</span></label><input type="text" id="seg_thresholds" data-required placeholder="如：10,30,60 → [0,10)低 / [10,30)中 / [30,60)高 / [60+]极高"><div class="err-msg">必填，逗号分隔数值</div></div>
+        <div class="field"><label>对比指标 <span class="help">不选=全输出</span></label><div class="chips"><label class="chip"><input type="checkbox" name="seg_metrics" value="user_count" checked>用户数</label><label class="chip"><input type="checkbox" name="seg_metrics" value="revenue" checked>广告收入</label><label class="chip"><input type="checkbox" name="seg_metrics" value="freq" checked>Freq</label><label class="chip"><input type="checkbox" name="seg_metrics" value="arpu">ARPU</label><label class="chip"><input type="checkbox" name="seg_metrics" value="retention">留存</label><label class="chip"><input type="checkbox" name="seg_metrics" value="pay_rate">付费率</label></div></div>
+        <div class="field"><label>补充说明 <span class="help">选填</span></label><input type="text" id="seg_notes" placeholder="如：对比各群 D7 留存 / 只看新用户"></div>
+      </div>
+      <div class="submit-bar"><button type="button" class="btn btn-ghost btn-reset">重置</button><button type="submit" class="btn btn-primary">✅ 生成 SQL</button></div>
+    </form>
+  </div>
+
+  <!-- Tab 3: 分层预设 -->
+  <div class="tab-panel" id="tab-preset">
+    <form id="form-preset">
+      <div class="form-error-summary"></div>
+      <div class="fcard">
+        <h3><span class="n">1</span> 分层预设</h3>
+        <p class="card-desc">使用团队预设的分层规则，一键生成标准分层 SQL。</p>
+        <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-pre-product"><label class="chip"><input type="radio" name="pre_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="pre_product" value="P10">P10</label><label class="chip"><input type="radio" name="pre_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="pre_product" value="UNO2">UNO2</label></div><select id="pre_product_sel" data-required style="display:none;"><option value="">请选择</option><option value="UNO">UNO</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
+        <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="pre_date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="pre_date_end" data-required><div class="err-msg">必填</div></div></div>
+        <div class="field"><label>平台 <span class="help">不选=全平台</span></label><div class="chips"><label class="chip"><input type="checkbox" name="pre_platform" value="IOS">iOS</label><label class="chip"><input type="checkbox" name="pre_platform" value="ANDROID">Android</label></div></div>
+        <div class="field"><label>预设方案 <span class="req">*</span></label><div class="chips" id="chips-preset-scheme"><label class="chip checked"><input type="radio" name="preset_scheme" value="quartile" checked>四分位（P25/P50/P75）</label><label class="chip"><input type="radio" name="preset_scheme" value="value_tier">价值三档（低/中/高）</label><label class="chip"><input type="radio" name="preset_scheme" value="head_tail">头尾分析（Top10% vs 底部50%）</label></div></div>
+        <div class="field"><label>广告类型 <span class="help">不选=全类型</span></label><div class="chips"><label class="chip"><input type="checkbox" name="pre_adtype" value="rewardvideo">激励视频 (RV)</label><label class="chip"><input type="checkbox" name="pre_adtype" value="interstitial">插屏 (INT)</label><label class="chip"><input type="checkbox" name="pre_adtype" value="banner">Banner</label></div></div>
+        <div class="field"><label>补充说明 <span class="help">选填</span></label><input type="text" id="pre_notes" placeholder="如：额外输出各层的 D7 留存"></div>
+      </div>
+      <div class="submit-bar"><button type="button" class="btn btn-ghost btn-reset">重置</button><button type="submit" class="btn btn-primary">✅ 生成 SQL</button></div>
+    </form>
+  </div>
+
+  <!-- 共享输出区 -->
   <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
 </div>
+
 <script src="../assets/form-framework.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   FF.init();
-  FF.initWizard([
-    { title: '基础', question: '分析哪个产品的广告分层？', explain: '选产品和日期。', example: '<b>例：</b>SKB 最近一周' },
-    { title: '筛选', question: '需要限定平台/广告类型吗？', explain: '不选=全部。', example: '<b>例：</b>只看安卓 RV' },
-    { title: '分桶', question: '用什么方式划分 eCPM 层级？', explain: '自动等分或自定义阈值。', example: '<b>例：</b>5桶等分' },
-    { title: '指标', question: '需要输出哪些分析指标？', explain: '选指标和下钻维度。', example: '<b>例：</b>用户数 + 收入 + eCPM + 按广告类型下钻' },
-    { title: '高级', question: '需要额外配置吗？', explain: '搜索/看板口径/自检。', example: '<b>例：</b>启用看板口径' },
-  ]);
+  // 强制初始化默认选中状态
+  document.querySelectorAll('.chip input:checked').forEach(inp => { inp.closest('.chip').classList.add('checked'); });
 
-  // 产品 chips → select 联动
-  document.querySelectorAll('#chips-tier-product .chip').forEach(chip => {
-    const inp = chip.querySelector('input');
-    inp.addEventListener('change', () => {
-      chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked'));
-      chip.classList.add('checked');
-      document.getElementById('product').value = inp.value;
+  // Tab 切换
+  document.querySelectorAll('.scene-switch button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.scene-switch button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
     });
   });
 
-  // 分桶方式切换
-  document.querySelectorAll('#chips-bucket-mode .chip input').forEach(inp => {
-    inp.addEventListener('change', () => {
-      document.getElementById('bucket-auto-wrap').style.display = inp.value === 'auto' ? '' : 'none';
-      document.getElementById('bucket-custom-wrap').style.display = inp.value === 'custom' ? '' : 'none';
-      document.querySelectorAll('#chips-bucket-mode .chip').forEach(c => c.classList.remove('checked'));
-      inp.closest('.chip').classList.add('checked');
-    });
-  });
-
-  // Toggle 开关
-  function setupToggle(toggleId, statusId, wrapId) {
-    const toggle = document.getElementById(toggleId);
-    const status = document.getElementById(statusId);
-    const wrap = wrapId ? document.getElementById(wrapId) : null;
-    if (!toggle) return;
-    toggle.addEventListener('change', () => {
-      status.textContent = toggle.checked ? '已启用' : '未启用';
-      if (wrap) wrap.style.display = toggle.checked ? '' : 'none';
+  // 产品 Chips 联动
+  function bindChips(chipsId, selectId) {
+    document.querySelectorAll(`#${chipsId} .chip`).forEach(chip => {
+      const inp = chip.querySelector('input');
+      inp.addEventListener('change', () => {
+        chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked'));
+        chip.classList.add('checked');
+        document.getElementById(selectId).value = inp.value;
+      });
     });
   }
-  setupToggle('tier_global_search_toggle', 'tier-search-status', 'tier-search-input-wrap');
-  setupToggle('tier_dashboard_toggle', 'tier-dashboard-status', 'tier-dashboard-desc');
-  setupToggle('tier_sql_verify_toggle', 'tier-sql-verify-status', 'tier-sql-verify-desc');
+  bindChips('chips-dist-product', 'dist_product_sel');
+  bindChips('chips-seg-product', 'seg_product_sel');
+  bindChips('chips-pre-product', 'pre_product_sel');
+
+  // 取整方式 radio
+  document.querySelectorAll('#chips-dist-round .chip').forEach(chip => {
+    const inp = chip.querySelector('input');
+    inp.addEventListener('change', () => { chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked')); chip.classList.add('checked'); });
+  });
+  // 预设方案 radio
+  document.querySelectorAll('#chips-preset-scheme .chip').forEach(chip => {
+    const inp = chip.querySelector('input');
+    inp.addEventListener('change', () => { chip.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('checked')); chip.classList.add('checked'); });
+  });
+
+  // 日期快捷按钮
+  document.querySelectorAll('#tab-dist .date-quick').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const range = btn.dataset.range;
+      const today = new Date();
+      const fmt = d => d.toISOString().slice(0, 10);
+      let start, end;
+      if (range === '1') { const y = new Date(today); y.setDate(today.getDate()-1); start=y; end=y; }
+      else if (range === 'month') { start = new Date(today.getFullYear(), today.getMonth(), 1); end = today; }
+      else if (range === 'lastmonth') { start = new Date(today.getFullYear(), today.getMonth()-1, 1); end = new Date(today.getFullYear(), today.getMonth(), 0); }
+      else { const days = parseInt(range); start = new Date(today); start.setDate(today.getDate()-days+1); end = today; }
+      document.getElementById('dist_date_start').value = fmt(start);
+      document.getElementById('dist_date_end').value = fmt(end);
+      btn.closest('.date-shortcuts').querySelectorAll('.date-quick').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
 
   // 重置
-  document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('确认重置？')) location.reload(); });
+  document.querySelectorAll('.btn-reset').forEach(btn => { btn.addEventListener('click', () => { if(confirm('确认重置？')) location.reload(); }); });
 
-  // 提交
-  document.getElementById('ad-tier-form').addEventListener('submit', e => {
-    e.preventDefault();
-    if (!FF.validate(e.target)) return;
+  // 工具
+  const TABLE_MAP = {
+    UNO:  { schema:'dw_ods_mn01', active:'dm_mn01_player_active_info', pk:'role_id', adlog:'c_app_ad_log', mode:'single_uno' },
+    P10:  { schema:'dw_ods_common_mn02', active:'dm_mn02_player_active_info', pk:'account_id', adplay:'c_adplay', advalue:'c_advalue', mode:'split' },
+    SKB:  { schema:'dw_ods_common_mn04', active:'dm_mn04_player_active_info', pk:'account_id', adplay:'c_adplay', advalue:'c_advalue', mode:'split' },
+    UNO2: { schema:'dw_ods_mn08', active:'dm_mn08_player_active_info', pk:'role_id', adlog:'c_client_app_ad_log', mode:'single' }
+  };
+  function getChecked(name) { return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value); }
 
-    const product = FF.val('product');
-    const dateStart = FF.val('date_start');
-    const dateEnd = FF.val('date_end');
-    const goal = FF.val('tier_goal');
-    const platforms = FF.getCheckedChips('tier_platform');
-    const adtypes = FF.getCheckedChips('tier_adtype');
-    const mediations = FF.getCheckedChips('tier_mediation');
-    const extraFilter = FF.val('tier_extra_filter');
-    const bucketMode = document.querySelector('input[name="bucket_mode"]:checked').value;
-    const bucketCount = FF.val('bucket_count');
-    const bucketThresholds = FF.val('bucket_thresholds');
-    const granularity = document.querySelector('input[name="bucket_granularity"]:checked').value;
-    const metrics = FF.getCheckedChips('tier_metrics');
-    const drills = FF.getCheckedChips('tier_drills');
-    const notes = FF.val('tier_notes');
-    const searchEnabled = document.getElementById('tier_global_search_toggle').checked;
-    const searchKeywords = FF.val('tier_search_keywords');
-    const dashboardMode = document.getElementById('tier_dashboard_toggle').checked;
-    const sqlVerify = document.getElementById('tier_sql_verify_toggle').checked;
+  // ═══════════ Form 1: eCPM 分布 ═══════════
+  document.getElementById('form-dist').addEventListener('submit', e => {
+    e.preventDefault(); if (!FF.validate(e.target)) return;
+    const product = document.getElementById('dist_product_sel').value;
+    const dateStart = document.getElementById('dist_date_start').value;
+    const dateEnd = document.getElementById('dist_date_end').value;
+    const platforms = getChecked('dist_platform');
+    const adtypes = getChecked('dist_adtype');
+    const mediations = getChecked('dist_mediation');
+    const areas = getChecked('dist_area');
+    const roundMode = document.querySelector('input[name="dist_round"]:checked').value;
+    const metrics = getChecked('dist_metrics');
+    const notes = document.getElementById('dist_notes').value;
+    const roundFn = roundMode === 'ceil' ? 'CEIL' : 'FLOOR';
+    const t = TABLE_MAP[product];
+    const platformFilter = platforms.filter(p => p !== 'split');
+    const adtypeFilter = adtypes.filter(a => a !== 'split');
+    const mediationFilter = mediations.filter(m => m !== 'split');
+    const area = areas.length ? areas[0] : '';
 
-    const d = {
-      module: 'ad_tiering',
-      product, date_range: [dateStart, dateEnd], goal,
-      filters: { platforms, adtypes, mediations, extra: extraFilter },
-      bucket: { mode: bucketMode, count: bucketCount, thresholds: bucketThresholds, granularity },
-      metrics, drills, notes,
-      options: { search: searchEnabled, search_keywords: searchKeywords, dashboard_mode: dashboardMode, sql_verify: sqlVerify }
-    };
+    // 固定 GROUP BY
+    const fixedDims = ['date'];
+    if (platforms.includes('split')) fixedDims.push('platform');
+    // CUBE 维度
+    const cubeDims = ['adtype','entrance_id','ecpm_value'];
+    if (mediations.includes('split')) cubeDims.splice(2, 0, 'mediation');
 
-    // 产品→表映射
-    const TABLE_MAP = {
-      UNO:  { schema: 'dw_ods_mn01', active: 'dm_mn01_player_active_info', pk: 'role_id', adplay: 'c_adplay', advalue: 'c_advalue', mode: 'split' },
-      P10:  { schema: 'dw_ods_common_mn02', active: 'dm_mn02_player_active_info', pk: 'account_id', adplay: 'c_adplay', advalue: 'c_advalue', mode: 'split' },
-      SKB:  { schema: 'dw_ods_common_mn04', active: 'dm_mn04_player_active_info', pk: 'account_id', adplay: 'c_adplay', advalue: 'c_advalue', mode: 'split' },
-      UNO2: { schema: 'dw_ods_mn08', active: 'dm_mn08_player_active_info', pk: 'role_id', adlog: 'c_client_app_ad_log', mode: 'single' }
-    };
-    const tbl = TABLE_MAP[product];
+    // 指标
+    const metricCols = [];
+    metrics.forEach(m => {
+      if (m === 'play_users') metricCols.push("COUNT(DISTINCT account_id) AS user_count");
+      else if (m === 'play_count') metricCols.push("SUM(play_cnt) AS total_plays");
+      else if (m === 'iaa_revenue') metricCols.push("ROUND(SUM(revenue),4) AS total_revenue");
+      else metricCols.push(`-- TODO: ${m}`);
+    });
+    metricCols.push("ROUND(AVG(CASE WHEN play_cnt > 0 THEN revenue * 1000.0 / play_cnt END),2) AS avg_ecpm");
 
-    const prompt = `# 角色
-你是资深广告变现数据分析师。请基于以下需求编写用户 eCPM 分桶分层 SQL。
+    let sql = '';
+    sql += `-- ============================================================\n`;
+    sql += `-- ${product} eCPM 分布：每用户当天每次点击下的 eCPM 分桶\n`;
+    sql += `-- 时间：${dateStart} ~ ${dateEnd}\n`;
+    sql += `-- ============================================================\n\n`;
 
-# 背景
-- 产品：${product}
-- 时间范围：${dateStart} ~ ${dateEnd}
-- 目标：${goal || '分析各 eCPM 分桶用户的广告参与度、收入贡献与 Freq'}
+    // player_base
+    sql += `WITH player_base AS\n(\n    SELECT  date\n`;
+    if (t.mode === 'single_uno') sql += `           ,cast(role_id AS varchar) AS account_id\n`;
+    else sql += `           ,lower(account_id) AS account_id\n`;
+    sql += `           ,MAX(platform)     AS platform\n`;
+    if (area) sql += `           ,MAX(country)      AS country\n`;
+    sql += `    FROM   ${t.schema}.${t.active}\n`;
+    sql += `    WHERE  date BETWEEN '${dateStart}' AND '${dateEnd}'\n`;
+    if (platformFilter.length) sql += `      AND UPPER(platform) IN ('${platformFilter.join("','")}')\n`;
+    sql += `    GROUP BY date, ${t.mode === 'single_uno' ? 'role_id' : 'account_id'}\n),\n`;
 
-# 数据源
-- 活跃表：${tbl.schema}.${tbl.active}（主键：${tbl.pk}）
-${tbl.mode === 'split' ? `- 广告播放表：${tbl.schema}.${tbl.adplay}\n- 广告收入表：${tbl.schema}.${tbl.advalue}` : `- 广告日志表：${tbl.schema}.${tbl.adlog}（log_subtype 区分 adplay/advalue）`}
-- 引擎：Presto/Trino
-${product === 'UNO2' ? '- ⚠️ UNO2 安卓收入需 /1000000' : '- ⚠️ iOS 无需除以 1000000，Android 需 /1000000'}
+    // ad_data
+    if (t.mode === 'single') {
+      sql += `ad_data AS\n(\n    SELECT  date\n           ,lower(sdk_account_id) AS account_id\n           ,adtype\n           ,entranceid\n           ,platform\n           ,mediation\n`;
+      sql += `           ,SUM(CASE WHEN log_subtype = 'adplay' THEN 1 ELSE 0 END) AS play_times\n`;
+      sql += `           ,SUM(CASE WHEN log_subtype = 'advalue' THEN if(platform = 'IOS', value, value/1000000) ELSE 0 END) AS revenue\n`;
+      sql += `    FROM ${t.schema}.${t.adlog}\n    WHERE date BETWEEN '${dateStart}' AND '${dateEnd}'\n      AND log_subtype IN ('adplay','advalue')\n`;
+      if (platformFilter.length) sql += `      AND UPPER(platform) IN ('${platformFilter.join("','")}')\n`;
+      if (adtypeFilter.length) sql += `      AND adtype IN ('${adtypeFilter.join("','")}')\n`;
+      if (mediationFilter.length) sql += `      AND mediation IN ('${mediationFilter.join("','")}')\n`;
+      sql += `    GROUP BY date, sdk_account_id, adtype, entranceid, platform, mediation\n),\n`;
+    } else if (t.mode === 'single_uno') {
+      sql += `ad_data AS\n(\n    SELECT  date\n           ,cast(roleid AS varchar) AS account_id\n           ,adtype\n           ,'' AS entranceid\n           ,platform\n           ,mediation\n`;
+      sql += `           ,SUM(if(log_type = 'adplay' AND status = '1', 1, 0)) AS play_times\n`;
+      sql += `           ,SUM(CASE WHEN log_type = 'advalue' AND platform = 'IOS' THEN cast(value AS double)\n                     WHEN log_type = 'advalue' AND platform = 'ANDROID' THEN cast(value AS double)/1000000.0\n                     ELSE 0 END) AS revenue\n`;
+      sql += `    FROM ${t.schema}.${t.adlog}\n    WHERE date BETWEEN '${dateStart}' AND '${dateEnd}'\n      AND log_type IN ('adplay','advalue')\n      AND substr(log_time, 1, 10) = date\n`;
+      if (platformFilter.length) sql += `      AND UPPER(platform) IN ('${platformFilter.join("','")}')\n`;
+      if (adtypeFilter.length) sql += `      AND adtype IN ('${adtypeFilter.join("','")}')\n`;
+      if (mediationFilter.length) sql += `      AND mediation IN ('${mediationFilter.join("','")}')\n`;
+      sql += `    GROUP BY date, roleid, adtype, mediation, platform\n),\n`;
+    } else {
+      sql += `ad_data AS\n(\n    SELECT date, account_id, adtype, entranceid, platform, mediation\n`;
+      sql += `           ,SUM(CASE WHEN log_type = 'adplay' THEN times ELSE 0 END) AS play_times\n`;
+      sql += `           ,SUM(CASE WHEN log_type = 'advalue' THEN value ELSE 0 END) AS revenue\n    FROM\n    (\n`;
+      sql += `        SELECT date, lower(account_id) AS account_id, adtype, entranceid, platform, mediation, 'adplay' AS log_type, 0 AS value, 1 AS times\n`;
+      sql += `        FROM ${t.schema}.${t.adplay}\n        WHERE date BETWEEN '${dateStart}' AND '${dateEnd}'\n`;
+      if (platformFilter.length) sql += `          AND UPPER(platform) IN ('${platformFilter.join("','")}')\n`;
+      if (adtypeFilter.length) sql += `          AND adtype IN ('${adtypeFilter.join("','")}')\n`;
+      if (mediationFilter.length) sql += `          AND mediation IN ('${mediationFilter.join("','")}')\n`;
+      sql += `        UNION ALL\n`;
+      sql += `        SELECT date, lower(account_id) AS account_id, adtype, entranceid, platform, mediation, 'advalue' AS log_type, if(platform = 'IOS', value, value/1000000) AS value, 1 AS times\n`;
+      sql += `        FROM ${t.schema}.${t.advalue}\n        WHERE date BETWEEN '${dateStart}' AND '${dateEnd}'\n`;
+      if (platformFilter.length) sql += `          AND UPPER(platform) IN ('${platformFilter.join("','")}')\n`;
+      if (adtypeFilter.length) sql += `          AND adtype IN ('${adtypeFilter.join("','")}')\n`;
+      if (mediationFilter.length) sql += `          AND mediation IN ('${mediationFilter.join("','")}')\n`;
+      sql += `    )\n    GROUP BY date, account_id, adtype, entranceid, platform, mediation\n),\n`;
+    }
 
-# 筛选条件
-${platforms.length ? '- 平台：' + platforms.join(', ') : '- 平台：全平台'}
-${adtypes.length ? '- 广告类型：' + adtypes.join(', ') : '- 广告类型：全类型'}
-${mediations.length ? '- 聚合渠道：' + mediations.join(', ') : '- 聚合渠道：全渠道'}
-${dashboardMode ? '- 看板口径：is_adult=1 AND UPPER(client)=\'APP\'' : ''}
-${extraFilter ? '- 其他过滤：' + extraFilter : ''}
+    // player_ecpm
+    sql += `player_ecpm AS\n(\n    SELECT  p.date\n           ,p.account_id\n           ,p.platform\n`;
+    if (area) sql += `           ,p.country\n`;
+    sql += `           ,COALESCE(a.adtype,'None')     AS adtype\n           ,COALESCE(a.entranceid,'None') AS entrance_id\n           ,COALESCE(a.mediation,'None')  AS mediation\n`;
+    sql += `           ,COALESCE(a.play_times,0)      AS play_cnt\n           ,COALESCE(a.revenue,0)         AS revenue\n`;
+    sql += `           ,CASE WHEN COALESCE(a.play_times,0) = 0 THEN 0\n                 ELSE ${roundFn}(a.revenue * 1000.0 / a.play_times) END AS ecpm_value\n`;
+    sql += `    FROM player_base p\n    LEFT JOIN ad_data a\n      ON p.date = a.date AND p.account_id = a.account_id\n)\n`;
 
-# eCPM 分桶规则
-- 方式：${bucketMode === 'auto' ? '等分 ' + bucketCount + ' 桶（按分位数）' : '自定义阈值 [' + bucketThresholds + ']'}
-- 粒度：${granularity === 'user_day' ? '用户×日（每条为一个用户某天的 eCPM）' : '用户均值（先聚合日期维度，再分桶）'}
-- eCPM 计算：Revenue * 1000 / PlayTimes（按广告点击粒度汇总后再计算）
+    // 地区 SELECT 列
+    let areaCol = '';
+    if (area === 'area_type') areaCol = `       ,CASE WHEN UPPER(country) IN ('US') THEN 'US' WHEN UPPER(country) IN ('AU','CA','CN','DE','HK','JP','KR','NZ','SG','TW','GB','FR') THEN 'T1' WHEN UPPER(country) IN ('AE','AT','BE','BS','CH','CY','CZ','DK','EE','ES','FI','HU','IE','IL','IS','IT','KW','LU','NL','NO','PL','PR','PT','QA','RU','SA','SE','SM','SV','TR') THEN 'T2' ELSE 'T3' END AS area_type\n`;
+    else if (area === 'area_group') areaCol = `       ,CASE WHEN country = 'US' THEN 'US' WHEN country IN ('TZ','BG','BW','UA','GE','LT','NZ','CG','TR','GB','UZ','GT','CY','ZA','HN','UY','SR','JM','PK','YE','DE','RS','RO','GH','IT','CA','NA','FI','KY','EE','OM','IE','TG','AL','EG','BB','DK','SI','AW','HK','AO','JP','SE','WS','SA','JO','NL','BE','LU','AU','MT','AT','BN','SG','CS','HR','NO','GP','BS','NC','GM','CH','LB','CN','FJ','PR','LY','AE','YT','IL','NG','MU','GI','SC','MR','MQ','CM','BH','LI','MV','GR','LA','FO','CV','GG','IM','QA','NE','GU','IO','IS','DM','KW','GA','VU','SL','BZ','GY','MS','AI','ZW','RU','RW') THEN 'GroupA' WHEN country IN ('TN','GF','MW','GD','BD','AM','HU','MA','NI','DO','SK','ZM','IR','MY','ES','PA','PL','LR','TW','LV','SN','VN','FR') THEN 'GroupB' ELSE 'GroupC' END AS area_group\n`;
 
-# 输出指标
-${metrics.length ? metrics.join('、') : '用户数、广告参与用户数、总播放次数、总广告收入、平均eCPM'}
+    // 最终 SELECT
+    sql += `SELECT  ${fixedDims.join('\n       ,')}\n`;
+    if (areaCol) sql += areaCol;
+    sql += `       ,COALESCE(adtype,'ALL')                      AS adtype\n`;
+    sql += `       ,COALESCE(entrance_id,'ALL')                 AS entrance_id\n`;
+    sql += `       ,COALESCE(mediation,'ALL')                   AS mediation\n`;
+    sql += `       ,COALESCE(CAST(ecpm_value AS VARCHAR),'ALL') AS ecpm_value\n`;
+    sql += `       ,${metricCols.join('\n       ,')}\n`;
+    sql += `FROM   player_ecpm\n`;
+    sql += `GROUP BY ${fixedDims.join('\n       ,')}\n`;
+    if (area) sql += `       ,country\n`;
+    sql += `       ,CUBE(${cubeDims.join(',')})\n;\n`;
 
-# 下钻维度
-${drills.length ? '使用 CUBE 对以下维度下钻：' + drills.join('、') : '按 date + platform + eCPM 分桶聚合即可'}
+    const d = { module:'ad_tier_dist', product, date_range:[dateStart,dateEnd], platforms, adtypes, mediations, areas, metrics, round_mode:roundMode, notes };
+    FF.renderArtifacts([{key:'sql',label:'SQL',content:sql},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
+    // 提示 CUBE ALL 维度
+    const outBody = document.querySelector('#output .out-body');
+    const oldHint = outBody.querySelector('.cube-hint');
+    if (oldHint) oldHint.remove();
+    const hint = document.createElement('div');
+    hint.className = 'cube-hint';
+    hint.style.cssText = 'font-size:12px;color:var(--brand-1);background:#fff4ec;border:1px solid #ffd8a8;border-radius:8px;padding:10px 14px;margin-bottom:14px;';
+    hint.textContent = `⚠️ ${cubeDims.join('、')} 维度带有 ALL 值（CUBE 产生），数据透视时需筛选 ALL 行查看去重汇总`;
+    const panel = outBody.querySelector('.out-panel');
+    if (panel) outBody.insertBefore(hint, panel);
+  });
 
-# SQL 模板参考
-请参考以下通用模板结构：
-1. vars CTE — 日期范围 + 筛选数组（ARRAY 方式，空=不筛选）
-2. player_base — 从活跃表取基础用户池
-3. ad_data — ${tbl.mode === 'split' ? '分表 UNION ALL（adplay + advalue）' : '单表按 log_subtype 聚合'}
-4. player_ecpm — LEFT JOIN + 计算 eCPM
-5. 最终 SELECT — 分桶 + 聚合${drills.length ? ' + CUBE(' + drills.join(',') + ')' : ''}
-${notes ? '\n# 补充\n' + notes : ''}`;
+  // ═══════════ Form 2: eCPM 分群 ═══════════
+  document.getElementById('form-segment').addEventListener('submit', e => {
+    e.preventDefault(); if (!FF.validate(e.target)) return;
+    const product = document.getElementById('seg_product_sel').value;
+    const dateStart = document.getElementById('seg_date_start').value;
+    const dateEnd = document.getElementById('seg_date_end').value;
+    const platforms = getChecked('seg_platform');
+    const thresholds = document.getElementById('seg_thresholds').value;
+    const metrics = getChecked('seg_metrics');
+    const notes = document.getElementById('seg_notes').value;
+    const t = TABLE_MAP[product];
+    const prompt = `# 角色\n你是资深广告变现数据分析师。\n\n# 任务\n生成 eCPM 分群对比 SQL — 按自定义阈值 [${thresholds}] 将用户划分为不同 eCPM 价值群体，对比各群体行为差异。\n\n# 参数\n- 产品：${product}\n- 时间：${dateStart} ~ ${dateEnd}\n${platforms.length ? '- 平台：'+platforms.join(', ') : '- 平台：全平台'}\n- 分群阈值：${thresholds}（单位：美元 eCPM）\n- 对比指标：${metrics.length ? metrics.join('、') : '用户数、广告收入、Freq、ARPU'}\n\n# 数据源\n- 活跃表：${t.schema}.${t.active}\n- 引擎：Presto/Trino\n\n# SQL 结构要求\n1. 先计算每个用户的日均 eCPM\n2. 用 CASE WHEN 按阈值 [${thresholds}] 分群\n3. 按分群聚合输出各群指标及占比\n${notes?'\n# 补充\n'+notes:''}`;
+    const d = { module:'ad_tier_segment', product, date_range:[dateStart,dateEnd], platforms, thresholds, metrics, notes };
+    FF.renderArtifacts([{key:'sql',label:'SQL Prompt',content:prompt},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
+  });
 
-    FF.renderArtifacts([
-      { key: 'sql', label: 'SQL Prompt', content: prompt },
-      { key: 'json', label: 'JSON', content: JSON.stringify(d, null, 2) }
-    ], { collectFn: () => d });
+  // ═══════════ Form 3: 分层预设 ═══════════
+  document.getElementById('form-preset').addEventListener('submit', e => {
+    e.preventDefault(); if (!FF.validate(e.target)) return;
+    const product = document.getElementById('pre_product_sel').value;
+    const dateStart = document.getElementById('pre_date_start').value;
+    const dateEnd = document.getElementById('pre_date_end').value;
+    const platforms = getChecked('pre_platform');
+    const adtypes = getChecked('pre_adtype');
+    const scheme = document.querySelector('input[name="preset_scheme"]:checked').value;
+    const notes = document.getElementById('pre_notes').value;
+    const t = TABLE_MAP[product];
+    const schemeDesc = { quartile:'四分位分层：按 P25/P50/P75 分为 Q1~Q4', value_tier:'价值三档：低(< P33)/中(P33~P66)/高(> P66)', head_tail:'头尾分析：Top 10% vs 底部 50%' };
+    const prompt = `# 角色\n你是资深广告变现数据分析师。\n\n# 任务\n生成标准分层预设 SQL — 使用「${schemeDesc[scheme]}」规则，输出各层用户画像。\n\n# 参数\n- 产品：${product}\n- 时间：${dateStart} ~ ${dateEnd}\n${platforms.length ? '- 平台：'+platforms.join(', ') : '- 平台：全平台'}\n${adtypes.length ? '- 广告类型：'+adtypes.join(', ') : '- 广告类型：全类型'}\n- 预设方案：${schemeDesc[scheme]}\n\n# 数据源\n- 活跃表：${t.schema}.${t.active}\n- 引擎：Presto/Trino\n\n# SQL 结构要求\n1. 先计算每个用户的日均 eCPM\n2. 用 PERCENTILE/NTILE 确定分位数阈值\n3. 按分层输出：用户数、占比、总广告收入、收入占比、平均 eCPM、Freq、ARPU\n${notes?'\n# 补充\n'+notes:''}`;
+    const d = { module:'ad_tier_preset', product, date_range:[dateStart,dateEnd], platforms, adtypes, scheme, notes };
+    FF.renderArtifacts([{key:'sql',label:'SQL Prompt',content:prompt},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
   });
 });
 </script>
