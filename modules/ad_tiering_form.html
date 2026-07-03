@@ -43,7 +43,7 @@
       <div class="fcard">
         <h3><span class="n">1</span> eCPM 分布</h3>
         <p class="card-desc">查看每次广告点击下 eCPM 的去重人数、播放次数、收入的分布情况。</p>
-        <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-dist-product"><label class="chip"><input type="checkbox" name="dist_product" value="UNO">UNO</label><label class="chip"><input type="checkbox" name="dist_product" value="P10">P10</label><label class="chip"><input type="checkbox" name="dist_product" value="SKB">SKB</label><label class="chip"><input type="checkbox" name="dist_product" value="UNO2">UNO2</label><label class="chip"><input type="checkbox" name="dist_product" value="ALL">全部</label></div><select id="dist_product_sel" data-required style="display:none;"><option value="">请选择</option><option value="UNO">UNO</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO2">UNO2</option><option value="ALL">ALL</option></select><div class="err-msg">必填</div></div>
+        <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-dist-product"><label class="chip"><input type="radio" name="dist_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="dist_product" value="P10">P10</label><label class="chip"><input type="radio" name="dist_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="dist_product" value="UNO2">UNO2</label></div><input type="hidden" id="dist_product_sel" data-required><div class="err-msg">必填</div></div>
         <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="dist_date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="dist_date_end" data-required><div class="err-msg">必填</div></div></div>
         <div class="date-shortcuts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;margin-bottom:12px;">
           <button type="button" class="date-quick" data-range="1">前1天</button>
@@ -122,27 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 产品 Chips 联动（多选，全部互斥）
-  function bindProductChips(chipsId, selectId) {
-    document.querySelectorAll(`#${chipsId} .chip`).forEach(chip => {
-      const inp = chip.querySelector('input');
-      inp.addEventListener('change', () => {
-        const group = chip.closest('.chips');
-        if (inp.value === 'ALL' && inp.checked) {
-          group.querySelectorAll('input').forEach(i => { if (i !== inp) { i.checked = false; i.closest('.chip').classList.remove('checked'); } });
-        } else if (inp.checked) {
-          const allInp = group.querySelector('input[value="ALL"]');
-          if (allInp) { allInp.checked = false; allInp.closest('.chip').classList.remove('checked'); }
-        }
-        chip.classList.toggle('checked', inp.checked);
-        const selected = [...group.querySelectorAll('input:checked')].map(i => i.value);
-        document.getElementById(selectId).value = selected.join(',') || '';
-      });
-    });
-  }
-  bindProductChips('chips-dist-product', 'dist_product_sel');
-
-  // 其他产品单选（Tab 2 & 3 保持 radio）
+  // 产品 Chips 联动（单选 radio）
   function bindChips(chipsId, selectId) {
     document.querySelectorAll(`#${chipsId} .chip`).forEach(chip => {
       const inp = chip.querySelector('input');
@@ -153,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+  bindChips('chips-dist-product', 'dist_product_sel');
   bindChips('chips-seg-product', 'seg_product_sel');
   bindChips('chips-pre-product', 'pre_product_sel');
 
@@ -201,8 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('form-dist').addEventListener('submit', e => {
     e.preventDefault(); if (!FF.validate(e.target)) return;
     const product = document.getElementById('dist_product_sel').value;
-    const products = product.includes('ALL') ? ['UNO','P10','SKB','UNO2'] : product.split(',').filter(Boolean);
-    if (!products.length) return;
+    const t = TABLE_MAP[product];
+    if (!t) return;
     const dateStart = document.getElementById('dist_date_start').value;
     const dateEnd = document.getElementById('dist_date_end').value;
     const platforms = getChecked('dist_platform');
@@ -213,16 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const metrics = getChecked('dist_metrics');
     const notes = document.getElementById('dist_notes').value;
     const roundFn = roundMode === 'ceil' ? 'CEIL' : 'FLOOR';
-
-    // 为每个产品生成独立 SQL，合并输出
-    let fullSql = '';
-    products.forEach((prod, idx) => {
-    const t = TABLE_MAP[prod];
-    if (!t) return;
     const platformFilter = platforms.filter(p => p !== 'split');
     const adtypeFilter = adtypes.filter(a => a !== 'split');
     const mediationFilter = mediations.filter(m => m !== 'split');
     const area = areas.length ? areas[0] : '';
+
     const fixedDims = ['date'];
     if (platforms.includes('split')) fixedDims.push('platform');
     const cubeDims = ['adtype','entrance_id','ecpm_value'];
@@ -237,9 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
     metricCols.push("ROUND(AVG(CASE WHEN play_cnt > 0 THEN revenue * 1000.0 / play_cnt END),2) AS avg_ecpm");
 
     let sql = '';
-    if (idx > 0) sql += `\n\n`;
     sql += `-- ============================================================\n`;
-    sql += `-- ${prod} eCPM 分布：每用户当天每次点击下的 eCPM 分桶\n`;
+    sql += `-- ${product} eCPM 分布：每用户当天每次点击下的 eCPM 分桶\n`;
     sql += `-- 时间：${dateStart} ~ ${dateEnd}\n`;
     sql += `-- ============================================================\n\n`;
 
@@ -318,29 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (area) sql += `       ,country\n`;
     sql += `       ,CUBE(${cubeDims.join(',')})\n;\n`;
 
-    fullSql += sql;
-    }); // end products.forEach
-
-    // 指标
-    const metricColsDesc = metrics.map(m => {
-      if (m === 'play_users') return 'user_count';
-      if (m === 'play_count') return 'total_plays';
-      if (m === 'iaa_revenue') return 'total_revenue';
-      return m;
-    });
-
-    const d = { module:'ad_tier_dist', product: products.join(','), date_range:[dateStart,dateEnd], platforms, adtypes, mediations, areas, metrics, round_mode:roundMode, notes };
-    FF.renderArtifacts([{key:'sql',label:'SQL',content:fullSql},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
+    const d = { module:'ad_tier_dist', product, date_range:[dateStart,dateEnd], platforms, adtypes, mediations, areas, metrics, round_mode:roundMode, notes };
+    FF.renderArtifacts([{key:'sql',label:'SQL',content:sql},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}], {collectFn:()=>d});
     // 提示 CUBE ALL 维度
-    const cubeDimsAll = ['adtype','entrance_id','ecpm_value'];
-    if (mediations.includes('split')) cubeDimsAll.splice(2, 0, 'mediation');
     const outBody = document.querySelector('#output .out-body');
     const oldHint = outBody.querySelector('.cube-hint');
     if (oldHint) oldHint.remove();
     const hint = document.createElement('div');
     hint.className = 'cube-hint';
     hint.style.cssText = 'font-size:12px;color:var(--brand-1);background:#fff4ec;border:1px solid #ffd8a8;border-radius:8px;padding:10px 14px;margin-bottom:14px;';
-    hint.textContent = `⚠️ ${cubeDimsAll.join('、')} 维度带有 ALL 值（CUBE 产生），数据透视时需筛选 ALL 行查看去重汇总`;
+    hint.textContent = `⚠️ ${cubeDims.join('、')} 维度带有 ALL 值（CUBE 产生），数据透视时需筛选 ALL 行查看去重汇总`;
     const panel = outBody.querySelector('.out-panel');
     if (panel) outBody.insertBefore(hint, panel);
   });
