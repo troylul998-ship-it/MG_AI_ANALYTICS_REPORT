@@ -1580,6 +1580,17 @@ GROUP BY account_id</pre>
 <tr><td>成年用户</td><td><code>is_adult = 1</code></td><td>UNO 广告分析需加</td></tr>
 </table>
 
+<h3>日志表选择规则</h3>
+<div class="info-note">📌 选择日志表时，根据行为类型优先使用对应前缀的表，确保数据口径与业务分析场景一致。</div>
+<table>
+<tr><th>行为类型</th><th>优先日志表</th><th>表前缀</th><th>说明</th></tr>
+<tr><td>游戏行为（登录、对局、PVE/PVP、道具等）</td><td>客户端日志</td><td><code>c_</code> 开头（如 <code>c_login</code>、<code>c_matchinfo</code>、<code>c_pve_pass_route</code>）</td><td>游戏内行为优先看客户端打点，数据更完整、实时性更好</td></tr>
+<tr><td>广告行为（adplay、advalue、adinit）</td><td>SDK 广告日志</td><td><code>c_client_app_ad_log</code></td><td>广告相关行为走 SDK 打点，需区分 log_subtype（adplay/advalue）</td></tr>
+<tr><td>三方支付行为（付费、订单、支付链路）</td><td>SDK 支付日志</td><td><code>omni_server_payment</code>、<code>server_web_order_suc</code>、<code>pay_track</code></td><td>三方支付走 SDK/Server 链路，优先用三方中间表（<code>dm_mnXX_player_3pp_payment_info</code>）</td></tr>
+<tr><td>服务端行为（充值到账确认、发货等）</td><td>服务端日志</td><td><code>s_</code> 开头（如 <code>s_login</code>、<code>s_payment</code>）</td><td>仅在需要服务端确认的场景使用，日常分析优先用客户端日志</td></tr>
+</table>
+<div class="note">⚠️ 典型案例：查看游戏版本分布时，使用 <code>dw_ods_mn08.c_login</code>（客户端登录日志）而非 <code>s_login</code>（服务端登录日志），配合 <code>max_by(client_version, log_time)</code> 取当天最新版本。</div>
+
 <h3>生命周期分段</h3>
 <table>
 <tr><th>标签</th><th>SQL</th><th>含义</th></tr>
