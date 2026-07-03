@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (oldHint) oldHint.remove();
     const hint = document.createElement('div');
     hint.className = 'cube-hint';
-    hint.style.cssText = 'font-size:12px;color:var(--brand-1);background:#fff4ec;border:1px solid #ffd8a8;border-radius:8px;padding:10px 14px;margin-bottom:14px;';
+    hint.style.cssText = 'font-size:12px;font-weight:700;color:var(--brand-1);background:#fff4ec;border:1px solid #ffd8a8;border-radius:8px;padding:10px 14px;margin-bottom:14px;';
     hint.textContent = `⚠️ ${cubeDims.join('、')} 维度带有 ALL 值（CUBE 产生），数据透视时需筛选 ALL 行查看去重汇总`;
     const panel = outBody.querySelector('.out-panel');
     if (panel) outBody.insertBefore(hint, panel);
