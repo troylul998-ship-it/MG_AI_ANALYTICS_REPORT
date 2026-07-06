@@ -16,12 +16,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chip) chip.classList.add('checked');
   });
 
+  // 默认日期设为今天
+  const today = new Date();
+  const dateStr = today.toISOString().split('T')[0];
+  const dateInput = document.getElementById('wr_date');
+  if (dateInput && !dateInput.value) dateInput.value = dateStr;
+
   // Wizard 步骤配置
   FF.initWizard([
     { title: '基本信息', question: '周报覆盖哪些产品？', explain: '选结束日期和覆盖产品。', example: '<b>例：</b>2026-06-29（周日），UNO' },
     { title: '数据维度', question: '需要分析哪些维度？', explain: '选择基础/渠道/点位/双聚合。', example: '<b>例：</b>全部维度 + 双聚合分 group' },
-    { title: '分析输出', question: '输出到哪里？', explain: '选输出格式和补充业务背景。', example: '<b>例：</b>更新 Confluence + 推送飞书卡片' },
+    { title: '分析输出', question: '输出到哪里？', explain: '选输出格式和补充业务背景。', example: '<b>例：</b>飞书文档 + 推送飞书卡片' },
   ]);
+
+  // 动态行：标准化文档参考
+  FF.initDynamic('wr-template-ref-rows', 'wr-add-template-ref', (data) => {
+    const d = data || {};
+    return `<input type="text" data-f="doc_name" placeholder="文档名" value="${FF.esc(d.doc_name||'')}" style="flex:0 0 160px;">` +
+    `<input type="text" data-f="doc_url" placeholder="文档链接（选填）" value="${FF.esc(d.doc_url||'')}" style="flex:1;">`;
+  }, { rowClass: 'dyn-row' });
 
   // 重置
   document.getElementById('btn-reset').addEventListener('click', () => {
@@ -55,6 +68,7 @@ function collect() {
     dims: FF.getCheckedChips('wr_dims'),
     agg_focus: FF.getCheckedChips('wr_agg'),
     reqs: FF.getCheckedChips('wr_reqs'),
+    template_refs: FF.collectRows('wr-template-ref-rows', ['doc_name', 'doc_url']),
     context: FF.val('wr_context'),
     outputs: FF.getCheckedChips('wr_output'),
   };
@@ -136,33 +150,9 @@ function buildWeeklyFullPrompt(d) {
   L.push('---');
   L.push('');
 
-  // Step 4: Confluence
-  if (d.outputs.includes('confluence')) {
-    L.push('## Step 4：更新 Confluence 文档');
-    L.push('');
-    L.push('将本周周报内容**追加到 Confluence 表格最顶部**（最新一周在最上面）：');
-    L.push('');
-    L.push('- **目标页面**：https://confluence.mattel163.cn/pages/viewpage.action?pageId=182657726');
-    L.push('- **操作方式**：在现有表格的第一行数据行之前插入新行');
-    L.push('- **表格结构**：| 时间 | 数据结论 | 基础数据 | 渠道数据 | 点位数据 | 双聚合数据 | 其他 |');
-    L.push('');
-    L.push('**各列内容格式：**');
-    L.push('- **时间列**：`X.XX周数据`（加粗），如 `**6.29周数据**`');
-    L.push('- **数据结论列**：用 bullet points 列出核心结论（3-5 条）');
-    L.push('- **基础数据列**：插入 OmniEye 基础趋势截图');
-    L.push('- **渠道数据列**：分 AND / IOS 两端的渠道截图');
-    L.push('- **点位数据列**：分 AND / IOS 两端的点位截图');
-    L.push('- **双聚合数据列**：AND 端整体 + IOS 端 group 分组的 gap 截图和结论');
-    L.push('- **其他列**：实验结论、渠道动态等（如无则留空）');
-    L.push('');
-    L.push('---');
-    L.push('');
-  }
-
-  // Step 5: 飞书文档
+  // Step 4: 飞书文档
   if (d.outputs.includes('feishu_doc')) {
-    const stepNum = d.outputs.includes('confluence') ? 5 : 4;
-    L.push(`## Step ${stepNum}：创建飞书文档`);
+    L.push('## Step 4：创建飞书文档');
     L.push('');
     L.push('创建独立飞书文档（用于卡片推送链接）：');
     L.push('```bash');
@@ -182,11 +172,9 @@ function buildWeeklyFullPrompt(d) {
     L.push('');
   }
 
-  // Step 6: 飞书卡片
+  // Step 5: 飞书卡片
   if (d.outputs.includes('feishu_card')) {
-    let stepNum = 4;
-    if (d.outputs.includes('confluence')) stepNum++;
-    if (d.outputs.includes('feishu_doc')) stepNum++;
+    const stepNum = d.outputs.includes('feishu_doc') ? 5 : 4;
     L.push(`## Step ${stepNum}：推送飞书卡片通知（需确认）`);
     L.push('');
     L.push('> 📨 周报生成完成后，请询问用户：');
@@ -448,6 +436,19 @@ function buildWeeklyAnalysisPrompt(d) {
   L.push('- 不得估算、不得补数、不得改口径');
   L.push('- eCPM(log) 是 Log 口径的 eCPM');
   L.push('- 产品排序固定：**UNO → UNO2 → P10 → SKB**');
+  if (d.template_refs && d.template_refs.length > 0) {
+    const refs = d.template_refs.filter(r => r.doc_name || r.doc_url);
+    if (refs.length > 0) {
+      L.push('- ✅ **严格参考以下标准化文档的格式**，输出的结构、措辞风格、详略程度必须与参考文档保持一致：');
+      refs.forEach(r => {
+        if (r.doc_url) {
+          L.push(`  - [${r.doc_name || '参考文档'}](${r.doc_url})`);
+        } else {
+          L.push(`  - ${r.doc_name}`);
+        }
+      });
+    }
+  }
   if (d.reqs.includes('attribution')) L.push('- ✅ 需要归因分析（识别收入变化的主要驱动因素）');
   if (d.reqs.includes('channel_top')) L.push('- ✅ 需要渠道 Top5 影响分析（点名渠道 + 变化方向）');
   if (d.reqs.includes('placement_change')) L.push('- ✅ 需要点位异动识别（频次变化 ±5% 以上的点位）');

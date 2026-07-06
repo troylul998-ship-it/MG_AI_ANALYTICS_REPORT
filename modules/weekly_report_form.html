@@ -29,7 +29,7 @@
   <div class="form-head">
     <a class="back" href="../index.html">← 返回工作台</a>
     <h2>📆 周报分析工作台</h2>
-    <p>OmniEye 周数据提取 → 基础/渠道/点位/双聚合分析 → Confluence 更新 → 飞书卡片推送。</p>
+    <p>OmniEye 周数据提取 → 基础/渠道/点位/双聚合分析 → 飞书文档 → 飞书卡片推送。</p>
   </div>
 
   <div class="mode-switch">
@@ -101,6 +101,11 @@
         </div>
       </div>
       <div class="field" style="margin-top:16px;">
+        <label><b>标准化分析</b> <span class="help">选填，填入后生成的 Prompt 会要求严格参考该文档的格式</span></label>
+        <div id="wr-template-ref-rows"></div>
+        <button type="button" class="btn-add" id="wr-add-template-ref">+ 添加参考文档</button>
+      </div>
+      <div class="field" style="margin-top:16px;">
         <label>补充背景 <span class="help">选填，如活动上下线、版本更新、切量操作等</span></label>
         <textarea id="wr_context" rows="3" placeholder="如：&#10;• 本周外观点位奖励更新&#10;• 接龙活动上线&#10;• AND 端 admob preloading 全量"></textarea>
       </div>
@@ -108,7 +113,6 @@
       <div class="field">
         <label>输出格式</label>
         <div class="chips" id="chips-wr-output">
-          <label class="chip checked"><input type="checkbox" name="wr_output" value="confluence" checked>📄 更新 Confluence 周报表格</label>
           <label class="chip checked"><input type="checkbox" name="wr_output" value="feishu_doc" checked>📄 飞书文档</label>
           <label class="chip checked"><input type="checkbox" name="wr_output" value="feishu_card" checked>💬 飞书卡片推送</label>
         </div>
