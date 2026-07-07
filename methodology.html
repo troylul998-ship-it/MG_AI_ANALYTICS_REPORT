@@ -963,171 +963,158 @@ execFileSync(process.execPath, [runJs, 'im', '+messages-send',
 
 <!-- 日报推送流水线 SKILL -->
 <div class="m-panel" id="m-pipeline">
-<div class="m-lead">日报完整流水线 SKILL：从 OmniEye 拉取数据 → 分析计算 → 生成飞书文档 → 生成飞书卡片 → 推送群组。其他 Agent 可直接复用本流程。</div>
+<div class="m-lead">日报完整流水线 SKILL（最终版 2026.07.07）：从 OmniEye 拉取数据 → 分析计算 → 生成飞书文档 → 生成飞书卡片 → 推送群组。其他 Agent 可直接复用本流程。</div>
 
 <h2>一、完整流水线概览（5 步）</h2>
 <div class="step-box"><span class="num">1</span><b>拉取数据（OmniEye API）</b><p style="margin:6px 0 0;">通过 PlatformClient.callApi() 从 OmniEye 拉取 4 产品 × 多接口数据（近30天日维度 + 双聚合周维度）。</p></div>
-<div class="step-box"><span class="num">2</span><b>分析计算</b><p style="margin:6px 0 0;">计算日环比、周同比、贡献度归因、近30天趋势、渠道占比变化、双聚合GAP。</p></div>
+<div class="step-box"><span class="num">2</span><b>分析计算</b><p style="margin:6px 0 0;">计算日环比、周同比、贡献度归因、近30天趋势、渠道占比+eCPM变化、双聚合GAP。</p></div>
 <div class="step-box"><span class="num">3</span><b>生成飞书文档</b><p style="margin:6px 0 0;">按固定模板结构生成飞书文档（收入概况表 + 分产品归因 + 日报重点 + 近30天趋势 + 其他数据表格）。</p></div>
-<div class="step-box"><span class="num">4</span><b>生成飞书卡片 JSON</b><p style="margin:6px 0 0;">生成 schema 2.0 卡片（5 张表格 + markdown 模块），限制 5 张 table。</p></div>
+<div class="step-box"><span class="num">4</span><b>生成飞书卡片 JSON</b><p style="margin:6px 0 0;">生成 schema 2.0 卡片（4 张表格 + markdown 模块）。</p></div>
 <div class="step-box"><span class="num">5</span><b>推送到飞书群组</b><p style="margin:6px 0 0;">通过 lark-cli 推送卡片到指定群组，可选 @所有人。</p></div>
 
-<h2>二、数据拉取（Step 1）</h2>
+<h2>二、飞书卡片最终结构（4张table）</h2>
+<table>
+<tr><th>序号</th><th>模块</th><th>类型</th><th>内容</th></tr>
+<tr><td>0</td><td>日报信息</td><td>markdown</td><td>日期/环比/总收入/文档链接</td></tr>
+<tr><td>1</td><td>⭐ 日报重点</td><td>markdown</td><td>4条（整体/效率分化/点位活动/关注点）—— 完全对齐飞书日报文档</td></tr>
+<tr><td>2</td><td>📊 一、收入概况</td><td>table</td><td>11列×4行（含在线时长+近30天趋势）</td></tr>
+<tr><td>3</td><td>🎬 二、广告效率（ARPU+eCPM）</td><td>table</td><td>合并表10列：RV/INT ARPU + RV/INT/IOS/AND eCPM + 趋势</td></tr>
+<tr><td>4</td><td>📡 三、渠道收入（占比+eCPM）</td><td>table</td><td>12列：全渠道 总占比+加权eCPM + 近30天趋势</td></tr>
+<tr><td>5</td><td>🔀 四、聚合GAP</td><td>table</td><td>4列：AND/IOS本周上周 + 近30天趋势</td></tr>
+<tr><td>6</td><td>💡 后续建议</td><td>markdown</td><td>行动建议（无序列表）+ 趋势风险（无序列表）</td></tr>
+</table>
+
+<h3>收入概况列顺序（固定11列）</h3>
+<div class="tmpl">产品(80px) → IAA收入 → IAA环比 → IAA同比 → DAU → 频次 → eCPM环比 → ARPU环比 → 在线时长环比 → 归因(300px) → 近30天IAA收入趋势(360px)</div>
+
+<h3>广告效率表（合并ARPU+eCPM，10列）</h3>
+<div class="tmpl">产品(80px) → RV ARPU → INT ARPU → RV eCPM → INT eCPM → IOS ARPU → AND ARPU → IOS eCPM → AND eCPM → 近30天趋势(300px)
+趋势列格式：RV⬇️8% INT⬇️8% I.ARPU⬇️8% A.ARPU⬇️11% | eCPM:Total⬇️11% RV⬇️13%</div>
+
+<h3>渠道收入表（占比+eCPM，12列）</h3>
+<div class="tmpl">产品(80px) → AL → admob → unity → moloco → facebook → inmobi → vungle → ironsrc → bidmach → mintegral → 近30天趋势(320px)
+
+每格格式：总占比% | $加权eCPM(日环比%)
+示例：46% | $11.3(+3.7%)
+
+近30天趋势列（分两行）：
+  占比：AL↑2.4 moloco⬇️4.1
+  eCPM：AL⬇️19% admob⬇️9% unity↑6%</div>
+
+<h3>聚合GAP表（4列）</h3>
+<div class="tmpl">产品(80px) → AND（本周/上周）(260px) → IOS（本周/上周）(260px) → 近30天趋势(300px)
+小总结含💡行动建议</div>
+
+<h2>三、格式规范</h2>
+<table>
+<tr><th>规则</th><th>说明</th></tr>
+<tr><td>负值带⬇️</td><td>"⬇️-12.05%"，正值不加emoji</td></tr>
+<tr><td>异常阈值⚠️</td><td>核心指标超±10%自动加⚠️（如"⚠️⬇️-12.05%"）</td></tr>
+<tr><td>金额带逗号</td><td>"$43,302"</td></tr>
+<tr><td>DAU格式</td><td>"116.2万(⬇️-7.92%)"</td></tr>
+<tr><td>在线时长格式</td><td>"34.1min(⬇️-1.76%)"</td></tr>
+<tr><td>渠道格式</td><td>"46% | $11.3(+3.7%)" — 总占比+加权eCPM</td></tr>
+<tr><td>归因列</td><td>只写文档归因语句，不带贡献度数字</td></tr>
+<tr><td>近30天趋势</td><td>白话描述，不用"量价共振"等术语</td></tr>
+<tr><td>每模块小总结</td><td>日环比：xxx / 近30天趋势：xxx</td></tr>
+<tr><td>聚合GAP小总结</td><td>周环比：xxx + 💡行动建议</td></tr>
+<tr><td>卡片底部</td><td>不放按钮</td></tr>
+<tr><td>row_height</td><td>只接受"low"或"high"</td></tr>
+<tr><td>产品列</td><td>统一80px</td></tr>
+</table>
+
+<h2>四、数据拉取配置</h2>
 <h3>接口清单</h3>
 <table>
 <tr><th>数据模块</th><th>Endpoint</th><th>参数要点</th><th>范围</th></tr>
 <tr><td>收入概况</td><td>adverAnakeytrendRevenue</td><td>platform:All, dateType:day</td><td>近30天</td></tr>
 <tr><td>eCPM/频次</td><td>adverAnakeytrendeCPM</td><td>platform:All/IOS/ANDROID</td><td>近30天</td></tr>
-<tr><td>渠道占比</td><td>adverAnakeytrendTableAdchannel</td><td>platform:All/IOS/ANDROID</td><td>近30天</td></tr>
+<tr><td>渠道占比+eCPM</td><td>adverAnakeytrendTableAdchannel</td><td>platform:All/IOS/ANDROID</td><td>近30天</td></tr>
 <tr><td>双聚合GAP</td><td>MultiAggregationTesting221</td><td>cycle:week, mediation配对</td><td>本周+上周</td></tr>
 </table>
 
-<h3>项目配置</h3>
+<h3>项目配置与双聚合口径</h3>
 <div class="tmpl">PROJECTS = { UNO:'mn01', UNO2:'1000014', P10:'mn02', SKB:'1000008' }
 
-// 双聚合特殊口径
-UNO: admob vs MAX（全量）
-UNO2: admob 量级极小，无有效对比
-P10/SKB AND端: 剔当日新增(reg_group排除"1") + 剔T3国家(只传T1+T2共44国)
-P10/SKB IOS端: 剔当日新增, levelplay vs MAX</div>
+双聚合口径：
+  UNO: admob vs MAX（全量）
+  UNO2: admob 量级极小，无有效对比
+  P10/SKB AND端: 剔当日新增(reg_group排除"1") + 剔T3国家(只传T1+T2共44国)
+  P10/SKB IOS端: 剔当日新增, levelplay vs MAX
 
-<h3>T1+T2 国家清单（44国）</h3>
-<div class="tmpl">AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,EE,ES,FI,HU,IE,IL,IS,IT,KW,LU,NL,NO,PL,PR,PT,QA,RU,SA,SE,SM,SV,TR</div>
+T1+T2国家（44国）：
+  AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,EE,ES,FI,HU,IE,IL,IS,IT,KW,LU,NL,NO,PL,PR,PT,QA,RU,SA,SE,SM,SV,TR</div>
 
 <h3>调用方式</h3>
-<div class="tmpl">// 使用 PlatformClient 直接调用（绕过 MCP 压缩）
-import { PlatformClient } from '@aidea/bi-analyse-client/dist/platformClient.js';
+<div class="tmpl">import { PlatformClient } from '@aidea/bi-analyse-client/dist/platformClient.js';
 const client = new PlatformClient();
 const resp = await client.callApi('/md/configReport/getCustomData/' + endpoint, 'post', params, projectId);
 // resp.data.data.data = 行数据数组, resp.data.data.title = 列名数组</div>
 
-<h2>三、分析计算（Step 2）</h2>
-<h3>计算内容</h3>
+<h2>五、分析计算逻辑</h2>
 <table>
 <tr><th>计算项</th><th>方法</th><th>输出</th></tr>
 <tr><td>日环比</td><td>(当日-前日)/前日×100</td><td>每指标的环比%</td></tr>
 <tr><td>周同比</td><td>(当日-7天前)/7天前×100</td><td>IAA同比%</td></tr>
-<tr><td>贡献度归因</td><td>ARPU=eCPM×Freq/1000, 拆解eCPM和Freq各贡献</td><td>"eCPM主导(70%)"</td></tr>
-<tr><td>近30天趋势</td><td>头7天均值 vs 尾7天均值的变化率</td><td>收入/eCPM/频次/DAU变化%</td></tr>
-<tr><td>渠道占比趋势</td><td>30天日维度,头7天vs尾7天占比变化</td><td>AL +2.4pct等</td></tr>
-<tr><td>双聚合GAP</td><td>本周vs上周的ARPU差值方向</td><td>"MAX+27.9%/MAX+26.5%"</td></tr>
+<tr><td>贡献度归因</td><td>ARPU=eCPM×Freq/1000, 拆解各因子贡献</td><td>"eCPM主导(70%)"→仅用于分析，不写入卡片</td></tr>
+<tr><td>近30天趋势</td><td>头7天均值 vs 尾7天均值的变化率</td><td>收入/eCPM/频次/DAU/渠道eCPM变化%</td></tr>
+<tr><td>渠道占比+eCPM</td><td>按iOS/AND收入加权计算总占比和综合eCPM</td><td>"46% | $11.3(+3.7%)"</td></tr>
+<tr><td>双聚合GAP</td><td>本周vs上周的mediation ARPU差值方向</td><td>"MAX+27.9%/MAX+26.5%"</td></tr>
 </table>
 
-<h3>归因逻辑</h3>
-<div class="tmpl">ΔARPU = (eCPM₁×Freq₁ - eCPM₀×Freq₀) / 1000
-eCPM贡献 = (eCPM₁-eCPM₀)×Freq₀ / 1000
-Freq贡献 = eCPM₀×(Freq₁-Freq₀) / 1000
-→ |eCPM贡献%| > 65% → "eCPM主导"
-→ |Freq贡献%| > 65% → "频次主导"
-→ 否则 → "双驱"</div>
-
-<h2>四、飞书卡片结构（Step 4）</h2>
-<h3>卡片模块（限制最多 5 张 table）</h3>
-<table>
-<tr><th>序号</th><th>模块</th><th>类型</th><th>内容</th></tr>
-<tr><td>0</td><td>日报信息</td><td>markdown</td><td>日期/环比/总收入/文档链接</td></tr>
-<tr><td>1</td><td>⭐ 日报重点</td><td>markdown</td><td>4条：整体/效率分化/点位活动/关注点</td></tr>
-<tr><td>2</td><td>📊 一、收入概况</td><td>table</td><td>11列×4行</td></tr>
-<tr><td>3</td><td>🎬 二、广告类型&平台</td><td>table</td><td>RV/INT/IOS/AND ARPU + 近30天趋势</td></tr>
-<tr><td>4</td><td>💲 三、eCPM表现</td><td>table</td><td>Total/RV/INT/IOS/AND eCPM + 近30天趋势</td></tr>
-<tr><td>5</td><td>📡 四、渠道收入</td><td>table</td><td>Top5渠道占比 + 近30天占比趋势</td></tr>
-<tr><td>6</td><td>🔀 五、聚合GAP</td><td>table</td><td>周维度 本周/上周</td></tr>
-</table>
-
-<h3>收入概况表列顺序（固定）</h3>
-<div class="tmpl">产品(80px) → IAA收入 → IAA环比 → IAA同比 → DAU → 频次 → eCPM环比 → ARPU环比 → 在线时长环比 → 归因(300px) → 近30天IAA收入趋势(360px)</div>
-
-<h3>格式规范</h3>
-<table>
-<tr><th>规则</th><th>说明</th></tr>
-<tr><td>负值带⬇️</td><td>如 "⬇️-12.05%"，正值不加emoji</td></tr>
-<tr><td>金额带逗号</td><td>如 "$43,302"</td></tr>
-<tr><td>DAU格式</td><td>"116.2万(⬇️-7.92%)"</td></tr>
-<tr><td>频次格式</td><td>"5.93(⬇️-6.61%)"</td></tr>
-<tr><td>在线时长格式</td><td>"34.1min(⬇️-1.76%)"</td></tr>
-<tr><td>渠道占比格式</td><td>"46%(I:52% A:34%)" — 整体加权+双端拆分</td></tr>
-<tr><td>产品列</td><td>统一80px宽</td></tr>
-<tr><td>row_height</td><td>只接受"low"或"high"</td></tr>
-<tr><td>每模块小总结</td><td>标题下灰色字：日环比：xxx / 近30天趋势：xxx</td></tr>
-<tr><td>聚合GAP小总结</td><td>周环比：xxx</td></tr>
-<tr><td>归因列内容</td><td>只写文档归因语句（不带贡献度数字）</td></tr>
-<tr><td>近30天趋势列</td><td>白话描述，不用术语</td></tr>
-<tr><td>近30天趋势示例</td><td>"约 44K，近30天收入⬇️13%，eCPM 走弱是主因（⬇️11%），DAU 缩量⬇️6%。"</td></tr>
-</table>
-
-<h3>不要在卡片底部放按钮</h3>
-<p>卡片最后一个元素是聚合GAP表格，不加"变现日报_XXXXXX"按钮。</p>
-
-<h2>五、推送配置（Step 5）</h2>
-<h3>群组 ID</h3>
+<h2>六、推送配置</h2>
 <table>
 <tr><th>群组</th><th>chat_id</th><th>用途</th></tr>
-<tr><td>赛博牛马🐂</td><td>oc_44ce402d9ee9d0f901b61e6885cc33b1</td><td>日常测试推送</td></tr>
-<tr><td>MG 变现小群</td><td>oc_9b0689b9a37e1eebf014fb39d8c78638</td><td>正式推送 + @所有人</td></tr>
+<tr><td>赛博牛马🐂</td><td>oc_44ce402d9ee9d0f901b61e6885cc33b1</td><td>日常测试</td></tr>
+<tr><td>MG 变现小群</td><td>oc_9b0689b9a37e1eebf014fb39d8c78638</td><td>正式推送+@所有人</td></tr>
 </table>
-
-<h3>推送方式</h3>
 <div class="tmpl">// 推送卡片
-const runJs = 'path/to/@larksuite/cli/scripts/run.js';
 execFileSync(process.execPath, [runJs, 'im', '+messages-send',
-  '--as', 'bot',
-  '--chat-id', CHAT_ID,
-  '--msg-type', 'interactive',
-  '--content', JSON.stringify(card)
-]);
+  '--as', 'bot', '--chat-id', CHAT_ID,
+  '--msg-type', 'interactive', '--content', JSON.stringify(card)]);
 
-// @所有人（单独文本消息）
-const msg = JSON.stringify({ text: '<at user_id="all">所有人</at> MG 变现日报已更新 ✅' });
+// @所有人
+const msg = JSON.stringify({ text: '&lt;at user_id="all"&gt;所有人&lt;/at&gt; 日报已更新 ✅' });
 execFileSync(process.execPath, [runJs, 'im', '+messages-send',
-  '--as', 'bot',
-  '--chat-id', CHAT_ID,
-  '--msg-type', 'text',
-  '--content', msg
-]);</div>
+  '--as', 'bot', '--chat-id', CHAT_ID, '--msg-type', 'text', '--content', msg]);</div>
 
-<h3>⚠️ Windows cmd 特殊处理</h3>
-<p>cmd.exe 的 <code>&lt;</code> 符号会导致问题。使用 <code>execFileSync(process.execPath, [script, ...args])</code> 绕过 shell。</p>
-
-<h2>六、飞书文档权限</h2>
+<h2>七、飞书文档权限</h2>
 <table>
 <tr><th>角色</th><th>权限</th></tr>
 <tr><td>陆嘉欣</td><td>管理权限（full_access）</td></tr>
 <tr><td>Mobile Growth 群 (oc_efab06bc2b4f283575440499e8f802e2)</td><td>编辑权限（edit）</td></tr>
 </table>
 
-<h2>七、关键文件路径</h2>
+<h2>八、关键文件路径</h2>
 <table>
 <tr><th>文件</th><th>用途</th></tr>
 <tr><td>MG/变现/daily_report/run_daily.mjs</td><td>一键数据拉取+分析（主入口）</td></tr>
 <tr><td>MG/变现/daily_report/fetch_30d.mjs</td><td>拉取近30天数据+趋势计算</td></tr>
-<tr><td>MG/变现/daily_report/gen_card_final.mjs</td><td>生成飞书卡片 JSON</td></tr>
-<tr><td>MG/变现/daily_report/gen_doc_0707.mjs</td><td>生成飞书文档 markdown</td></tr>
-<tr><td>MG/变现/daily_report/send_daily.js</td><td>推送卡片到赛博牛马群</td></tr>
-<tr><td>MG/变现/daily_report/card_daily.json</td><td>当前卡片 JSON</td></tr>
+<tr><td>MG/变现/daily_report/card_daily_v2.json</td><td>最终版卡片JSON</td></tr>
+<tr><td>MG/变现/daily_report/send_v2.js</td><td>推送到赛博牛马群</td></tr>
 <tr><td>MG/变现/daily_report/daily_summary.json</td><td>分析结果缓存</td></tr>
 <tr><td>MG/变现/daily_report/trend_30d.json</td><td>近30天趋势数据</td></tr>
 <tr><td>MG/变现/countries_tier.json</td><td>国家分层清单</td></tr>
 </table>
 
-<h2>八、Agent 复用指南</h2>
-<h3>每日执行流程</h3>
-<div class="tmpl">1. 修改 run_daily.mjs 中的日期参数（CUR/PREV/YOY/DS/DE/CW/PW）
+<h2>九、Agent 复用指南</h2>
+<div class="tmpl">每日执行流程：
+1. 修改 run_daily.mjs 中的日期参数（CUR/PREV/YOY/DS/DE/CW/PW）
 2. 执行: node run_daily.mjs  → 生成 daily_raw.json + daily_summary.json
 3. 执行: node fetch_30d.mjs  → 生成 trend_30d.json（近30天趋势）
-4. 执行: node gen_card_final.mjs → 生成 card_daily.json
-5. 创建飞书文档（lark-cli docs +create）+ 设置权限
-6. 执行: node send_daily.js → 推送到赛博牛马群
-7. 正式推送到 MG 变现小群 + @所有人</div>
+4. 编辑 card_daily_v2.json（更新数据+趋势描述）
+5. 执行: node send_v2.js → 推送到赛博牛马群测试
+6. 正式推送到 MG 变现小群 + @所有人
 
-<h3>日期参数说明</h3>
-<div class="tmpl">CUR   = 数据日期（昨天，即最新可用数据）
-PREV  = 环比基准（大前天）
-YOY   = 周同比基准（7天前）
-DS    = 近2周起始（用于日度数据）
-DE    = 近2周结束（= CUR）
-DS_2M = 近30天起始（= CUR 往前推30天）
-CW    = 本周范围 [周一, 周日]
-PW    = 上周范围 [周一, 周日]</div>
+日期参数说明：
+  CUR   = 数据日期（昨天，即最新可用数据）
+  PREV  = 环比基准（大前天）
+  YOY   = 周同比基准（7天前）
+  DS    = 近2周起始（用于日度数据）
+  DE    = 近2周结束（= CUR）
+  DS_2M = 近30天起始（= CUR 往前推30天）
+  CW    = 本周范围 [周一, 周日]
+  PW    = 上周范围 [周一, 周日]</div>
 
 </div>
 
