@@ -99,7 +99,8 @@
 <div class="sidebar-item" data-panel="m-viz"><span class="icon">📊</span>数据可视化</div>
 <div class="sidebar-item" data-panel="m-report"><span class="icon">📄</span>分析报告 & 仪表盘</div>
 <div class="sidebar-item" data-panel="m-daily"><span class="icon">📰</span>日报分析模板</div>
-<div class="sidebar-item" data-panel="m-card"><span class="icon">💬</span>日报推送流水线</div>
+<div class="sidebar-item" data-panel="m-card"><span class="icon">💬</span>日报卡片推送</div>
+<div class="sidebar-item" data-panel="m-pipeline"><span class="icon">🔁</span>日报推送流水线</div>
 <div class="sidebar-item" data-panel="m-skb-ref"><span class="icon">🛹</span>SKB 数分结论参考</div>
 </div>
 </aside>
@@ -893,6 +894,75 @@ SKB
 
 <!-- 日报卡片推送模板 -->
 <div class="m-panel" id="m-card">
+<div class="m-lead">日报生成后，按以下标准格式推送飞书原生卡片（Interactive Card）到群组通知。</div>
+
+<h3>⚠️ 日期规则（重要）</h3>
+<table>
+<tr><th>字段</th><th>含义</th><th>示例（假设今天是 7 月 7 日）</th></tr>
+<tr><td>卡片标题 / 文档标题</td><td>报告发送日期（即今天）</td><td>MG 变现日报速览 | 2026.07.07</td></tr>
+<tr><td>📅 日期</td><td>数据日期（昨日）</td><td>2026-07-06，星期一</td></tr>
+<tr><td>📊 环比</td><td>昨天 vs 大前天</td><td>2026-07-06 / 2026-07-05</td></tr>
+</table>
+
+<h3>卡片结构（最终版 · 5 张 table）</h3>
+<table>
+<tr><th>模块</th><th>类型</th><th>内容</th></tr>
+<tr><td>日报信息</td><td>markdown</td><td>📅日期 / 📊环比 / 💰总收入 / 📄文档链接</td></tr>
+<tr><td>⭐ 日报重点</td><td>markdown</td><td>4条：整体/效率分化/点位活动/关注点</td></tr>
+<tr><td>📊 一、收入概况</td><td>table</td><td>11列×4行（含在线时长环比+近30天趋势）</td></tr>
+<tr><td>🎬 二、广告类型&平台</td><td>table</td><td>RV/INT/IOS/AND ARPU + 近30天趋势</td></tr>
+<tr><td>💲 三、eCPM表现</td><td>table</td><td>Total/RV/INT/IOS/AND eCPM + 近30天趋势</td></tr>
+<tr><td>📡 四、渠道收入</td><td>table</td><td>Top5渠道占比 + 近30天占比趋势</td></tr>
+<tr><td>🔀 五、聚合GAP</td><td>table</td><td>周维度 本周/上周</td></tr>
+</table>
+
+<h3>收入概况列顺序（固定）</h3>
+<div class="tmpl">产品(80px) → IAA收入 → IAA环比 → IAA同比 → DAU → 频次 → eCPM环比 → ARPU环比 → 在线时长环比 → 归因(300px) → 近30天IAA收入趋势(360px)</div>
+
+<h3>格式规范</h3>
+<table>
+<tr><th>规则</th><th>说明</th></tr>
+<tr><td>负值带⬇️</td><td>"⬇️-12.05%"，正值不加emoji</td></tr>
+<tr><td>金额带逗号</td><td>"$43,302"</td></tr>
+<tr><td>DAU格式</td><td>"116.2万(⬇️-7.92%)"</td></tr>
+<tr><td>在线时长格式</td><td>"34.1min(⬇️-1.76%)"</td></tr>
+<tr><td>渠道占比格式</td><td>"46%(I:52% A:34%)"</td></tr>
+<tr><td>归因列</td><td>只写文档归因语句（不带贡献度数字）</td></tr>
+<tr><td>近30天趋势</td><td>白话描述，如"约44K，近30天收入⬇️13%，eCPM走弱是主因"</td></tr>
+<tr><td>每模块小总结</td><td>日环比：xxx / 近30天趋势：xxx</td></tr>
+<tr><td>聚合GAP小总结</td><td>周环比：xxx</td></tr>
+<tr><td>产品列</td><td>统一80px</td></tr>
+<tr><td>row_height</td><td>只接受"low"或"high"</td></tr>
+<tr><td>卡片底部</td><td>不放按钮，最后一个元素是聚合GAP表格</td></tr>
+</table>
+
+<h3>推送方式</h3>
+<div class="tmpl">// lark-cli 推送卡片
+execFileSync(process.execPath, [runJs, 'im', '+messages-send',
+  '--as', 'bot', '--chat-id', CHAT_ID,
+  '--msg-type', 'interactive', '--content', JSON.stringify(card)
+]);
+
+// @所有人（单独文本消息）
+const msg = JSON.stringify({ text: '<at user_id="all">所有人</at> 日报已更新 ✅' });
+execFileSync(process.execPath, [runJs, 'im', '+messages-send',
+  '--as', 'bot', '--chat-id', CHAT_ID,
+  '--msg-type', 'text', '--content', msg
+]);</div>
+
+<h3>群组 ID</h3>
+<table>
+<tr><th>群组</th><th>chat_id</th><th>用途</th></tr>
+<tr><td>赛博牛马🐂</td><td>oc_44ce402d9ee9d0f901b61e6885cc33b1</td><td>日常测试</td></tr>
+<tr><td>MG 变现小群</td><td>oc_9b0689b9a37e1eebf014fb39d8c78638</td><td>正式推送+@所有人</td></tr>
+</table>
+
+<h3>⚠️ Windows cmd 特殊处理</h3>
+<p>cmd.exe 的 <code>&lt;</code> 符号会导致问题。使用 <code>execFileSync(process.execPath, [script, ...args])</code> 绕过 shell。</p>
+</div>
+
+<!-- 日报推送流水线 SKILL -->
+<div class="m-panel" id="m-pipeline">
 <div class="m-lead">日报完整流水线 SKILL：从 OmniEye 拉取数据 → 分析计算 → 生成飞书文档 → 生成飞书卡片 → 推送群组。其他 Agent 可直接复用本流程。</div>
 
 <h2>一、完整流水线概览（5 步）</h2>
