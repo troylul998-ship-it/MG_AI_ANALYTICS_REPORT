@@ -49,7 +49,9 @@
         <label>报告类型 <span class="req">*</span></label>
         <div class="chips" id="chips-report-type">
           <label class="chip"><input type="radio" name="report_type" value="daily" checked>📅 日报</label>
+          <label class="chip"><input type="radio" name="report_type" value="advanced">🚀 进阶日报</label>
         </div>
+        <p id="report-type-hint-advanced" style="display:none;font-size:11px;color:var(--brand-1);margin-top:6px;">进阶日报：基于「飞书日报文档已生成」的 v3 工作流，读文档摘录前3块 + 后台补广告效率/渠道/聚合GAP，产出可复制给其他 agent 直接执行的全能 Prompt。</p>
       </div>
       <div class="field">
         <label>数据日期 <span class="req">*</span> <span class="help">日报填数据日期，周报填结束日期</span></label>

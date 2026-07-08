@@ -26,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 报告类型切换
   document.querySelectorAll('input[name="report_type"]').forEach(r => {
     r.addEventListener('change', () => {
-      const label = document.querySelector('label[for="report_date"]') ||
-        document.getElementById('report_date').previousElementSibling;
+      const isAdvanced = document.querySelector('input[name="report_type"]:checked')?.value === 'advanced';
+      const hint = document.getElementById('report-type-hint-advanced');
+      if (hint) hint.style.display = isAdvanced ? 'block' : 'none';
     });
   });
 
@@ -85,7 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!FF.validate(e.target)) return;
     const data = collect();
     const isWeekly = data.report_type === 'weekly';
+    const isAdvanced = data.report_type === 'advanced';
     const fullPrompt = buildFullPrompt(data);
+    // 进阶日报：只输出一个自包含的全能 Prompt（可直接复制给其他 agent 执行）
+    if (isAdvanced) {
+      FF.renderArtifacts([
+        { key: 'full', label: '🚀 全能日报 Prompt（进阶 v3）', content: fullPrompt },
+        { key: 'json', label: '⚙️ 结构化配置 JSON', content: JSON.stringify(data, null, 2) },
+      ], { collectFn: collect });
+      return;
+    }
     const dataPrompt = buildDataPrompt(data);
     const analysisPrompt = buildAnalysisPrompt(data);
     FF.renderArtifacts([
@@ -118,10 +128,186 @@ function collect() {
   };
 }
 
-/* ---------- 全能 Prompt（日报/周报自动分流） ---------- */
+/* ---------- 全能 Prompt（日报/周报/进阶日报 自动分流） ---------- */
 function buildFullPrompt(d) {
   if (d.report_type === 'weekly') return buildWeeklyFullPrompt(d);
+  if (d.report_type === 'advanced') return buildAdvancedFullPrompt(d);
   return buildDailyFullPrompt(d);
+}
+
+/* ---------- 全能日报 Prompt（进阶 v3 · 自包含，可直接复制给其他 agent 执行） ----------
+   对应线上 methodology「日报推送流水线」v3 模块。
+   前提：飞书日报文档已由上游生成，本流程不创建文档，只读文档摘录 + 后台补数 + 组卡推送。
+------------------------------------------------------------------ */
+function buildAdvancedFullPrompt(d) {
+  const productList = (d.products && d.products.length ? d.products : ['UNO','UNO2','P10','SKB']).join('、');
+  const L = [];
+  L.push('# 🚀 MG 变现日报卡片推送任务（进阶 v3 · 全能 Prompt）');
+  L.push('');
+  L.push('> 你是一名严谨的数据分析师。请基于「已生成的飞书日报文档」，为 ' + productList + ' 产出并推送飞书日报卡片。');
+  L.push('> 本 Prompt 自包含全部执行细节，可直接执行。完整方法论参见线上：');
+  L.push('> https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/methodology.html →「🔁 日报推送流水线」');
+  L.push('');
+  L.push('## 🧭 三条铁律（贯穿全程）');
+  L.push('1. **第一性原理**：每个数字都要能回答"来自哪个接口的哪个字段、口径是什么"，回答不了就不能进卡片。不要因"旧脚本这么写"就照抄，先确认字段/接口今天仍真实返回。');
+  L.push('2. **对抗性审查**：每完成一步反问"这个数若错会错在哪"（口径变？列名变？某产品当天无数据被填0？分母为0？）。能双源核对的必须核对。|环比|≥30% 或 |30天|≥40% 先当疑似口径问题，核实后才呈现。');
+  L.push('3. **绝不造数（红线）**：拉不到 = 报警停下问用户。绝不用 Math.random / 估算 / 插值 / 经验值填充。');
+  L.push('');
+  L.push('## 📥 输入');
+  L.push('- **飞书日报文档 URL**：{{请粘贴今天已生成的飞书日报文档链接}}（若未提供，先反问用户索取，不要猜文档ID）');
+  L.push('- **数据日期**：' + (d.report_date || '{{CUR，通常=昨天}}'));
+  L.push('');
+  L.push('## 📅 日期口径（写死）');
+  L.push('```');
+  L.push('今天记为 T 日。后台只有截至昨天的完整数据，故：');
+  L.push('CUR  = T-1  数据日期（昨日）    PREV = T-2  环比基准（前日）');
+  L.push('YOY  = CUR-7 周同比           DS30 = CUR-30 近30天起始   DE = CUR 近30天结束');
+  L.push('CW   = [CUR所在周一, 周日]     PW = [上周一, 上周日]');
+  L.push('· 卡片标题日期用 T（发布日）；正文「日期」字段用 CUR（数据日），须与文档一致');
+  L.push('· 动手前先核对「文档日期 == 你算的 CUR」，不一致立即停下问用户');
+  L.push('```');
+  L.push('');
+  L.push('## 🔀 数据分工（唯一权威源原则）');
+  L.push('| 卡片模块 | 数据来源 |');
+  L.push('|---|---|');
+  L.push('| 0 日报信息 / 1 日报重点 / 2 收入概况 | **飞书文档摘录**（逐字，不重算） |');
+  L.push('| 3 广告效率 / 4 渠道收入 / 5 聚合GAP | **后台 OmniEye API 拉取** |');
+  L.push('| 2 收入概况的「近30天趋势」列 | 后台 trend30（文档没有此列） |');
+  L.push('| 6 后续建议 | 文档关注点 + 后台趋势综合 |');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## Step 1 · 读飞书文档 & 摘录前3块');
+  L.push('用 lark MCP 读文档正文（唯一正确方式）：');
+  L.push('```');
+  L.push('mcp_lark_mcp_docx_v1_document_rawContent  { path: { document_id: "从URL /docx/{id} 提取" } }');
+  L.push('❌ 不要用 axios/cheerio 打 open.feishu.cn（无有效 token，必失败）');
+  L.push('```');
+  L.push('摘录映射：');
+  L.push('- **日报信息**（模块0）：数据总结的日期/环比 + 总收入行；总DAU=4产品DAU加总；文档链接');
+  L.push('- **日报重点**（模块1）：⭐日报重点4条，原文照搬，产品顺序调为 UNO>UNO2>P10>SKB');
+  L.push('- **收入概况8列→10列**（模块2）：');
+  L.push('  - 口径提示：文档 IAA收入=API口径，其余列=log口径。IAA收入直接抄文档，不可用后台log收入替换');
+  L.push('  - 归因列 → 移出表格，浓缩为模块标题下 grey summary');
+  L.push('  - eCPM列「$6.29（+2.28%）」→ 卡片只取环比「+2.28%」；AdARPU列同理只取环比');
+  L.push('  - 在线时长环比 → 文档表无，取自各产品「点位」段"在线时长 X（±X%）"（缺则报警不编）');
+  L.push('  - 近30天趋势 → 文档表无，取自后台 trend30（见 Step 2）');
+  L.push('  - ⚠️ 文档列名会变（如"频次"↔"DAU频次"），按列义匹配而非列序；摘录后校验 4产品×8字段齐全');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## Step 2 · 后台数据（全 log 口径）');
+  L.push('运行环境（本机专属，先确认路径存在）：');
+  L.push('```javascript');
+  L.push("import { PlatformClient } from 'file:///C:/Users/lujiaxin04/AppData/Roaming/npm/node_modules/@aidea/bi-analyse-client/dist/platformClient.js';");
+  L.push('const client = new PlatformClient();');
+  L.push('function rows(resp){const d=resp?.data?.data?.data,t=resp?.data?.data?.title;');
+  L.push('  if(Array.isArray(d)&&Array.isArray(t))return d.map(r=>Array.isArray(r)?Object.fromEntries(t.map((x,i)=>[x,r[i]])):r);return [];}');
+  L.push("async function call(ep,params,pid){return rows(await client.callApi('/md/configReport/getCustomData/'+ep,'post',params,pid));}");
+  L.push('const base={adchannel:["all"],adtype:["all"],country:["All"],dataType:"log"};  // 后台三块全程 log，禁止改 api');
+  L.push("const PROJECTS={UNO:'mn01',UNO2:'1000014',P10:'mn02',SKB:'1000008'};");
+  L.push('const pct=(a,b)=>(b&&b!==0)?((a-b)/b*100):null;  // 分母为0返回null，不是0');
+  L.push('```');
+  L.push('');
+  L.push('**⭐ 主数据接口：`adverAnakeytrendTable`（关键）** — 广告效率与收入概况所有日维度指标都从这一个接口取，`dateType:"date"`，platform 分别 `["All"]/["IOS"]/["ANDROID"]`，`dateStart:DS30, dateEnd:DE`。');
+  L.push('- 现成字段（禁止推算）：`AdARPU, eCPM, RV_AdARPU, RV_eCPM, INT_AdARPU, INT_eCPM, DAU, Revenue, FrequencyDAU`');
+  L.push('- IOS/AND 端 ARPU·eCPM：从 platform:["IOS"]/["ANDROID"] 返回里取该端 AdARPU、eCPM');
+  L.push('- ❌ 废弃：不要用 adverAnakeytrendeCPM + "RV_eCPM×RV_FrequencyDAU/1000" 推算 ARPU（该接口无 RV_AdARPU 字段）');
+  L.push('');
+  L.push('**近30天趋势 trend30（口径钉死）**：一律用 `adverAnakeytrendTable`(All)，不要用 adverAnakeytrendRevenue（两接口Revenue口径不同）。升序日期，头7天均值 vs 尾7天均值：`trend30[k]={revChg(Revenue), dauChg(DAU), ecpmChg(eCPM)}`。');
+  L.push('');
+  L.push('**渠道收入 `adverAnakeytrendTableAdchannel`**（platform ANDROID/IOS，DS30~DE）：');
+  L.push('- 每格：`总占比%(整数) | $加权eCPM(日环比%)`；总占比=IOS占比×IOS收入权重+AND占比×AND收入权重（权重=各端当日Revenue/双端合计）；加权eCPM=(IOS_Rev×IOS_ECPM+AND_Rev×AND_ECPM)/(IOS_Rev+AND_Rev)');
+  L.push('- 渠道映射：applovin→AL, admob, unity, moloco, facebook, inmobi, vungle, ironsource→ironsrc, bidmachine→bidmach, mintegral；剔除 None/fyber；占比<1%显示 -');
+  L.push('- 渠道趋势列：有稳定30天占比pct-point口径则用（首2周vs末2周），否则用文档「渠道」段真实定性描述（禁编pct数字）');
+  L.push('');
+  L.push('**聚合GAP `MultiAggregationTesting221`**（cycle "week"，CW/PW 各拉一次）：');
+  L.push('| 产品 | AND | IOS | 过滤 |');
+  L.push('|---|---|---|---|');
+  L.push('| UNO | max vs admob | max vs admob | 全量 |');
+  L.push('| UNO2 | — | — | 默认"量级极小，无有效对比"，**每天必须确认量级** |');
+  L.push('| P10 | max vs admob | max vs levelplay | AND: country=T1T2 + reg_group=REG(剔新增)；IOS: reg_group=REG |');
+  L.push('| SKB | max vs admob | max vs levelplay | 全量 |');
+  L.push('```');
+  L.push('GAP口径：取返回里 admob/max-1（或 levelplay/max-1）字段 ×100 = 百分比');
+  L.push('  正=admob/levelplay 领先 MAX；负=MAX 领先。卡片格式 "ADM +4.2% / +1.5%"（本周/上周）');
+  L.push('  AND用ADM(admob)；IOS的P10/SKB用ULP(levelplay)、UNO用ADM');
+  L.push('UNO2 量级每日确认：拉一次两个mediation的 AdvalueARPU，仍极小(某侧≈0)→"量级极小，无有效对比"；已起量→正常输出GAP并提醒用户');
+  L.push('REG=["2","3","4","5","6","7","8~15","16~30","31~60","61~90","91~180","181~365",">365"]（剔新增排除"1"）');
+  L.push('T1T2=AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,EE,ES,FI,HU,IE,IL,IS,IT,KW,LU,NL,NO,PL,PR,PT,QA,RU,SA,SE,SM,SV,TR（44国）');
+  L.push('```');
+  L.push('**失败处理**：任一 call 抛错/返回空/CUR无数据 → 报警 `❌ 后台失败 | 模块 | 产品 | 日期 | 错误`，停止，不产半成品卡片。');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## Step 3 · 交叉校验 & 异常值（数据准确核心防线）');
+  L.push('**口径基准**：飞书文档 IAA收入=API口径、其余=log；后台全 log。推论：');
+  L.push('- ① IAA收入不做文档↔后台对账（口径不同），只抄文档API值');
+  L.push('- ② DAU/eCPM/AdARPU/频次 文档与后台同为log，必须交叉校验');
+  L.push('- ③ 后台三块全程log，不得混入api');
+  L.push('');
+  L.push('**交叉校验（仅log指标）**：');
+  L.push('| 校验项 | 文档(log) | 后台(log) | 容差 |');
+  L.push('|---|---|---|---|');
+  L.push('| 各产品 AdARPU 环比 | 文档AdARPU列 | 后台AdARPU CUR/PREV环比 | ±0.5pct |');
+  L.push('| 各产品 eCPM 环比 | 文档eCPM(log)列 | 后台eCPM CUR/PREV环比 | ±0.5pct |');
+  L.push('| 各产品 DAU | 文档DAU | 后台DAU | ±1% |');
+  L.push('| IAA收入 | API vs log，**不校验，跳过** |||');
+  L.push('');
+  L.push('**总量 & 异常值**：卡片总收入==文档总收入==4产品IAA之和（<1%）；总DAU==4产品DAU之和。|环比|≥30% 或 |30天|≥40% 标"疑似口径异常"先核实并注明。分母为0/null → 显示 "-" 不显示 "0%"。');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## Step 4 · 组装7模块卡片 & 格式规则');
+  L.push('模块顺序：0 日报信息 / 1 ⭐日报重点 / 2 收入概况(10列) / 3 广告效率(10列) / 4 渠道收入(12列) / 5 聚合GAP(4列) / 6 💡后续建议。');
+  L.push('');
+  L.push('**颜色 & ⚠️ 规则（唯一权威版）**：');
+  L.push("- 值≥+5% → 绿色 `<font color='green'>+6.95%</font>`，**不加⚠️**");
+  L.push("- 值≤-5% → 红色 `<font color='red'>-12.05%</font>`");
+  L.push('- -5%<值<+5% → 不标色');
+  L.push("- **仅收入概况模块**：指标≤-5%（下滑）→ 红色 + 前缀⚠️ `<font color='red'>⚠️-5.84%</font>`。正增长(≥+5%)只标绿不加⚠️。广告效率/渠道/GAP 三块只按±5%标色，一律不加⚠️。");
+  L.push('');
+  L.push('**近30天趋势描述词汇表**：>+10%持续提升/显著回升；+5~10%明显改善/稳步增长；-5~+5%基本持平/波动不大；-10~-5%小幅下滑/略有承压；<-10%大幅下滑/明显走弱。');
+  L.push('');
+  L.push('**各表列定义**（照抄黄金样例 card_0708_final.json）：');
+  L.push('```');
+  L.push('收入概况(10列)：产品(80px) IAA收入(text) IAA环比 IAA同比 DAU 频次 eCPM环比 ARPU环比 在线时长环比 近30天趋势(300px)');
+  L.push('  DAU "115.44万(-0.69%)"；在线时长 "34.16min(+0.03%)"；趋势 "IAA -4.8%，DAU -3.5%，eCPM -2.3%"（内部各指标按±5%标色）');
+  L.push('广告效率(10列)：产品 RV_ARPU INT_ARPU RV_eCPM INT_eCPM IOS_ARPU AND_ARPU IOS_eCPM AND_eCPM 近30天趋势(320px)');
+  L.push('  单元格 "$0.0244(-0.30%)"；趋势 "RV+0% INT-4% I.ARPU+0% A.ARPU-3% | eCPM:Total-2% RV-6%"');
+  L.push('渠道(12列)：产品 AL admob unity moloco facebook inmobi vungle ironsrc bidmach mintegral 近30天趋势(400px)');
+  L.push('  单元格 "48% | $12.3(+1.1%)"');
+  L.push('聚合GAP(4列)：产品 AND端(260px) IOS端(260px) 近30天趋势(300px)');
+  L.push('  单元格 "ADM +4.2% / +1.5%"；UNO2 固定 "量级极小，无有效对比"');
+  L.push('```');
+  L.push('**格式禁令**：❌ 禁用 ⬇️↑↗️↘️，方向只用 +/-；金额千分位 "$43,302"；`row_height="low"`；卡片底部不放按钮；每模块标题下配 grey summary（日环比：… / 近30天趋势：…，GAP用周环比+💡行动建议），summary内多产品按 UNO>UNO2>P10>SKB；卡片用飞书 JSON 2.0（`schema:"2.0"`, `body.elements`）。');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## Step 5 · 推送（先测试群 → 确认 → 正式群+@所有人）');
+  L.push('```javascript');
+  L.push("const runJs='C:\\\\Users\\\\lujiaxin04\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\@larksuite\\\\cli\\\\scripts\\\\run.js';");
+  L.push("execFileSync(process.execPath,[runJs,'im','+messages-send','--as','bot','--chat-id',CHAT_ID,'--msg-type','interactive','--content',JSON.stringify(card)]);");
+  L.push("// @所有人（仅正式群，卡片推送成功后单独发文本）");
+  L.push('// atMsg = { text: \'<at user_id="all">所有人</at> 日报已更新 ✅\' }');
+  L.push('```');
+  L.push('| 群 | chat_id | 用途 |');
+  L.push('|---|---|---|');
+  L.push('| 赛博牛马🐂 | oc_44ce402d9ee9d0f901b61e6885cc33b1 | 先推测试 |');
+  L.push('| MG 变现小群 | oc_9b0689b9a37e1eebf014fb39d8c78638 | 用户确认后推正式 + @所有人 |');
+  L.push('**顺序铁律**：先推测试群 → 用户确认无误 → 才推正式群+@所有人。严禁跳过确认直推正式群。本流程不创建飞书文档。');
+  L.push('');
+  L.push('---');
+  L.push('');
+  L.push('## ✅ 推送前自检 & 收尾对抗审查');
+  L.push('**推送前必过**：后台数值全部可追溯真实返回（无random/估算/推算）；广告效率用 adverAnakeytrendTable 现成 RV/INT AdARPU；trend30 用同接口；交叉校验log指标在容差内；总收入/总DAU对账通过；7模块齐全顺序对；⚠️仅出现在收入概况≤-5%；无方向emoji；多产品按 UNO>UNO2>P10>SKB。');
+  L.push('**推送后收尾**：① 随机抽3个数回溯来源接口/字段/口径 ② 审最反直觉的数（最大涨跌）是真实波动还是口径bug ③ 检查有无 0%/-/null 残留 ④ 汇报"已校验N项全过；离群X个已核实(原因)；存疑Y处"，有存疑则告知用户由其决定是否推正式群，**不确定就不推正式群**。');
+  if (d.context) {
+    L.push('');
+    L.push('## 📌 本次业务背景补充');
+    L.push(d.context);
+  }
+  return L.join('\n');
 }
 
 /* ---------- 全能日报 Prompt ---------- */
