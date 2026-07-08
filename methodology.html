@@ -1027,9 +1027,13 @@ PW    = [上周一, 上周日]           例 → ['2026-06-23','2026-06-29']
 ⚠️ 文档列名会变（如"频次"↔"DAU频次"），按列义匹配而非硬编码列序；摘录后校验 4产品×8字段齐全</div>
 
 <h2>Step 2 · 子Agent A 后台数据（全 log 口径）</h2>
-<h3>环境依赖（本机专属，换机先 Test-Path 确认）</h3>
-<div class="tmpl">platformClient: file:///C:/Users/lujiaxin04/AppData/Roaming/npm/node_modules/@aidea/bi-analyse-client/dist/platformClient.js
-lark-cli:       .../＠larksuite/cli/scripts/run.js（见推送段）</div>
+<h3>环境依赖（⚠️ 路径必须动态探测，禁止硬编码用户名）</h3>
+<p><b>根因教训</b>：C:\Users\&lt;用户名&gt;\... 里的用户名因机器/账号而异（曾因硬编码某用户名导致换机器执行报错）。用 <code>npm root -g</code> 动态解析全局包目录，与用户名解耦：</p>
+<div class="tmpl">$NPM_ROOT = npm root -g   // 每次执行都探测，不复用上次记录的绝对路径
+Test-Path (Join-Path $NPM_ROOT "@aidea\bi-analyse-client\dist\platformClient.js")
+Test-Path (Join-Path $NPM_ROOT "@larksuite\cli\scripts\run.js")
+// 任一 False → 报警停止，问用户该机器是否已安装这两个依赖包，不得假设路径继续
+// 代码中用 NPM_ROOT 拼路径：file:///+NPM_ROOT+'/@aidea/bi-analyse-client/dist/platformClient.js'</div>
 <h3>⭐ 主数据接口：adverAnakeytrendTable（v3 关键修正）</h3>
 <p>广告效率与收入概况所需的<b>所有日维度指标</b>都从这一个接口取，<code>dateType:"date"</code>，platform 分别 <code>["All"]/["IOS"]/["ANDROID"]</code>，<code>dateStart:DS30, dateEnd:DE</code>。通用 base 参数 <code>{adchannel:["all"],adtype:["all"],country:["All"],dataType:"log"}</code>（后台三块全程 log，禁止改 api）。</p>
 <table>
@@ -1139,17 +1143,18 @@ T1T2=44国（AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,E
 </table>
 
 <h2>Step 5 · 推送</h2>
-<div class="tmpl">runJs = 'C:/Users/lujiaxin04/AppData/Roaming/npm/node_modules/＠larksuite/cli/scripts/run.js'
-// 推卡片
+<p>⚠️ <b>群号/@对象必须向用户确认，禁止照抄历史群号</b>：下表是本项目（MG Mobile Growth）当前使用的真实群号，仅供本项目复用；换团队/换场景/换 agent 执行前，必须先问用户"测试群 chat_id？正式群 chat_id？是否需要 @所有人 或指定成员（需 open_id）？"，得到确认后才能推送。</p>
+<div class="tmpl">runJs = NPM_ROOT + '/@larksuite/cli/scripts/run.js'   // NPM_ROOT 见 Step2 环境探测
+// 先推测试群，确认chat_id来自用户本次提供或下表本项目配置
 execFileSync(process.execPath,[runJs,'im','+messages-send','--as','bot','--chat-id',CHAT_ID,'--msg-type','interactive','--content',JSON.stringify(card)]);
-// @所有人（仅正式群，卡片推送成功后单独发文本）
-atMsg = { text: '&lt;at user_id="all"&gt;所有人&lt;/at&gt; 日报已更新 ✅' }</div>
+// @提及仅在用户明确要求且提供 open_id 时才发
+atMsg = { text: '&lt;at user_id="{{open_id}}"&gt;{{姓名}}&lt;/at&gt; 日报已更新 ✅' }</div>
 <table>
-<tr><th>群</th><th>chat_id</th><th>用途</th></tr>
+<tr><th>群</th><th>chat_id</th><th>用途（本项目当前配置，仅供参考）</th></tr>
 <tr><td>赛博牛马🐂</td><td><code>oc_44ce402d9ee9d0f901b61e6885cc33b1</code></td><td>先推测试</td></tr>
 <tr><td>MG 变现小群</td><td><code>oc_9b0689b9a37e1eebf014fb39d8c78638</code></td><td>用户确认后推正式 + @所有人</td></tr>
 </table>
-<p><b>顺序</b>：先推测试群 → 用户确认无误 → 才推正式群 + @所有人。严禁跳过确认直推正式群。本流程不创建飞书文档，故文档权限设置不触发。</p>
+<p><b>顺序</b>：先推测试群 → 用户确认无误 → 才推正式群 +（用户指定的@对象，若有）。严禁跳过确认直推正式群，严禁使用未经用户本次确认的 chat_id。本流程不创建飞书文档，故文档权限设置不触发。</p>
 
 <h2>自检清单（推送前必过）</h2>
 <h3>数据真实性</h3>
