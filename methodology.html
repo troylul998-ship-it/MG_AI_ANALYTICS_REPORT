@@ -961,280 +961,226 @@ execFileSync(process.execPath, [runJs, 'im', '+messages-send',
 <p>cmd.exe 的 <code>&lt;</code> 符号会导致问题。使用 <code>execFileSync(process.execPath, [script, ...args])</code> 绕过 shell。</p>
 </div>
 
-<!-- 日报推送流水线 SKILL（主Agent+3子Agent架构） -->
+<!-- 日报推送流水线 SKILL v3（文档摘录 + 后台子Agent + 交叉校验 + 对抗审查） -->
 <div class="m-panel" id="m-pipeline">
-<div class="m-lead">日报推送 SKILL · 主Agent + 3子Agent 架构（2026.07）：主Agent编排调度，子Agent 1 数据获取 → 子Agent 2 飞书文档生成 → 子Agent 3 卡片推送。<br><b>⚠️ 核心原则：① 数据真实性 — 所有数据必须来自 OmniEye API，绝不估算虚构 ② 归因基于真实数据 — 归因必须由已计算指标（eCPM/频次/DAU 变化%）推导，不可用通用表述</b></div>
+<div class="m-lead">日报卡片推送 SKILL · v3（2026.07.08 重构）：<b>飞书日报文档已由上游生成，本流程不创建文档</b>。主Agent 读文档摘录前3块（日报信息/日报重点/收入概况），子Agent A 拉后台补后3块（广告效率/渠道/聚合GAP）+ 收入概况的近30天趋势列，主Agent 组装7模块卡片并推送。<br><b>⚠️ 目标：任何 agent 在完全空白背景下，只读本模块即可端到端跑通，且数据准确无误、结论100%源于真实数据。</b></div>
+
+<h2>🧭 给执行 Agent 的开场须知（先读）</h2>
+<div class="step-box"><span class="num">1</span><b>第一性原理</b><p style="margin:6px 0 0;">每个数字都要能回答"它从哪个接口的哪个字段来、口径是什么"。回答不了就不能进卡片。不要因"旧脚本这么写"就照抄——先确认字段/接口在<b>今天</b>依然真实返回该值。</p></div>
+<div class="step-box"><span class="num">2</span><b>对抗性审查（每阶段结束都做）</b><p style="margin:6px 0 0;">完成一步后反问"这个数若错，会错在哪？"（口径变了？列名变了？某产品当天无数据被填0？分母为0？）。能双源核对的必须核对。任何 |环比|≥30% 或 |30天|≥40% 先当"疑似口径问题"，核实后才呈现并标注。</p></div>
+<div class="step-box"><span class="num">3</span><b>绝不造数（红线）</b><p style="margin:6px 0 0;">拉不到 = 报警停下问用户。绝不用 Math.random / 估算 / 插值 / 经验值填充。</p></div>
+
+<h2>核心原则（不可违反）</h2>
+<table>
+<tr><th>#</th><th>原则</th></tr>
+<tr><td>1</td><td><b>数据真实性</b>：后台数据必须来自 OmniEye API 真实返回；任一数据点失败 → 立即停止报警，等用户引导。绝不造数/估算/降级。</td></tr>
+<tr><td>2</td><td><b>前3块只摘录不重算</b>：日报信息/日报重点/收入概况的数值逐字摘录自飞书文档，不另拉后台重算（唯一例外：收入概况"近30天趋势"列文档没有，取自后台）。</td></tr>
+<tr><td>3</td><td><b>归因基于真实数据</b>：方向/归因语句必须可追溯到真实指标变化%。禁止"效率提升"这类无数据支撑的空话。</td></tr>
+<tr><td>4</td><td><b>多产品顺序固定</b>：任何多产品文字总结永远按 UNO &gt; UNO2 &gt; P10 &gt; SKB；不涉及的产品跳过，其余不重排。</td></tr>
+</table>
 
 <h2>架构概览</h2>
-<div class="tmpl">主Agent（Orchestrator）— 接收用户指令、解析日期、分配任务、协调执行顺序
-  ├── 子Agent 1：数据获取（Data Fetcher）
-  │     输入：目标日期
-  │     输出：6个本地JSON数据文件
-  ├── 子Agent 2：日报文档生成（Doc Generator）
-  │     输入：子Agent 1 的数据文件
-  │     输出：飞书日报文档 URL
-  └── 子Agent 3：卡片推送（Card Pusher）
-        输入：子Agent 1 数据 + 子Agent 2 文档URL
-        输出：飞书群卡片推送</div>
+<div class="tmpl">用户给飞书日报文档 URL
+   │
+   ├─(主Agent) 读文档正文 → 摘录：日报信息 + 日报重点 + 收入概况(8列)
+   │
+   ├─(子Agent A) 拉后台 → 广告效率 + 渠道收入 + 聚合GAP + trend30 (JSON)
+   │
+   └─(主Agent) 交叉校验 → 组装7模块卡片 → 应用颜色/⚠️规则 → 推测试群 → 确认 → 推正式群+@所有人</div>
+<p><b>关键分工</b>：飞书文档是「文字与收入概况」的唯一权威源；后台 API 只补「广告效率/渠道/GAP」三块。两者井水不犯河水，杜绝口径打架。</p>
 
-<h3>职责划分</h3>
+<h2>日期口径（写死）</h2>
+<div class="tmpl">今天记为 T 日。后台只有截至昨天的完整数据，故：
+CUR   = T-1    数据日期（昨日）     例 T=07-08 → CUR=2026-07-07
+PREV  = T-2    环比基准（前日）     例 → 2026-07-06
+YOY   = CUR-7  周同比基准          例 → 2026-06-30
+DS30  = CUR-30 近30天起始          例 → 2026-06-07
+DE    = CUR    近30天结束          例 → 2026-07-07
+CW    = [CUR所在周一, 周日]        例 → ['2026-06-30','2026-07-06']
+PW    = [上周一, 上周日]           例 → ['2026-06-23','2026-06-29']
+· 近30天历史每天从后台实时拉取（不用缓存源）
+· 卡片标题日期用 T（发布日）；正文「日期」字段用 CUR（数据日），与文档一致
+· 动手前先核对「文档日期 == 你算的 CUR」，不一致立即停下问用户</div>
+
+<h2>Step 1 · 主Agent 读飞书文档 &amp; 摘录前3块</h2>
+<h3>读文档（唯一正确方式）</h3>
+<div class="tmpl">mcp_lark_mcp_docx_v1_document_rawContent  { path: { document_id: "从URL /docx/{id} 提取" } }
+❌ 不要用 axios/cheerio 打 open.feishu.cn（无有效 token，必失败）
+· 用户只说"推今天日报"没给URL → 反问要文档链接，不猜文档ID</div>
+<h3>摘录 → 卡片模块映射</h3>
 <table>
-<tr><th>Agent</th><th>输入</th><th>输出</th><th>依赖</th></tr>
-<tr><td>主Agent（Orchestrator）</td><td>用户指令</td><td>协调结果确认</td><td>—</td></tr>
-<tr><td>子Agent 1：数据获取</td><td>目标日期</td><td>6个本地数据文件</td><td>OmniEye API</td></tr>
-<tr><td>子Agent 2：日报文档生成</td><td>子Agent 1 数据</td><td>飞书文档 URL</td><td>飞书文档 API</td></tr>
-<tr><td>子Agent 3：卡片推送</td><td>子Agent 1 数据 + 文档URL</td><td>飞书群卡片消息</td><td>lark-cli</td></tr>
+<tr><th>卡片模块</th><th>来自文档</th><th>转换</th></tr>
+<tr><td>0 日报信息</td><td>数据总结 + 总收入行</td><td>日期/环比/总收入/<b>总DAU=4产品DAU加总</b>/文档链接</td></tr>
+<tr><td>1 ⭐日报重点</td><td>⭐日报重点 4条</td><td>原文照搬去多余空格，产品顺序调为 UNO&gt;UNO2&gt;P10&gt;SKB</td></tr>
+<tr><td>2 收入概况表</td><td>收入概况8列表</td><td>归因列移出→summary；见下方转换</td></tr>
+<tr><td>6 后续建议</td><td>关注点 + 各产品点位段</td><td>综合，按产品顺序</td></tr>
 </table>
-<p><b>数据传递规则</b>：子Agent间通过本地JSON文件传递，子Agent 2/3 只能读取子Agent 1输出，不可自行调用API。</p>
+<h3>收入概况：8列文档表 → 10列卡片表</h3>
+<div class="tmpl">文档8列（含归因）→ 卡片10列（无归因）
+0. 口径提示：文档 IAA收入=API口径，其余列=log口径。IAA收入直接抄文档，不可用后台log收入替换
+1. 归因列 → 移出表格，浓缩为模块标题下 grey summary
+2. eCPM列 文档"$6.29（+2.28%）" → 卡片只取环比 "+2.28%"
+3. AdARPU列 文档"$0.0373（-4.36%）" → 只取环比 "-4.36%"
+4. 在线时长环比 → 文档表无，取自各产品「点位」段"在线时长 X（±X%）"→ "34.16min(+0.03%)"（缺则报警不编）
+5. 近30天趋势 → 文档表无，取自后台 trend30 → "IAA -4.8%，DAU -3.5%，eCPM -2.3%"
+⚠️ 因此收入概况表必须等子Agent A 跑完才能组装
+⚠️ 文档列名会变（如"频次"↔"DAU频次"），按列义匹配而非硬编码列序；摘录后校验 4产品×8字段齐全</div>
 
-<h2>子Agent 1 — 数据获取（Data Fetcher）</h2>
-<h3>接口清单（6个接口）</h3>
+<h2>Step 2 · 子Agent A 后台数据（全 log 口径）</h2>
+<h3>环境依赖（本机专属，换机先 Test-Path 确认）</h3>
+<div class="tmpl">platformClient: file:///C:/Users/lujiaxin04/AppData/Roaming/npm/node_modules/@aidea/bi-analyse-client/dist/platformClient.js
+lark-cli:       .../＠larksuite/cli/scripts/run.js（见推送段）</div>
+<h3>⭐ 主数据接口：adverAnakeytrendTable（v3 关键修正）</h3>
+<p>广告效率与收入概况所需的<b>所有日维度指标</b>都从这一个接口取，<code>dateType:"date"</code>，platform 分别 <code>["All"]/["IOS"]/["ANDROID"]</code>，<code>dateStart:DS30, dateEnd:DE</code>。通用 base 参数 <code>{adchannel:["all"],adtype:["all"],country:["All"],dataType:"log"}</code>（后台三块全程 log，禁止改 api）。</p>
 <table>
-<tr><th>#</th><th>Endpoint</th><th>platform参数</th><th>时间范围</th><th>粒度</th></tr>
-<tr><td>1</td><td>adverAnakeytrendRevenue</td><td>All</td><td>近30天</td><td>day</td></tr>
-<tr><td>2</td><td>adverAnakeytrendeCPM</td><td>All</td><td>近30天</td><td>day</td></tr>
-<tr><td>3</td><td>adverAnakeytrendeCPM</td><td>IOS</td><td>近30天</td><td>day</td></tr>
-<tr><td>4</td><td>adverAnakeytrendeCPM</td><td>ANDROID</td><td>近30天</td><td>day</td></tr>
-<tr><td>5</td><td>adverAnakeytrendTableAdchannel</td><td>All / IOS / ANDROID</td><td>近30天</td><td>day</td></tr>
-<tr><td>6</td><td>MultiAggregationTesting221</td><td>按产品×端</td><td>本周+上周</td><td>week</td></tr>
+<tr><th>项</th><th>说明</th></tr>
+<tr><td>现成字段（禁止推算）</td><td>AdARPU, eCPM, <b>RV_AdARPU, RV_eCPM, INT_AdARPU, INT_eCPM</b>, DAU, Revenue, FrequencyDAU（验证：SKB 07-07 RV_AdARPU=0.0698 与后台截图一致）</td></tr>
+<tr><td>IOS/AND 端 ARPU·eCPM</td><td>从 platform:["IOS"]/["ANDROID"] 返回里取该端 AdARPU、eCPM</td></tr>
+<tr><td>❌ 废弃旧写法</td><td>不要再用 adverAnakeytrendeCPM + "RV_eCPM×RV_FrequencyDAU/1000" 推算 ARPU（该接口无 RV_AdARPU 字段）</td></tr>
 </table>
-
-<h3>项目配置</h3>
-<div class="tmpl">PROJECTS = { UNO: 'mn01', UNO2: '1000014', P10: 'mn02', SKB: '1000008' }</div>
-
-<h3>双聚合口径</h3>
+<h3>近30天趋势（trend30）— 口径统一钉死</h3>
+<div class="tmpl">· 一律用 adverAnakeytrendTable(platform All)，不要用 adverAnakeytrendRevenue
+  （两接口 Revenue 口径不同，会得出不同30天%，如 UNO -4.8% vs -12.9%）
+· 口径：升序日期，头7天均值 vs 尾7天均值（过滤>0）
+  trend30[k]={revChg(Revenue), dauChg(DAU), ecpmChg(eCPM)}</div>
+<h3>渠道收入（adverAnakeytrendTableAdchannel）</h3>
+<div class="tmpl">platform ["ANDROID"]/["IOS"]，DS30~DE。字段 adchannel, Revenue, RevenueRate, ECPM
+每格：总占比%(整数) | $加权eCPM(日环比%)
+  总占比 = IOS占比×IOS收入权重 + AND占比×AND收入权重（权重=各端当日Revenue/双端合计）
+  加权eCPM = (IOS_Rev×IOS_ECPM + AND_Rev×AND_ECPM)/(IOS_Rev+AND_Rev)
+渠道名映射：applovin→AL, admob, unity, moloco, facebook, inmobi, vungle,
+  ironsource→ironsrc, bidmachine→bidmach, mintegral；剔除 None/fyber；占比&lt;1%显示 -
+渠道趋势列：有稳定30天占比pct-point口径则用（首2周vs末2周），否则用文档「渠道」段真实定性描述（皆真实，禁编pct）</div>
+<h3>聚合GAP（MultiAggregationTesting221，cycle "week"，CW/PW 各拉一次）</h3>
 <table>
-<tr><th>产品</th><th>AND端</th><th>IOS端</th></tr>
-<tr><td>UNO</td><td>admob vs MAX（全量，无过滤）</td><td>admob vs MAX（全量）</td></tr>
-<tr><td>UNO2</td><td colspan="2">admob量级极小，无有效对比</td></tr>
-<tr><td>P10</td><td>admob vs MAX，剔当日新增(reg排除"1") + 剔T3国家</td><td>levelplay vs MAX，剔当日新增</td></tr>
-<tr><td>SKB</td><td>admob vs MAX（全量，无过滤）</td><td>levelplay vs MAX（全量，无过滤）</td></tr>
+<tr><th>产品</th><th>AND</th><th>IOS</th><th>过滤</th></tr>
+<tr><td>UNO</td><td>max vs admob</td><td>max vs admob</td><td>全量</td></tr>
+<tr><td>UNO2</td><td>—</td><td>—</td><td>默认"量级极小，无有效对比"，<b>每天必须确认量级</b></td></tr>
+<tr><td>P10</td><td>max vs admob</td><td>max vs levelplay</td><td>AND: country=T1T2 + reg_group=REG(剔新增)；IOS: reg_group=REG</td></tr>
+<tr><td>SKB</td><td>max vs admob</td><td>max vs levelplay</td><td>全量</td></tr>
 </table>
+<div class="tmpl">GAP口径：取返回里 admob/max-1（或 levelplay/max-1）字段 ×100 = 百分比
+  正=admob/levelplay 领先 MAX；负=MAX 领先。卡片格式 "ADM +4.2% / +1.5%"（本周/上周）
+  AND用ADM(admob)；IOS的P10/SKB用ULP(levelplay)、UNO用ADM
+UNO2 量级每日确认：拉一次 fetchPair，两个mediation的 AdvalueARPU 是否都非零且样本充足
+  仍极小(某侧≈0) → 输出"量级极小，无有效对比"；已起量(双侧稳定非零) → 按正常产品输出GAP并提醒用户
+REG=["2","3","4"..."181~365",">365"]（剔新增，排除"1"）
+T1T2=44国（AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,EE,ES,FI,HU,IE,IL,IS,IT,KW,LU,NL,NO,PL,PR,PT,QA,RU,SA,SE,SM,SV,TR）</div>
+<p><b>失败处理</b>：任一 call 抛错/返回空/CUR无数据 → 抛出报警 <code>❌ 后台失败 | 模块 | 产品 | 日期 | 错误</code>，停止，不产半成品卡片。</p>
 
-<h3>T1+T2 国家清单（44国）</h3>
-<div class="tmpl">AU,CA,CN,DE,FR,GB,HK,JP,KR,NZ,SG,TW,UK,US,AE,AT,BE,BS,CH,CY,CZ,DK,EE,ES,FI,HU,IE,IL,IS,IT,KW,LU,NL,NO,PL,PR,PT,QA,RU,SA,SE,SM,SV,TR</div>
-
-<h3>剔新增 REG 参数</h3>
-<div class="tmpl">REG = ["2","3","4","5","6","7","8~15","16~30","31~60","61~90","91~180","181~365",">365"]</div>
-
-<h3>日期参数自动计算规则</h3>
-<div class="tmpl">CUR   = 目标日期（数据日期，通常为昨日）        例：'2026-07-02'
-PREV  = CUR - 1天（环比基准）                   例：'2026-07-01'
-YOY   = CUR - 7天（周同比基准）                 例：'2026-06-25'
-DS30  = CUR - 30天（近30天起始）                 例：'2026-06-02'
-DE    = CUR（近30天结束）                        例：'2026-07-02'
-CW    = [本周一, 本周日]（CUR所在周）           例：['2026-06-30','2026-07-06']
-PW    = [上周一, 上周日]                         例：['2026-06-23','2026-06-29']</div>
-
-<h3>输出文件（6个）</h3>
+<h2>Step 3 · 交叉校验 &amp; 异常值（数据准确的核心防线）</h2>
+<h3>口径基准（决定哪些能对账）</h3>
+<div class="tmpl">· 飞书文档：IAA收入=API口径；其他指标(DAU/频次/eCPM/AdARPU/在线时长)=log口径
+· 后台子Agent：全部 dataType:"log"，即全 log
+推论：
+  ① IAA收入 不做文档↔后台对账（文档API、后台log，本就不同）；只抄文档API值，禁用后台log覆盖
+  ② DAU/eCPM/AdARPU/频次 文档与后台同为log，可且必须交叉校验
+  ③ 后台三块动态数据全程log，不得混入api</div>
+<h3>文档 ↔ 后台 交叉校验（仅限 log 指标）</h3>
 <table>
-<tr><th>文件名</th><th>内容</th></tr>
-<tr><td>daily_raw_{date}.json</td><td>收入/DAU/ARPU/eCPM/频次 日维度数据</td></tr>
-<tr><td>ecpm_platform_{date}.json</td><td>分端(IOS/AND) eCPM 数据</td></tr>
-<tr><td>channel_{date}.json</td><td>渠道占比 + eCPM（All/IOS/AND）</td></tr>
-<tr><td>ad_efficiency_{date}.json</td><td>RV/INT/IOS/AND ARPU + eCPM</td></tr>
-<tr><td>trend_30d_{date}.json</td><td>近30天趋势（头7天vs尾7天均值变化%）</td></tr>
-<tr><td>dualagg_{date}.json</td><td>双聚合GAP数据（本周/上周）</td></tr>
+<tr><th>校验项</th><th>文档值(log)</th><th>后台值(log)</th><th>容差</th></tr>
+<tr><td>各产品 AdARPU 环比</td><td>文档 AdARPU 列</td><td>后台 AdARPU CUR/PREV 环比</td><td>±0.5pct</td></tr>
+<tr><td>各产品 eCPM 环比</td><td>文档 eCPM(log) 列</td><td>后台 eCPM CUR/PREV 环比</td><td>±0.5pct</td></tr>
+<tr><td>各产品 DAU 值</td><td>文档 DAU</td><td>后台 DAU</td><td>±1%</td></tr>
+<tr><td>IAA收入</td><td colspan="3">API vs log，<b>不校验</b>，跳过</td></tr>
 </table>
+<p><b>实测</b>：2026-07-08 交叉校验 12项 log 指标全 PASS（DAU 逐字吻合、eCPM/AdARPU 环比差 ≤0.13pct），规则自洽无误报。</p>
+<h3>总量 &amp; 异常值</h3>
+<div class="tmpl">· 卡片总收入 == 文档总收入 == 收入概况4产品IAA之和（容差&lt;1%）；总DAU==4产品DAU之和
+· 离群哨兵：|环比|≥30% 或 |30天|≥40% → 标"疑似口径异常"先核实（如 UNO2 eCPM 30天 -68% 属Banner口径变化），
+  确认后在summary显式注明"（口径变化，需核实）"，不得当正常数据静默呈现
+· 环比分母为0/字段null → 显示 "-"，不显示 "0%"</div>
 
-<h3>调用方式</h3>
-<div class="tmpl">import { PlatformClient } from '@aidea/bi-analyse-client/dist/platformClient.js';
-const client = new PlatformClient();
-const resp = await client.callApi('/md/configReport/getCustomData/' + endpoint, 'post', params, projectId);
-// resp.data.data.data = 行数据数组（每行为数组）
-// resp.data.data.title = 列名数组
-// 通用base参数：{ adchannel:["all"], adtype:["all"], country:["All"], dataType:"log" }</div>
-
-<h2>子Agent 2 — 日报文档生成（Doc Generator）</h2>
-<h3>飞书文档结构（参考 TqBzds6OooZflgxTTTacD1Pznye）</h3>
-<div class="tmpl">1. 数据总结（日期/环比说明/历史日报链接）
-
-2. 收入概况表（8列含归因）
-   | 产品 | IAA收入 | IAA环比 | IAA同比 | DAU | 频次 | eCPM(log) | AdARPU | 归因 |
-
-3. 分产品4维度分析（UNO/UNO2/P10/SKB），每产品：
-   - 整体：收入环比%变化 + 多因子归因（必须含收入%数值）
-   - 平台：双平台 ARPU 方向 + 驱动因子（不写具体数值）
-   - 渠道：渠道 eCPM 方向 + 关键渠道（不写具体数值）
-   - 点位：在线时长变化%（必须有数值）+ 关键广告位变化描述
-
-4. ⭐ 日报重点（4条）
-   1. 整体情况：总收入环比 + 主要拖累/驱动产品
-   2. 效率分化：各产品 AdARPU/eCPM 变化方向对比
-   3. 点位活动：各产品核心点位变化总结
-   4. 关注点：未来需重点关注的 2-3 个问题
-
-5. 📈 近期趋势（4条，纯指标）</div>
-
-<h3>归因规则</h3>
-<div class="tmpl">1. 计算 eCPM变化%、频次变化%、DAU变化%
-2. 判断归因方向：
-   - DAU 变化 > ±5% 且为主导 → "量端驱动"
-   - 频次变化 > ±5% 且为主导 → "频次驱动"
-   - eCPM 变化 > ±5% 且为主导 → "eCPM驱动"
-   - 多因子同时变化 → 组合："量+频驱动"、"eCPM下滑频次对冲"
-3. 归因语句必须可追溯到具体指标变化数值
-   ✅ "量+频驱动"（DAU +3.62%、频次 +4.86%）
-   ❌ "效率提升"（无数据支撑的通用描述）</div>
-
-<h3>格式规则</h3>
+<h2>Step 4 · 卡片组装（7模块）· 格式规则</h2>
 <table>
-<tr><th>维度</th><th>是否带数值</th><th>说明</th></tr>
-<tr><td>整体</td><td>✅ 带数值</td><td>收入环比%必须出现</td></tr>
-<tr><td>平台</td><td>❌ 不带</td><td>只写方向和驱动因子</td></tr>
-<tr><td>渠道</td><td>❌ 不带</td><td>只写方向和关键渠道</td></tr>
-<tr><td>点位</td><td>⚠️ 仅在线时长带%</td><td>其余只写方向描述</td></tr>
+<tr><th>#</th><th>模块</th><th>类型</th><th>数据源</th></tr>
+<tr><td>0</td><td>📊 日报信息</td><td>markdown</td><td>文档</td></tr>
+<tr><td>1</td><td>⭐ 日报重点</td><td>markdown</td><td>文档</td></tr>
+<tr><td>2</td><td>📊 一、收入概况</td><td>table 10列</td><td>文档 + 后台trend30</td></tr>
+<tr><td>3</td><td>🎬 二、广告效率</td><td>table 10列</td><td>后台</td></tr>
+<tr><td>4</td><td>📡 三、渠道收入</td><td>table 12列</td><td>后台</td></tr>
+<tr><td>5</td><td>🔀 四、聚合GAP</td><td>table 4列</td><td>后台</td></tr>
+<tr><td>6</td><td>💡 后续建议</td><td>markdown</td><td>文档 + 后台趋势</td></tr>
 </table>
-
-<h3>文档权限</h3>
+<h3>颜色 &amp; ⚠️ 规则（v3 唯一权威版）</h3>
 <table>
-<tr><th>角色</th><th>权限</th></tr>
-<tr><td>陆嘉欣</td><td>管理权限（full_access）</td></tr>
-<tr><td>Mobile Growth 群 (oc_efab06bc2b4f283575440499e8f802e2)</td><td>编辑权限（edit）</td></tr>
+<tr><th>条件</th><th>处理</th><th>示例</th></tr>
+<tr><td>值 ≥ +5%</td><td>绿色，<b>不加⚠️</b></td><td><code>&lt;font color='green'&gt;+6.95%&lt;/font&gt;</code></td></tr>
+<tr><td>值 ≤ -5%</td><td>红色</td><td><code>&lt;font color='red'&gt;-12.05%&lt;/font&gt;</code></td></tr>
+<tr><td>-5% &lt; 值 &lt; +5%</td><td>不标色</td><td><code>+2.28%</code></td></tr>
+<tr><td><b>仅收入概况</b>：指标 ≤ -5%（下滑）</td><td>红色 + 前缀 ⚠️</td><td><code>&lt;font color='red'&gt;⚠️-5.84%&lt;/font&gt;</code></td></tr>
 </table>
-
-<h2>子Agent 3 — 卡片推送（Card Pusher）</h2>
-<h3>卡片模块结构（固定7个模块）</h3>
+<p><b>唯一权威说明</b>：⚠️ 只用于<b>预警下滑</b>——收入概况模块（IAA环比/IAA同比/DAU/频次/eCPM环比/ARPU环比）某指标 ≤ -5% 时红色+⚠️；正向增长(≥+5%)只标绿不加⚠️；广告效率/渠道/GAP 三块只按 ±5% 标色，一律不加 ⚠️。</p>
+<h3>近30天趋势描述词汇表</h3>
 <table>
-<tr><th>序号</th><th>模块</th><th>类型</th><th>内容说明</th></tr>
-<tr><td>0</td><td>日报信息</td><td>markdown</td><td>日期/环比/总收入/文档链接/颜色规则说明</td></tr>
-<tr><td>1</td><td>⭐ 日报重点</td><td>markdown</td><td>4条（整体情况/效率分化/点位活动/关注点）</td></tr>
-<tr><td>2</td><td>📊 一、收入概况</td><td>table 10列</td><td>无归因列，归因写在summary文字中</td></tr>
-<tr><td>3</td><td>🎬 二、广告效率</td><td>table 10列</td><td>RV/INT ARPU + eCPM 合并展示</td></tr>
-<tr><td>4</td><td>📡 三、渠道收入</td><td>table 12列</td><td>占比 + eCPM</td></tr>
-<tr><td>5</td><td>🔀 四、聚合GAP</td><td>table 4列</td><td>本周/上周对比</td></tr>
-<tr><td>6</td><td>💡 后续建议</td><td>markdown</td><td>行动建议 + 趋势风险</td></tr>
+<tr><th>幅度</th><th>用词</th></tr>
+<tr><td>&gt; +10%</td><td>持续提升 / 显著回升</td></tr>
+<tr><td>+5%~+10%</td><td>明显改善 / 稳步增长</td></tr>
+<tr><td>-5%~+5%</td><td>基本持平 / 波动不大</td></tr>
+<tr><td>-10%~-5%</td><td>小幅下滑 / 略有承压</td></tr>
+<tr><td>&lt; -10%</td><td>大幅下滑 / 明显走弱</td></tr>
 </table>
-
-<h3>📊 收入概况表（10列，无归因列）</h3>
-<table>
-<tr><th>列名</th><th>data_type</th><th>宽度</th><th>格式示例</th></tr>
-<tr><td>产品</td><td>text</td><td>80px</td><td>UNO</td></tr>
-<tr><td>IAA收入</td><td>text</td><td>-</td><td>$43,302</td></tr>
-<tr><td>IAA环比</td><td>lark_md</td><td>-</td><td>&lt;font color='red'&gt;⚠️-12.05%&lt;/font&gt;</td></tr>
-<tr><td>IAA同比</td><td>lark_md</td><td>-</td><td>+1.73%</td></tr>
-<tr><td>DAU</td><td>lark_md</td><td>-</td><td>&lt;font color='red'&gt;116.2万(-7.92%)&lt;/font&gt;</td></tr>
-<tr><td>频次</td><td>lark_md</td><td>-</td><td>&lt;font color='red'&gt;5.93(-6.61%)&lt;/font&gt;</td></tr>
-<tr><td>eCPM环比</td><td>lark_md</td><td>-</td><td>+2.28%</td></tr>
-<tr><td>ARPU环比</td><td>lark_md</td><td>-</td><td>-4.48%</td></tr>
-<tr><td>在线时长环比</td><td>lark_md</td><td>-</td><td>34.1min(-1.76%)</td></tr>
-<tr><td>近30天趋势</td><td>lark_md</td><td>300px</td><td>IAA -13.2%，DAU -6%，eCPM -10.7%</td></tr>
-</table>
-<p><b>归因位置</b>：写在模块标题下方 <code>&lt;font color='grey'&gt;</code> summary 文字中：</p>
-<div class="tmpl">日环比：P10 +5.05%（量+频驱动）领涨，UNO -12.05%（量端+频次双跌）拖累
-近30天趋势：四产品收入均下滑，UNO -13%（eCPM走弱），SKB -9%（eCPM下滑）</div>
-
-<h3>🎬 广告效率表（10列）</h3>
-<div class="tmpl">产品(80px) → RV ARPU(170px) → INT ARPU(170px) → RV eCPM(170px) → INT eCPM(170px)
-          → IOS ARPU(170px) → AND ARPU(170px) → IOS eCPM(170px) → AND eCPM(170px)
-          → 近30天趋势(320px)
-
-单元格格式：$0.0245(-6.17%)  ← 绝对值(环比%)
-趋势列格式：RV-8% INT-8% I.ARPU-8% A.ARPU-11% | eCPM:Total-11% RV-13%</div>
-
-<h3>📡 渠道收入表（12列）</h3>
-<div class="tmpl">产品(80px) → AL(180px) → admob(180px) → unity(180px) → moloco(180px) → facebook(180px)
-          → inmobi(170px) → vungle(170px) → ironsrc(170px) → bidmach(170px)
-          → mintegral(170px) → 近30天趋势(400px)
-
-每格格式：46% | $11.3(+3.7%)  ← 总占比(整数%) | $加权eCPM(日环比%)
-趋势列格式（单行分号分隔）：
-  占比：AL+2.4 moloco-4.1；eCPM：AL-19% admob-9% unity+6%</div>
-
-<h3>🔀 聚合GAP表（4列）</h3>
-<div class="tmpl">产品(80px) → AND端（其他 vs MAX，本周/上周）(260px)
-          → IOS端（其他 vs MAX，本周/上周）(260px)
-          → 近30天趋势(300px)
-
-单元格格式：ADM +4.2% / +1.5%
-  正值 = other领先MAX，负值 = MAX领先other
-  UNO2 固定为"量级极小，无有效对比"</div>
-
-<h3>颜色规则</h3>
-<table>
-<tr><th>条件</th><th>标注方式</th><th>示例</th></tr>
-<tr><td>值 ≥ +5%</td><td>绿色 font 标签</td><td><code>&lt;font color='green'&gt;+5.05%&lt;/font&gt;</code></td></tr>
-<tr><td>值 ≤ -5%</td><td>红色 font 标签</td><td><code>&lt;font color='red'&gt;-12.05%&lt;/font&gt;</code></td></tr>
-<tr><td>-5% &lt; 值 &lt; +5%</td><td>默认黑色，不加标签</td><td><code>+2.28%</code></td></tr>
-<tr><td>IAA环比超过 ±10%</td><td>⚠️ 前缀（仅IAA环比列）</td><td><code>&lt;font color='red'&gt;⚠️-12.05%&lt;/font&gt;</code></td></tr>
-</table>
-
-<h3>格式规则全集</h3>
+<h3>各表列定义（照抄黄金样例 card_0708_final.json）</h3>
+<div class="tmpl">收入概况(10列)：产品(80px) IAA收入(text) IAA环比 IAA同比 DAU 频次 eCPM环比 ARPU环比 在线时长环比 近30天趋势(300px)
+  DAU格式 "115.44万(-0.69%)"；在线时长 "34.16min(+0.03%)"；趋势 "IAA -4.8%，DAU -3.5%，eCPM -2.3%"（内部各指标按±5%标色）
+广告效率(10列)：产品 RV_ARPU INT_ARPU RV_eCPM INT_eCPM IOS_ARPU AND_ARPU IOS_eCPM AND_eCPM 近30天趋势(320px)
+  单元格 "$0.0244(-0.30%)"；趋势 "RV+0% INT-4% I.ARPU+0% A.ARPU-3% | eCPM:Total-2% RV-6%"
+渠道(12列)：产品 AL admob unity moloco facebook inmobi vungle ironsrc bidmach mintegral 近30天趋势(400px)
+  单元格 "48% | $12.3(+1.1%)"
+聚合GAP(4列)：产品 AND端(260px) IOS端(260px) 近30天趋势(300px)
+  单元格 "ADM +4.2% / +1.5%"；UNO2 固定 "量级极小，无有效对比"</div>
+<h3>格式禁令</h3>
 <table>
 <tr><th>规则</th><th>说明</th></tr>
-<tr><td>❌ 禁止使用 ⬇️ ↑ ↗️ ↘️ emoji</td><td>只用 +/- 符号表示方向</td></tr>
-<tr><td>⚠️ 仅用于异常阈值</td><td>仅在 IAA环比 ≥±10% 时出现</td></tr>
-<tr><td>金额带逗号</td><td>"$43,302"</td></tr>
-<tr><td>DAU格式</td><td>"116.2万(-7.92%)"</td></tr>
-<tr><td>在线时长格式</td><td>"34.1min(-1.76%)"</td></tr>
-<tr><td>渠道格式</td><td>"46% | $11.3(+3.7%)" — 整数占比 + 加权eCPM(环比)</td></tr>
-<tr><td>渠道趋势格式</td><td>单行分号："占比：AL+2.4 moloco-4.1；eCPM：AL-19% admob-9% unity+6%"</td></tr>
-<tr><td>GAP格式</td><td>"ADM +4.2% / +1.5%" — 正=other领先MAX，负=MAX领先</td></tr>
-<tr><td>近30天趋势</td><td>纯指标："IAA -13.2%，DAU -6%，eCPM -10.7%"</td></tr>
-<tr><td>归因位置</td><td>收入概况模块summary文字中（不作为表格列）</td></tr>
-<tr><td>每模块小总结</td><td>日环比：xxx / 近30天趋势：xxx（grey色）</td></tr>
-<tr><td>聚合GAP小总结</td><td>周环比：xxx + 💡行动建议</td></tr>
-<tr><td>卡片底部</td><td>不放按钮</td></tr>
-<tr><td>row_height</td><td>只接受"low"或"high"</td></tr>
-<tr><td>产品列</td><td>统一80px</td></tr>
+<tr><td>❌ 禁用 ⬇️ ↑ ↗️ ↘️</td><td>方向只用 +/-</td></tr>
+<tr><td>⚠️ 使用范围</td><td>仅收入概况 ≤-5% 下滑</td></tr>
+<tr><td>金额千分位</td><td>"$43,302"；row_height="low"；卡片底部不放按钮</td></tr>
+<tr><td>每模块 grey summary</td><td>日环比：… / 近30天趋势：…（GAP用 周环比：…+💡行动建议）；内部多产品按 UNO&gt;UNO2&gt;P10&gt;SKB</td></tr>
 </table>
 
-<h3>推送配置</h3>
+<h2>Step 5 · 推送</h2>
+<div class="tmpl">runJs = 'C:/Users/lujiaxin04/AppData/Roaming/npm/node_modules/＠larksuite/cli/scripts/run.js'
+// 推卡片
+execFileSync(process.execPath,[runJs,'im','+messages-send','--as','bot','--chat-id',CHAT_ID,'--msg-type','interactive','--content',JSON.stringify(card)]);
+// @所有人（仅正式群，卡片推送成功后单独发文本）
+atMsg = { text: '&lt;at user_id="all"&gt;所有人&lt;/at&gt; 日报已更新 ✅' }</div>
 <table>
-<tr><th>群组</th><th>chat_id</th><th>用途</th></tr>
-<tr><td>赛博牛马🐂</td><td><code>oc_44ce402d9ee9d0f901b61e6885cc33b1</code></td><td>日常测试</td></tr>
-<tr><td>MG 变现小群</td><td><code>oc_9b0689b9a37e1eebf014fb39d8c78638</code></td><td>正式推送 + @所有人</td></tr>
+<tr><th>群</th><th>chat_id</th><th>用途</th></tr>
+<tr><td>赛博牛马🐂</td><td><code>oc_44ce402d9ee9d0f901b61e6885cc33b1</code></td><td>先推测试</td></tr>
+<tr><td>MG 变现小群</td><td><code>oc_9b0689b9a37e1eebf014fb39d8c78638</code></td><td>用户确认后推正式 + @所有人</td></tr>
 </table>
-<div class="tmpl">// 推送卡片（lark-cli）
-const runJs = 'C:\\Users\\lujiaxin04\\AppData\\Roaming\\npm\\node_modules\\@larksuite\\cli\\scripts\\run.js';
-execFileSync(process.execPath, [runJs, 'im', '+messages-send',
-  '--as', 'bot', '--chat-id', CHAT_ID,
-  '--msg-type', 'interactive', '--content', JSON.stringify(card)]);
+<p><b>顺序</b>：先推测试群 → 用户确认无误 → 才推正式群 + @所有人。严禁跳过确认直推正式群。本流程不创建飞书文档，故文档权限设置不触发。</p>
 
-// @所有人（仅正式群）
-const atMsg = JSON.stringify({ text: '&lt;at user_id="all"&gt;所有人&lt;/at&gt; 日报已更新 ✅' });
-execFileSync(process.execPath, [runJs, 'im', '+messages-send',
-  '--as', 'bot', '--chat-id', 'oc_9b0689b9a37e1eebf014fb39d8c78638',
-  '--msg-type', 'text', '--content', atMsg]);</div>
-
-<h2>主Agent 执行流程</h2>
-<div class="step-box"><span class="num">1</span><b>解析用户指令，确定目标日期</b><p style="margin:6px 0 0;">"生成7月2日日报" → CUR='2026-07-02'；"推送今天的日报" → CUR=昨日</p></div>
-<div class="step-box"><span class="num">2</span><b>调用子Agent 1（数据获取）→ 等待数据文件生成</b><p style="margin:6px 0 0;">传入目标日期，等待6个数据文件输出完成。</p></div>
-<div class="step-box"><span class="num">3</span><b>验证数据完整性</b><p style="margin:6px 0 0;">检查所有6个输出文件存在且非空；每文件含4产品数据；关键字段(Revenue/DAU/eCPM)不为null。</p></div>
-<div class="step-box"><span class="num">4</span><b>调用子Agent 2（日报文档生成）→ 等待飞书文档创建</b><p style="margin:6px 0 0;">传入全部数据文件 + 目标日期，等待文档URL输出。</p></div>
-<div class="step-box"><span class="num">5</span><b>获取文档URL</b><p style="margin:6px 0 0;">读取 doc_url_{date}.txt，验证URL格式(https://mattel163.feishu.cn/docx/...)。</p></div>
-<div class="step-box"><span class="num">6</span><b>调用子Agent 3（卡片推送）→ 生成卡片并推送</b><p style="margin:6px 0 0;">传入数据文件+文档URL。先推赛博牛马群测试，确认无误后推MG变现小群+@所有人。</p></div>
-<div class="step-box"><span class="num">7</span><b>向用户确认推送结果</b><p style="margin:6px 0 0;">报告：数据日期、文档URL、推送群组、推送状态。</p></div>
-
-<h2>产出物检查清单</h2>
-<h3>数据文件完整性</h3>
+<h2>自检清单（推送前必过）</h2>
+<h3>数据真实性</h3>
 <ul>
-<li>6个数据文件全部存在且非空</li>
-<li>每个文件包含 UNO/UNO2/P10/SKB 四产品数据</li>
-<li>Revenue、DAU、Total_eCPM 等关键字段不为 null</li>
-<li>双聚合：UNO2 为"无效对比"标记，其余3产品有本周+上周数据</li>
-<li>近30天趋势：每产品至少25天以上有效数据点</li>
+<li>后台所有数值可追溯到 OmniEye 真实返回，无 random/估算/推算</li>
+<li>广告效率用 adverAnakeytrendTable 现成 RV/INT AdARPU 字段（非推算）</li>
+<li>trend30 用 adverAnakeytrendTable（非 Revenue 接口）</li>
+<li>缺失项均报警而非填充</li>
+</ul>
+<h3>交叉校验</h3>
+<ul>
+<li>文档 AdARPU/eCPM 环比 ↔ 后台环比，容差内（±0.5pct）</li>
+<li>卡片总收入 == 文档总收入 == 4产品IAA之和（&lt;1%）；总DAU==4产品DAU之和</li>
+<li>|环比|≥30% 或 |30天|≥40% 的离群值已核实并注明</li>
+<li>IAA收入未做文档↔后台对账（口径不同，跳过）</li>
+</ul>
+<h3>数据一致性 &amp; 格式</h3>
+<ul>
+<li>文档「日期」== CUR；收入概况8个数值逐一 == 文档（未重算未篡改）</li>
+<li>UNO2 GAP == "量级极小，无有效对比"（且已确认量级仍极小）</li>
+<li>7模块齐全顺序对；收入概况10列(无归因列)/广告效率10列/渠道12列/GAP4列</li>
+<li>≥+5%绿、≤-5%红、中间不标色；⚠️ 仅出现在收入概况 ≤-5% 指标</li>
+<li>无 ⬇️/↑/↗️/↘️，方向仅 +/-；所有多产品文字按 UNO&gt;UNO2&gt;P10&gt;SKB</li>
+<li>渠道 "占比%|$eCPM(环比%)"；GAP "ADM +X%/+X%"；row_height=low；底部无按钮</li>
 </ul>
 
-<h3>卡片结构正确性</h3>
-<ul>
-<li>卡片总收入 = 4产品IAA收入之和</li>
-<li>固定7个模块（0-6），顺序正确</li>
-<li>收入概况表严格10列（无归因列），归因在summary文字中</li>
-<li>广告效率表10列，渠道表12列，GAP表4列</li>
-<li>近30天趋势为纯指标格式</li>
-<li>渠道格式为 "占比% | $eCPM(环比%)"</li>
-<li>GAP 格式为 "ADM +4.2% / +1.5%"</li>
-<li>无 ⬇️/↑/↗️/↘️ emoji</li>
-</ul>
-
-<h3>颜色规则正确性</h3>
-<ul>
-<li>≥+5% 绿色，≤-5% 红色，中间不标色</li>
-<li>⚠️ 仅在 IAA环比 ≥±10% 时出现</li>
-<li>所有数据可追溯到 OmniEye API 真实返回值</li>
-<li>归因语句有具体指标数据支撑，非通用描述</li>
-</ul>
+<h2>收尾对抗审查（推送后必做）</h2>
+<div class="step-box"><span class="num">1</span><b>随机抽3个数</b>回溯来自哪个接口哪个字段、口径对不对。</div>
+<div class="step-box"><span class="num">2</span><b>审最反直觉的数</b>（最大涨/跌）：它更可能是真实业务波动，还是口径 bug？给判断依据。</div>
+<div class="step-box"><span class="num">3</span><b>检查残留</b>是否有 0%/-/null 异常。</div>
+<div class="step-box"><span class="num">4</span><b>汇报</b>：已交叉校验N项全过；离群值X个已核实(原因)；存疑Y处(列出)。有存疑 → 告知用户由其决定是否推正式群，<b>不确定就不推正式群</b>。</div>
 
 </div>
 
