@@ -1,120 +1,17 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>因果推断 · AI 数据分析平台</title>
-  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/causal_chain_form.html">
-  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
-  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
-  <link rel="preload" href="../assets/style.css" as="style">
-  <link rel="preload" href="../assets/form.css" as="style">
-  <link rel="stylesheet" href="../assets/style.css">
-  <link rel="stylesheet" href="../assets/form.css">
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=https://mg-ai-analytics.ailabs.mattel163.com">
+<title>已迁移至内网版</title>
+<style>body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8f9fa;color:#333;}div{text-align:center;padding:40px;}h1{font-size:24px;margin-bottom:16px;}a{color:#e8590c;}</style>
 </head>
-<body class="mode-guide">
-<header class="topbar"><div class="topbar-inner"><div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div><h1>AI 数据分析平台</h1><span class="sub">因果推断</span><nav><a href="../index.html">← 返回工作台</a></nav></div></header>
-<div class="form-wrap">
-  <div class="form-head"><a class="back" href="../index.html">← 返回工作台</a><h2>🔗 因果推断分析</h2><p>定义因果链路（Treatment→Mediator→Outcome）、控制混淆、逐环节验证。</p></div>
-  <div class="mode-switch">
-    <button data-mode="guide" class="active">🧭 引导模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">一步步定义因果链。</span></button>
-    <button data-mode="fast">⚡ 快速模式<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填因果变量。</span></button>
-  </div>
-  <div class="mode-hint" id="hint-guide" style="display:none;"></div><div class="mode-hint" id="hint-fast" style="display:none;"></div>
-  <form id="causal-form">
-    <div class="form-error-summary"></div>
-    <div class="fcard"><h3><span class="n">1</span> 基本信息</h3>
-      <div class="field"><label>产品 <span class="req">*</span></label><div class="chips" id="chips-cc-product"><label class="chip"><input type="radio" name="cc_product" value="P10">P10</label><label class="chip"><input type="radio" name="cc_product" value="SKB">SKB</label><label class="chip"><input type="radio" name="cc_product" value="UNO">UNO</label><label class="chip"><input type="radio" name="cc_product" value="UNO2">UNO2</label></div><select id="product" data-required style="display:none;"><option value="">请选择</option><option value="P10">P10</option><option value="SKB">SKB</option><option value="UNO">UNO</option><option value="UNO2">UNO2</option></select><div class="err-msg">必填</div></div>
-      <div class="field"><label>分析目标 <span class="req">*</span></label><textarea id="cc_goal" data-required rows="2" placeholder="如：验证 RM 弹窗(Treatment) → 3PP 点击(Mediator) → 付费转化(Outcome) 的因果链"></textarea><div class="err-msg">必填</div></div>
-      <div class="row"><div class="field"><label>开始日期 <span class="req">*</span></label><input type="date" id="date_start" data-required><div class="err-msg">必填</div></div><div class="field"><label>结束日期 <span class="req">*</span></label><input type="date" id="date_end" data-required><div class="err-msg">必填</div></div></div>
-      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:18px 0;">
-      <div class="field" style="margin-top:16px;">
-        <label>&#128269; 全局搜索 <span class="help">选填，启用后 AI 会先搜索 Confluence 相关文档作为写 SQL 的前置背景</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch">
-            <input type="checkbox" id="ab_global_search_toggle">
-            <span class="toggle-slider"></span>
-          </label>
-          <span style="font-size:13px;font-weight:500;" id="ab-search-status">未启用</span>
-        </div>
-        <div id="ab-search-input-wrap" style="display:none;">
-          <input type="text" id="ab_search_keywords" placeholder="输入关键词或 Confluence 链接" style="width:100%;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">AI 生成 SQL 前会先查阅 Confluence 中与该关键词/链接相关的所有文档，确保口径准确。</p>
-        </div>
-      </div>
-      <div class="field" style="margin-top:16px;">
-        <label>&#128202; 看板口径 <span class="help">选填，启用后 DAU 计算将使用看板标准口径（含成年人、APP端等过滤条件）</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch">
-            <input type="checkbox" id="ab_dashboard_toggle">
-            <span class="toggle-slider"></span>
-          </label>
-          <span style="font-size:13px;font-weight:500;" id="ab-dashboard-status">未启用</span>
-        </div>
-        <div id="ab-dashboard-desc" style="display:none;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">启用后，DAU 和广告收入将严格遵循看板口径：DAU 需 is_adult=1 + UPPER(client)='APP'；广告收入统一用活跃表 advalue_sum_1d 字段。</p>
-        </div>
-      </div>
-      <div class="field" style="margin-top:16px;">
-        <label>&#128300; SQL 自检 <span class="help">选填，启用后 AI 会先给初版 SQL，当你对结果不置信时触发自检</span></label>
-        <div style="display:flex;align-items:center;gap:12px;margin:8px 0 10px;">
-          <label class="toggle-switch">
-            <input type="checkbox" id="ab_sql_verify_toggle">
-            <span class="toggle-slider"></span>
-          </label>
-          <span style="font-size:13px;font-weight:500;" id="ab-sql-verify-status">未启用</span>
-        </div>
-        <div id="ab-sql-verify-desc" style="display:none;">
-          <p style="font-size:11px;color:#999;margin-top:4px;">启用后流程：① AI 先快速输出初版 SQL，你直接去 Omnieye 跑 ② 如果报错或对结果有疑问，把报错/结果贴回来 ③ AI 启动完整自检 → 输出修正版 SQL。没问题就不用等自检，有问题再触发。</p>
-        </div>
-      </div>
-    </div>
-    <div class="fcard"><h3><span class="n">2</span> 因果链定义</h3>
-      <p class="card-desc">快速预设或手动定义。每个环节包含 Treatment → Mediator → Outcome。</p>
-      <div class="field"><label>快速预设</label><div class="chips" id="chips-cc-preset"><label class="chip"><input type="radio" name="cc_preset" value="rm_pay">RM弹窗→3PP点击→付费</label><label class="chip"><input type="radio" name="cc_preset" value="feature_engage">功能上线→参与度→留存</label><label class="chip"><input type="radio" name="cc_preset" value="custom">自定义</label></div></div>
-      <div id="cc-chain-rows"></div>
-      <button type="button" class="btn-add" id="add-cc-chain">+ 添加因果环节</button>
-    </div>
-    <div class="fcard"><h3><span class="n">3</span> 实验设计与混淆控制</h3>
-      <div class="row"><div class="field"><label>实验组标签 <span class="req">*</span></label><input type="text" id="cc_treat" data-required placeholder="如：rm_on"><div class="err-msg">必填</div></div><div class="field"><label>对照组标签 <span class="req">*</span></label><input type="text" id="cc_ctrl" data-required placeholder="如：rm_off"><div class="err-msg">必填</div></div></div>
-      <div class="field"><label>混淆因素控制 <span class="help">选填</span></label><div class="chips" data-custom="cc_confounders"><label class="chip"><input type="checkbox" name="cc_confounders" value="reg_days">注册天数</label><label class="chip"><input type="checkbox" name="cc_confounders" value="platform">平台</label><label class="chip"><input type="checkbox" name="cc_confounders" value="pay_history">历史付费</label><label class="chip"><input type="checkbox" name="cc_confounders" value="activity">活跃度</label></div></div>
-      <div class="field"><label>显著性水平</label><div class="chips"><label class="chip"><input type="radio" name="cc_alpha" value="0.05" checked>p < 0.05</label><label class="chip"><input type="radio" name="cc_alpha" value="0.01">p < 0.01</label><label class="chip"><input type="radio" name="cc_alpha" value="0.10">p < 0.10</label></div></div>
-    </div>
-    <div class="fcard"><h3><span class="n">4</span> 数据源</h3>
-      <div class="field"><label>主键 <span class="req">*</span></label><input type="text" id="pk" data-required placeholder="account_id"><div class="err-msg">必填</div></div>
-      <div class="field"><label>历史 SQL</label><textarea id="cc_sql_ref" rows="3" style="font-family:monospace;font-size:12px;" placeholder="粘贴参考 SQL"></textarea></div>
-      <div class="field"><label>补充</label><textarea id="cc_notes" rows="2" placeholder="补充说明"></textarea></div>
-    </div>
-    <div class="submit-bar"><button type="button" class="btn btn-ghost" id="btn-reset">重置</button><button type="submit" class="btn btn-primary">✅ 完成并生成</button></div>
-  </form>
-  <div class="output hidden" id="output"><div class="out-tabs"></div><div class="out-body"></div></div>
+<body>
+<div>
+<h1>🚀 本站已迁移</h1>
+<p>AI 数据分析平台已迁移至公司内网：</p>
+<p><a href="https://mg-ai-analytics.ailabs.mattel163.com">https://mg-ai-analytics.ailabs.mattel163.com</a></p>
+<p style="color:#999;font-size:14px;">正在自动跳转...</p>
 </div>
-<script src="../assets/form-framework.js" defer></script>
-<script>
-const CC_PRESETS = {
-  rm_pay: [{treatment:'RM弹窗展示',mediator:'3PP点击/跳转',outcome:'付费成功'}],
-  feature_engage: [{treatment:'功能上线',mediator:'功能参与度',outcome:'D7留存'}],
-};
-document.addEventListener('DOMContentLoaded', () => {
-  FF.init();
-  FF.initWizard([
-    {title:'背景',question:'验证什么因果关系？',explain:'选产品、写假设。',example:'<b>例：</b>RM弹窗→3PP点击→付费'},
-    {title:'因果链',question:'链路有哪些环节？',explain:'选预设或手动填。',example:'<b>例：</b>Treatment→Mediator→Outcome'},
-    {title:'设计',question:'怎么对比和控制？',explain:'填分组标签、选混淆因素。',example:'<b>例：</b>rm_on vs rm_off，控制注册天数'},
-    {title:'数据源',question:'数据从哪来？',explain:'填主键、贴SQL。',example:'<b>例：</b>account_id'},
-  ]);
-  document.querySelectorAll('#chips-cc-product .chip').forEach(chip=>{const inp=chip.querySelector('input');inp.addEventListener('change',()=>{chip.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('checked'));chip.classList.add('checked');document.getElementById('product').value=inp.value;});});
-  let chainIdx=0;
-  const chainDyn=FF.initDynamic('cc-chain-rows','add-cc-chain',(d={})=>{chainIdx++;return `<span style="flex:none;width:24px;font-weight:700;color:var(--brand-1);">${chainIdx}</span><input type="text" data-f="treatment" placeholder="Treatment(处理变量)" value="${FF.esc(d.treatment||'')}" style="flex:1;"><span style="flex:none;">→</span><input type="text" data-f="mediator" placeholder="Mediator(中介变量)" value="${FF.esc(d.mediator||'')}" style="flex:1;"><span style="flex:none;">→</span><input type="text" data-f="outcome" placeholder="Outcome(结果变量)" value="${FF.esc(d.outcome||'')}" style="flex:1;">`;},{rowClass:'dyn-row',initial:[{}]});
-  document.querySelectorAll('#chips-cc-preset .chip').forEach(chip=>{const inp=chip.querySelector('input');inp.addEventListener('change',()=>{chip.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('checked'));chip.classList.add('checked');const key=inp.value;if(CC_PRESETS[key]){FF.clearContainer('cc-chain-rows');chainIdx=0;CC_PRESETS[key].forEach(s=>chainDyn.addRow(s));}});});
-  document.getElementById('btn-reset').addEventListener('click',()=>{if(confirm('确认重置？'))location.reload();});
-  document.getElementById('causal-form').addEventListener('submit',e=>{
-    e.preventDefault();if(!FF.validate(e.target))return;
-    const d={module:'causal',product:FF.val('product'),project:FF.val('product')+' 因果链验证',goal:FF.val('cc_goal'),date_range:[FF.val('date_start'),FF.val('date_end')],chains:FF.collectRows('cc-chain-rows',['treatment','mediator','outcome']),treat_label:FF.val('cc_treat'),ctrl_label:FF.val('cc_ctrl'),confounders:FF.getCheckedChips('cc_confounders'),alpha:document.querySelector('input[name="cc_alpha"]:checked')?.value||'0.05',pk:FF.val('pk'),sql_ref:FF.val('cc_sql_ref'),notes:FF.val('cc_notes')};
-    const prompt=`# 角色\n你是资深数据分析师，擅长因果推断。\n\n# 假设\n${d.goal}\n\n# 因果链\n${d.chains.map((c,i)=>`${i+1}. ${c.treatment} → ${c.mediator} → ${c.outcome}`).join('\n')}\n\n# 实验设计\n- 实验组：${d.treat_label} vs 对照组：${d.ctrl_label}\n- 混淆控制：${d.confounders.join('、')||'无'}\n- 显著性：p < ${d.alpha}\n\n# 数据源\n- 产品：${d.product}　主键：${d.pk}\n- 时间：${d.date_range[0]}~${d.date_range[1]}\n${d.sql_ref?'\n# 历史SQL\n```sql\n'+d.sql_ref+'\n```':''}${d.notes?'\n# 补充\n'+d.notes:''}\n\n# 要求\n1. 逐环节验证（Treatment→Mediator、Mediator→Outcome）\n2. 用中介效应分析框架（Baron & Kenny / Sobel Test）\n3. 输出直接效应、间接效应、总效应\n4. 敏感性检验`;
-    FF.renderArtifacts([{key:'sql',label:'SQL Prompt',content:prompt},{key:'json',label:'JSON',content:JSON.stringify(d,null,2)}],{collectFn:()=>d});
-  });
-});
-</script>
-</body></html>
+</body>
+</html>
