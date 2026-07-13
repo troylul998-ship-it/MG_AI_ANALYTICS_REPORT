@@ -1,17 +1,138 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=https://mg-ai-analytics.ailabs.mattel163.com">
-<title>已迁移至内网版</title>
-<style>body{font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8f9fa;color:#333;}div{text-align:center;padding:40px;}h1{font-size:24px;margin-bottom:16px;}a{color:#e8590c;}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>周报分析 · AI 数据分析平台</title>
+  <link rel="canonical" href="https://troylul998-ship-it.github.io/MG_AI_ANALYTICS_REPORT/modules/weekly_report_form.html">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.loli.net" crossorigin>
+  <link rel="stylesheet" href="https://fonts.loli.net/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+  <link rel="preload" href="../assets/style.css" as="style">
+  <link rel="preload" href="../assets/form.css" as="style">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/form.css">
 </head>
-<body>
-<div>
-<h1>🚀 本站已迁移</h1>
-<p>AI 数据分析平台已迁移至公司内网：</p>
-<p><a href="https://mg-ai-analytics.ailabs.mattel163.com">https://mg-ai-analytics.ailabs.mattel163.com</a></p>
-<p style="color:#999;font-size:14px;">正在自动跳转...</p>
+<body class="mode-guide">
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo"><svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><text x="32" y="44" font-family="-apple-system,SF Pro Display,Helvetica Neue,Arial,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-2">MG</text></svg></div>
+    <h1>AI 数据分析平台</h1>
+    <span class="sub">周报分析工作台</span>
+    <nav><a href="../index.html">← 返回工作台</a></nav>
+  </div>
+</header>
+
+<div class="form-wrap">
+
+  <div class="form-head">
+    <a class="back" href="../index.html">← 返回工作台</a>
+    <h2>📆 周报分析工作台</h2>
+    <p>OmniEye 周数据提取 → 基础/渠道/点位/双聚合分析 → 飞书文档 → 飞书卡片推送。</p>
+  </div>
+
+  <div class="mode-switch">
+    <button data-mode="guide" class="active">🧭 引导模式（新手推荐）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">逐步引导你配置周报参数，AI 自动完成全流程。</span></button>
+    <button data-mode="fast">⚡ 快速模式（熟手）<br><span style="font-weight:400;font-size:12px;color:var(--text-3)">直接填所有参数，一键生成完整 Prompt。</span></button>
+  </div>
+
+  <form id="wr-form">
+    <div class="form-error-summary">⚠️ 以下必填项未填写</div>
+
+    <!-- 1 基本信息 -->
+    <div class="fcard">
+      <h3><span class="n">1</span> 周报基本信息</h3>
+      <div class="field">
+        <label>周报结束日期（周日） <span class="req">*</span> <span class="help">填写本周日的日期</span></label>
+        <input type="date" id="wr_date" data-required>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>覆盖产品 <span class="req">*</span></label>
+        <div class="chips" id="chips-wr-products">
+          <label class="chip checked"><input type="checkbox" name="wr_products" value="UNO" checked>UNO</label>
+          <label class="chip"><input type="checkbox" name="wr_products" value="UNO2">UNO2</label>
+          <label class="chip"><input type="checkbox" name="wr_products" value="P10">Phase10</label>
+          <label class="chip"><input type="checkbox" name="wr_products" value="SKB">Skip-Bo</label>
+        </div>
+        <p style="font-size:11px;color:var(--text-3);margin-top:6px;">当前周报主要覆盖 UNO，其他产品按需勾选。</p>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>数据类型</label>
+        <div class="chips" id="chips-wr-datatype">
+          <label class="chip checked"><input type="radio" name="wr_data_type" value="log" checked>Log（客户端打点）</label>
+          <label class="chip"><input type="radio" name="wr_data_type" value="api">API（渠道回传）</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 数据维度 -->
+    <div class="fcard">
+      <h3><span class="n">2</span> 数据维度配置</h3>
+      <div class="field">
+        <label>需要分析的维度 <span class="help">勾选需要包含在周报中的维度</span></label>
+        <div class="chips" id="chips-wr-dims">
+          <label class="chip checked"><input type="checkbox" name="wr_dims" value="basic" checked>📊 基础数据（收入&ARPU）</label>
+          <label class="chip checked"><input type="checkbox" name="wr_dims" value="channel" checked>📡 渠道数据（eCPM&收入占比）</label>
+          <label class="chip checked"><input type="checkbox" name="wr_dims" value="placement" checked>📍 点位数据（频次&参与率）</label>
+          <label class="chip checked"><input type="checkbox" name="wr_dims" value="dual_agg" checked>🔀 双聚合数据（MAX vs Admob）</label>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>双聚合关注重点 <span class="help">IOS 端需分 group 查看</span></label>
+        <div class="chips" id="chips-wr-agg">
+          <label class="chip checked"><input type="checkbox" name="wr_agg" value="and_overall" checked>AND 整体 gap</label>
+          <label class="chip checked"><input type="checkbox" name="wr_agg" value="ios_ab" checked>IOS groupA&B</label>
+          <label class="chip checked"><input type="checkbox" name="wr_agg" value="ios_c" checked>IOS groupC</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 输出配置 -->
+    <div class="fcard">
+      <h3><span class="n">3</span> 分析与输出配置</h3>
+      <div class="field">
+        <label>分析要求</label>
+        <div class="chips" id="chips-wr-reqs">
+          <label class="chip checked"><input type="checkbox" name="wr_reqs" value="attribution" checked>归因分析</label>
+          <label class="chip checked"><input type="checkbox" name="wr_reqs" value="channel_top" checked>渠道 Top5 影响</label>
+          <label class="chip checked"><input type="checkbox" name="wr_reqs" value="placement_change" checked>点位异动识别</label>
+          <label class="chip"><input type="checkbox" name="wr_reqs" value="experiment">实验结论汇总</label>
+        </div>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label><b>标准化分析</b> <span class="help">选填，填入后生成的 Prompt 会要求严格参考该文档的格式</span></label>
+        <div id="wr-template-ref-rows"></div>
+        <button type="button" class="btn-add" id="wr-add-template-ref">+ 添加参考文档</button>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>补充背景 <span class="help">选填，如活动上下线、版本更新、切量操作等</span></label>
+        <textarea id="wr_context" rows="3" placeholder="如：&#10;• 本周外观点位奖励更新&#10;• 接龙活动上线&#10;• AND 端 admob preloading 全量"></textarea>
+      </div>
+      <hr style="border:none;border-top:1px dashed var(--border);margin:20px 0;">
+      <div class="field">
+        <label>输出格式</label>
+        <div class="chips" id="chips-wr-output">
+          <label class="chip checked"><input type="checkbox" name="wr_output" value="feishu_doc" checked>📄 飞书文档</label>
+          <label class="chip checked"><input type="checkbox" name="wr_output" value="feishu_card" checked>💬 飞书卡片推送</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="button" class="btn btn-ghost" id="btn-reset">重置</button>
+      <button type="submit" class="btn btn-primary">✅ 完成并生成</button>
+    </div>
+  </form>
+
+  <div class="output hidden" id="output">
+    <div class="out-tabs"></div>
+    <div class="out-body"></div>
+  </div>
+
 </div>
+
+<script src="../assets/form-framework.js" defer></script>
+<script src="../assets/modules/weekly_report.js" defer></script>
 </body>
 </html>
